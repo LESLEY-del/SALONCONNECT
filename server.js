@@ -39,9 +39,9 @@ app.post('/api/payments/payfast-init', async (req, res) => {
 
         const tunnelUrl = 'https://sweet-carrots-invite.loca.lt';
 
-const returnUrl = `${tunnelUrl}/owner-dashboard.html?payment=success&type=${paymentType}`;
-const cancelUrl = `${tunnelUrl}/owner-dashboard.html?payment=cancelled`;
-const notifyUrl = `${tunnelUrl}/api/payments/payfast-webhook`;
+        const returnUrl = `${tunnelUrl}/owner-dashboard.html?payment=success&type=${paymentType}`;
+        const cancelUrl = `${tunnelUrl}/owner-dashboard.html?payment=cancelled`;
+        const notifyUrl = `${tunnelUrl}/api/payments/payfast-webhook`;
 
         let paymentData = {
             merchant_id: merchantId,
