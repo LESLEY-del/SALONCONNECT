@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonConnect - Admin Command Centre</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Immediate Admin Authentication & Role Guard
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('salonUser') || '{}');
+                if (!user || user.role !== 'admin') {
+                    localStorage.removeItem('salonUser');
+                    window.location.replace('login.html');
+                }
+            } catch (e) {
+                localStorage.removeItem('salonUser');
+                window.location.replace('login.html');
+            }
+        })();
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    boxShadow: {
+                        soft: '0 18px 50px rgba(28, 24, 72, .08)',
+                        glow: '0 18px 45px rgba(109, 76, 201, .18)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scrollbar-width: thin; scrollbar-color: #c4b5fd transparent; }
+        body { background: #f7f7fb; }
+        .glass { background: rgba(255,255,255,.82); backdrop-filter: blur(16px); }
+        .gradient-text {
+            background: linear-gradient(90deg,#4c2a9f,#8b5cf6,#b28af3);
+            -webkit-background-clip:text; background-clip:text; color:transparent;
+        }
+        .nav-active { background: rgba(255,255,255,.13); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+        .fade-up { animation: fadeUp .45s ease both; }
+        @keyframes fadeUp { from {opacity:0; transform:translateY(10px)} to {opacity:1; transform:none} }
+        .status-dot { width:8px;height:8px;border-radius:999px;display:inline-block; }
+        .table-row:hover { background:#faf9ff; }
+        .modal-backdrop { background:rgba(13,12,34,.62); backdrop-filter:blur(5px); }
+        .input-focus:focus { border-color:#8b5cf6; box-shadow:0 0 0 4px rgba(139,92,246,.10); outline:none; }
+    </style>
+</head>
+
+<body class="text-slate-800 font-sans min-h-screen">
+
+    <!-- PREMIUM ADMIN HEADER -->
+    <header class="sticky top-0 z-50 bg-[#11132f] text-white shadow-xl">
+        <div class="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="h-[74px] flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-700 flex items-center justify-center shadow-glow shrink-0">
+                        <span class="text-xl font-black">S</span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-xl font-black tracking-tight">Salon<span class="text-violet-300">Connect</span></div>
+                        <div class="text-[9px] uppercase tracking-[.25em] text-violet-200/70">Admin Command Centre</div>
+                    </div>
+                </div>
+
+                <nav class="hidden lg:flex items-center gap-1 text-sm">
+                    <a href="#overview" class="nav-active rounded-xl px-4 py-2.5 font-semibold">Overview</a>
+                    <a href="#competition" class="rounded-xl px-4 py-2.5 text-slate-300 hover:text-white hover:bg-white/10 transition">Competition</a>
+                    <a href="#communications" class="rounded-xl px-4 py-2.5 text-slate-300 hover:text-white hover:bg-white/10 transition">Communications</a>
+                    <a href="#salons" class="rounded-xl px-4 py-2.5 text-slate-300 hover:text-white hover:bg-white/10 transition">Salons</a>
+                </nav>
+
+                <div class="flex items-center gap-2">
+                    <div class="hidden sm:flex items-center gap-2 rounded-full bg-white/8 border border-white/10 px-3 py-2">
+                        <span class="status-dot bg-emerald-400"></span>
+                        <span class="text-[11px] font-bold text-slate-200">System Online</span>
+                    </div>
+                    <button onclick="logout()" class="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3.5 py-2.5 text-xs font-bold transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-7">
+
+        <!-- HERO -->
+        <section id="overview" class="relative overflow-hidden rounded-[2rem] bg-[#17183d] text-white shadow-soft">
+            <div class="absolute -right-24 -top-28 w-96 h-96 rounded-full border-[45px] border-violet-300/10"></div>
+            <div class="absolute -left-20 -bottom-40 w-96 h-96 rounded-full bg-violet-600/10 blur-3xl"></div>
+            <div class="relative p-7 sm:p-9 lg:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-7">
+                <div>
+                    <div class="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-violet-200">
+                        ✦ Platform Administration
+                    </div>
+                    <h1 class="mt-4 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight">Good day, Admin.</h1>
+                    <p class="mt-3 max-w-2xl text-sm sm:text-base leading-7 text-violet-100/75">
+                        Manage salons, approvals, platform communications and the Best Salon Competition from one professional workspace.
+                    </p>
+                </div>
+                <div class="lg:text-right">
+                    <p class="text-[10px] uppercase tracking-[.2em] text-violet-200/60">Admin workspace</p>
+                    <p id="current-date" class="mt-1 text-sm font-bold text-white"></p>
+                    <p id="current-time" class="text-xs text-violet-200/70"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATS -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 fade-up">
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+                <div class="flex items-center justify-between">
+                    <div class="w-11 h-11 rounded-2xl bg-violet-50 text-violet-700 flex items-center justify-center text-xl">✦</div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Platform</span>
+                </div>
+                <p class="mt-5 text-xs font-bold text-slate-500">Total Registered Salons</p>
+                <h3 id="stat-total" class="mt-1 text-3xl font-black text-[#17183d]">0</h3>
+                <p class="mt-1 text-[11px] text-slate-400">All salon accounts</p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+                <div class="flex items-center justify-between">
+                    <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">⏳</div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Review</span>
+                </div>
+                <p class="mt-5 text-xs font-bold text-slate-500">Pending Approvals</p>
+                <h3 id="stat-pending" class="mt-1 text-3xl font-black text-amber-600">0</h3>
+                <p class="mt-1 text-[11px] text-slate-400">Need administrator attention</p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+                <div class="flex items-center justify-between">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">✓</div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Public</span>
+                </div>
+                <p class="mt-5 text-xs font-bold text-slate-500">Active Public Salons</p>
+                <h3 id="stat-active" class="mt-1 text-3xl font-black text-emerald-600">0</h3>
+                <p class="mt-1 text-[11px] text-slate-400">Approved on the platform</p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+                <div class="flex items-center justify-between">
+                    <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">🏆</div>
+                    <span id="stat-comp-badge" class="text-[10px] font-black uppercase tracking-wider text-slate-400">Closed</span>
+                </div>
+                <p class="mt-5 text-xs font-bold text-slate-500">Competition</p>
+                <h3 id="stat-comp" class="mt-1 text-2xl font-black text-[#17183d]">Closed</h3>
+                <p class="mt-1 text-[11px] text-slate-400">Participation control</p>
+            </div>
+        </section>
+
+        <!-- COMPETITION -->
+        <section id="competition" class="grid grid-cols-1 xl:grid-cols-5 gap-5 fade-up">
+            <div class="xl:col-span-2 bg-white rounded-[1.7rem] border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="p-6 border-b border-slate-100">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-[10px] font-black uppercase tracking-[.18em] text-violet-600">Competition control</p>
+                            <h2 class="mt-1 text-xl font-black text-[#17183d]">Best Salon Competition</h2>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center">🏆</div>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">Open or close participation. Salon owners can only join when you explicitly open the competition.</p>
+                </div>
+
+                <div class="p-6">
+                    <div id="competition-panel" class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                        <div class="flex items-center gap-3">
+                            <span id="competition-dot" class="w-3 h-3 rounded-full bg-slate-400"></span>
+                            <div>
+                                <p class="text-sm font-black text-slate-800">Competition status</p>
+                                <p id="comp-status-text" class="text-xs text-slate-500 mt-0.5">Currently Closed</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleCompetition()" id="comp-toggle-btn" class="mt-5 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-3 text-xs font-black transition shadow-lg shadow-emerald-600/10">
+                            Open Competition
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-3 bg-white rounded-[1.7rem] border border-slate-200/80 shadow-soft overflow-hidden">
+                <div class="p-6 border-b border-slate-100">
+                    <p class="text-[10px] font-black uppercase tracking-[.18em] text-violet-600">Winner announcement</p>
+                    <h2 class="mt-1 text-xl font-black text-[#17183d]">Publish Competition Winner</h2>
+                    <p class="mt-2 text-xs text-slate-500">Automatically computes the top salons per tier/location group and publishes them.</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Custom Title Prefix (Optional)</label>
+                        <input type="text" id="winner-title" class="input-focus w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition" placeholder="e.g. 🏆 Official Regional Results">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Congratulatory Note (Optional)</label>
+                        <textarea id="winner-details" rows="4" class="input-focus w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm resize-none transition" placeholder="Add a custom message to accompany the top-scoring champions..."></textarea>
+                    </div>
+                    <button onclick="publishWinner()" class="w-full sm:w-auto rounded-xl bg-[#17183d] hover:bg-violet-700 text-white px-6 py-3 text-xs font-black transition shadow-lg">
+                        📣 Compute & Publish Winners
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPETITION PARTICIPANTS & LEADERBOARDS MONITOR -->
+        <section class="bg-white rounded-[1.7rem] border border-slate-200/80 shadow-soft overflow-hidden fade-up">
+            <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[.18em] text-violet-600">Live monitoring</p>
+                    <h2 class="mt-1 text-xl font-black text-[#17183d]">Competition Participants & Grouped Tiers</h2>
+                    <p class="mt-2 text-xs text-slate-500">View all registered salons, their competition tiers (Suburb, Town, Province, Country), location buckets, and points.</p>
+                </div>
+                <button onclick="fetchCompetitionParticipants()" class="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-700 transition">↻ Refresh Participants</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-[#faf9fd] text-[10px] font-black text-slate-500 uppercase tracking-[.12em] border-b border-slate-200">
+                            <th class="p-4 sm:p-5">Salon Name</th>
+                            <th class="p-4 sm:p-5">Tier Category</th>
+                            <th class="p-4 sm:p-5">Location Group Value</th>
+                            <th class="p-4 sm:p-5 text-right">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-participants-table" class="divide-y divide-slate-100 text-sm">
+                        <tr><td colspan="4" class="p-10 text-center text-slate-400">Loading competition participants...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- COMMUNICATIONS -->
+        <section id="communications" class="bg-white rounded-[1.7rem] border border-slate-200/80 shadow-soft overflow-hidden fade-up">
+            <div class="p-6 sm:p-7 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[.18em] text-violet-600">Communications</p>
+                    <h2 class="mt-1 text-xl font-black text-[#17183d]">Salon Owner Messaging</h2>
+                    <p class="mt-2 text-xs text-slate-500">Send a platform announcement to every salon owner or one selected owner.</p>
+                </div>
+                <div class="rounded-xl bg-violet-50 border border-violet-100 px-4 py-2.5">
+                    <span class="text-[10px] font-black text-violet-700">✉ ADMIN BROADCAST</span>
+                </div>
+            </div>
+
+            <div class="p-6 sm:p-7 space-y-5">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Recipient</label>
+                        <select id="email-recipient" class="input-focus w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition">
+                            <option value="all">Broadcast to All Salon Owners</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Email subject</label>
+                        <input type="text" id="email-subject" class="input-focus w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition" placeholder="e.g. Important SalonConnect Platform Update">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Message body</label>
+                    <textarea id="email-body" rows="5" class="input-focus w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm resize-none transition" placeholder="Write your announcement here..."></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <p class="text-[11px] text-slate-400">Review the recipient and message before sending.</p>
+                    <button onclick="sendAdminEmail()" class="w-full sm:w-auto rounded-xl bg-violet-600 hover:bg-violet-700 text-white px-7 py-3 text-xs font-black transition shadow-lg shadow-violet-600/15">
+                        ✉ Send Email Now
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SALONS -->
+        <section id="salons" class="bg-white rounded-[1.7rem] border border-slate-200/80 shadow-soft overflow-hidden fade-up">
+            <div class="p-6 sm:p-7 border-b border-slate-100">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-[.18em] text-violet-600">Salon directory</p>
+                        <h2 class="mt-1 text-xl font-black text-[#17183d]">Manage Salons & Media</h2>
+                        <p class="mt-2 text-xs text-slate-500">Review storefronts, approve accounts and moderate salon media.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">⌕</span>
+                            <input id="salon-search" oninput="filterSalonTable()" type="text" class="input-focus w-full sm:w-64 rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2.5 text-xs" placeholder="Search salon or owner...">
+                        </div>
+                        <button onclick="fetchSalons()" class="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-black text-slate-700 transition">↻ Refresh</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-[#faf9fd] text-[10px] font-black text-slate-500 uppercase tracking-[.12em] border-b border-slate-200">
+                            <th class="p-4 sm:p-5">Storefront</th>
+                            <th class="p-4 sm:p-5">Salon</th>
+                            <th class="p-4 sm:p-5">Owner</th>
+                            <th class="p-4 sm:p-5">Status</th>
+                            <th class="p-4 sm:p-5 text-right">Management</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-salon-table" class="divide-y divide-slate-100 text-sm">
+                        <tr><td colspan="5" class="p-10 text-center text-slate-400">Loading registered salons...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-5 sm:px-7 py-4 bg-[#faf9fd] border-t border-slate-100 flex flex-col sm:flex-row justify-between gap-2">
+                <p id="table-summary" class="text-[11px] text-slate-400">Loading...</p>
+                <p class="text-[11px] text-slate-400">SalonConnect Admin • Content moderation workspace</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- POSTS MODAL -->
+    <div id="posts-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[70] p-4">
+        <div class="bg-white w-full max-w-4xl rounded-[1.7rem] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+            <div class="bg-[#17183d] text-white p-5 sm:p-6 flex justify-between items-center">
+                <div>
+                    <p class="text-[9px] font-black uppercase tracking-[.2em] text-violet-200">Content moderation</p>
+                    <h3 id="modal-salon-title" class="font-black text-lg sm:text-xl mt-1">Salon Posts & Media Review</h3>
+                </div>
+                <button onclick="closePostsModal()" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xl transition">&times;</button>
+            </div>
+            <div class="p-5 sm:p-7 overflow-y-auto bg-[#faf9fd] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="modal-posts-container">
+                <p class="text-slate-400 col-span-full text-center py-12">Loading posts...</p>
+            </div>
+            <div class="p-4 sm:p-5 bg-white border-t border-slate-100 flex justify-end">
+                <button onclick="closePostsModal()" class="rounded-xl bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 text-xs font-black">Close Review</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed right-5 bottom-5 z-[100] hidden max-w-sm">
+        <div id="toast-inner" class="rounded-2xl bg-[#17183d] text-white shadow-2xl px-5 py-4 border border-white/10">
+            <p id="toast-title" class="text-xs font-black"></p>
+            <p id="toast-message" class="mt-1 text-[11px] text-violet-100/70"></p>
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : 'https://your-production-backend-domain.com/api';
+        let competitionActive = false;
+        let allSalons = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            fetchSalons();
+            loadCompetitionState();
+            fetchCompetitionParticipants();
+        });
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+            document.getElementById('current-time').textContent = now.toLocaleTimeString(undefined, {
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
+
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.remove('hidden');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+
+        async function fetchSalons() {
+            const tableBody = document.getElementById('admin-salon-table');
+            const emailSelect = document.getElementById('email-recipient');
+            tableBody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400">Refreshing salon directory...</td></tr>';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/admin/salons`);
+                if (!response.ok) throw new Error("Failed to fetch salons");
+                const salons = await response.json();
+                allSalons = Array.isArray(salons) ? salons : [];
+
+                emailSelect.innerHTML = '<option value="all">Broadcast to All Salon Owners</option>';
+
+                let pending = 0, active = 0;
+                allSalons.forEach(salon => {
+                    if (salon.status === 'approved') active++;
+                    else pending++;
+
+                    if (salon.email) {
+                        const opt = document.createElement('option');
+                        opt.value = salon.email;
+                        opt.textContent = `${salon.name || 'Salon'} (${salon.email})`;
+                        emailSelect.appendChild(opt);
+                    }
+                });
+
+                document.getElementById('stat-total').innerText = allSalons.length;
+                document.getElementById('stat-pending').innerText = pending;
+                document.getElementById('stat-active').innerText = active;
+                renderSalonTable(allSalons);
+            } catch (err) {
+                console.error("Error loading salons:", err);
+                tableBody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-red-500">Could not load salons. Check that the backend is running.</td></tr>';
+                document.getElementById('table-summary').textContent = 'Unable to load salon data.';
+            }
+        }
+
+        function renderSalonTable(salons) {
+            const tableBody = document.getElementById('admin-salon-table');
+            tableBody.innerHTML = '';
+
+            if (!salons.length) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400">No salons found.</td></tr>';
+                document.getElementById('table-summary').textContent = '0 salons displayed';
+                return;
+            }
+
+            salons.forEach((salon) => {
+                const approved = salon.status === 'approved';
+                const tr = document.createElement('tr');
+                tr.className = 'table-row transition';
+                const encodedName = encodeURIComponent(salon.name || 'Salon');
+
+                tr.innerHTML = `
+                    <td class="p-4 sm:p-5">
+                        <div class="w-24 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm">
+                            <img src="${salon.header_image || 'https://via.placeholder.com/240x160?text=Salon'}"
+                                 alt="Storefront" class="w-full h-full object-cover"
+                                 onerror="this.src='https://via.placeholder.com/240x160?text=Salon'">
+                        </div>
+                    </td>
+                    <td class="p-4 sm:p-5">
+                        <p class="font-black text-slate-900">${escapeHtml(salon.name || 'Unnamed Salon')}</p>
+                        <p class="text-[11px] text-slate-500 mt-1">📍 ${escapeHtml([salon.suburb, salon.town].filter(Boolean).join(', ') || 'Location not provided')}</p>
+                        <div class="mt-2 inline-flex rounded-full bg-violet-50 text-violet-700 px-2.5 py-1 text-[9px] font-black">
+                            ${Number(salon.male_barbers || 0)} Barbers&nbsp; • &nbsp;${Number(salon.female_stylists || 0)} Stylists
+                        </div>
+                    </td>
+                    <td class="p-4 sm:p-5">
+                        <p class="font-semibold text-slate-800">${escapeHtml(salon.username || 'Not provided')}</p>
+                        <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(salon.email || 'No email')}</p>
+                    </td>
+                    <td class="p-4 sm:p-5">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black ${approved ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+                            <span class="status-dot ${approved ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+                            ${approved ? 'Approved' : 'Pending'}
+                        </span>
+                    </td>
+                    <td class="p-4 sm:p-5">
+                        <div class="flex flex-wrap justify-end gap-2">
+                            <button onclick="viewSalonPosts('${salon.id}', '${encodedName}')"
+                                class="rounded-xl bg-[#17183d] hover:bg-violet-700 text-white px-3.5 py-2 text-[10px] font-black transition">
+                                View Media
+                            </button>
+                            <button onclick="updateStatus('${salon.id}', '${approved ? 'pending' : 'approved'}')"
+                                class="rounded-xl ${approved ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-100' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} px-3.5 py-2 text-[10px] font-black transition">
+                                ${approved ? 'Revoke' : 'Approve'}
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById('table-summary').textContent = `${salons.length} salon${salons.length === 1 ? '' : 's'} displayed`;
+        }
+
+        function filterSalonTable() {
+            const query = document.getElementById('salon-search').value.trim().toLowerCase();
+            const filtered = allSalons.filter(salon => {
+                const haystack = `${salon.name || ''} ${salon.username || ''} ${salon.email || ''} ${salon.suburb || ''} ${salon.town || ''}`.toLowerCase();
+                return haystack.includes(query);
+            });
+            renderSalonTable(filtered);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        async function updateStatus(salonId, newStatus) {
+            const action = newStatus === 'approved' ? 'approve' : 'revoke';
+            if (!confirm(`Are you sure you want to ${action} this salon?`)) return;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/admin/salons/${salonId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (!response.ok) throw new Error('Status update failed');
+                await fetchSalons();
+                showToast('Salon status updated', `The salon has been ${newStatus === 'approved' ? 'approved' : 'moved back to pending'}.`);
+            } catch (err) {
+                console.error("Error updating status:", err);
+                showToast('Update failed', 'The salon status could not be changed.');
+            }
+        }
+
+        async function viewSalonPosts(salonId, salonName) {
+            document.getElementById('modal-salon-title').innerText = `Posts by ${decodeURIComponent(salonName)}`;
+            document.getElementById('posts-modal').classList.remove('hidden');
+            document.getElementById('posts-modal').classList.add('flex');
+
+            const container = document.getElementById('modal-posts-container');
+            container.innerHTML = '<p class="text-slate-400 col-span-full text-center py-12">Loading posts...</p>';
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salon-gallery/${salonId}`);
+                if (!res.ok) throw new Error('Gallery request failed');
+                const posts = await res.json();
+
+                container.innerHTML = '';
+                if (!posts || posts.length === 0) {
+                    container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-4xl">🖼️</div><p class="mt-3 text-sm font-bold text-slate-700">No media posts yet</p><p class="mt-1 text-xs text-slate-400">This salon has not posted any pictures or videos.</p></div>';
+                    return;
+                }
+
+                posts.forEach(post => {
+                    const div = document.createElement('div');
+                    div.className = 'relative border border-slate-200 rounded-2xl p-2.5 bg-white shadow-sm';
+                    div.innerHTML = `
+                        <div class="rounded-xl overflow-hidden bg-slate-100">
+                            <img src="${post.image_url}" class="w-full h-44 object-cover" alt="Salon post"
+                                 onerror="this.src='https://via.placeholder.com/500x350?text=Media'">
+                        </div>
+                        <div class="flex items-center justify-between gap-2 p-2">
+                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Salon Media</span>
+                            <button onclick="deleteSalonPost(${post.id}, '${salonId}', '${salonName}')"
+                                class="rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 px-2.5 py-1.5 text-[9px] font-black transition">
+                                Delete
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-3xl">⚠️</div><p class="mt-3 text-sm font-bold text-red-600">Could not load media</p><p class="mt-1 text-xs text-slate-400">Please check the backend connection.</p></div>';
+            }
+        }
+
+        async function deleteSalonPost(postId, salonId, salonName) {
+            if (!confirm("Delete this salon post permanently?")) return;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salon-gallery/${postId}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Delete failed');
+                await viewSalonPosts(salonId, salonName);
+                showToast('Post deleted', 'The selected salon media has been removed.');
+            } catch (err) {
+                console.error(err);
+                showToast('Delete failed', 'The salon post could not be deleted.');
+            }
+        }
+
+        function closePostsModal() {
+            const modal = document.getElementById('posts-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // --- FETCH COMPETITION PARTICIPANTS FOR ADMIN MONITOR ---
+        async function fetchCompetitionParticipants() {
+            const tbody = document.getElementById('admin-participants-table');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-400">Loading participants...</td></tr>';
+            try {
+                const res = await fetch(`${BACKEND_URL}/admin/competitions/participants`);
+                if (!res.ok) throw new Error('Failed to fetch participants');
+                const data = await res.json();
+                const participants = data.participants || [];
+
+                tbody.innerHTML = '';
+                if (participants.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-400">No salons have joined any competition tiers yet.</td></tr>';
+                    return;
+                }
+
+                participants.forEach(p => {
+                    const salonName = p.salons ? p.salons.name : 'Unknown Salon';
+                    const tr = document.createElement('tr');
+                    tr.className = 'table-row transition';
+                    tr.innerHTML = `
+                        <td class="p-4 sm:p-5 font-black text-slate-900">${escapeHtml(salonName)}</td>
+                        <td class="p-4 sm:p-5"><span class="bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase">${escapeHtml(p.competition_key)}</span></td>
+                        <td class="p-4 sm:p-5 text-slate-600 font-semibold">${escapeHtml(p.competition_value)}</td>
+                        <td class="p-4 sm:p-5 text-right font-black text-indigo-600">${p.points || 0}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Error loading participants:", err);
+                tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Error loading competition participants.</td></tr>';
+            }
+        }
+
+        // Master admin toggle synced with backend database (admin_settings table)
+        async function loadCompetitionState() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/admin/competition-status`);
+                if (response.ok) {
+                    const data = await response.json();
+                    competitionActive = Boolean(data.isOpen);
+                }
+            } catch (err) {
+                console.error("Could not fetch competition status from backend", err);
+                competitionActive = false;
+            }
+            updateCompetitionUI();
+        }
+
+        async function toggleCompetition() {
+            const newState = !competitionActive;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/admin/competition-toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isOpen: newState })
+                });
+                if (!response.ok) throw new Error('Failed to update competition status on server');
+
+                competitionActive = newState;
+                updateCompetitionUI();
+                showToast(
+                    competitionActive ? 'Competition opened' : 'Competition closed',
+                    competitionActive ? 'Salon owners can now join competition tiers.' : 'Participation is now locked by admin.'
+                );
+            } catch (err) {
+                console.error("Error toggling competition:", err);
+                showToast('Action failed', 'Could not update competition status on backend.');
+            }
+        }
+
+        function updateCompetitionUI() {
+            const btn = document.getElementById('comp-toggle-btn');
+            const txt = document.getElementById('comp-status-text');
+            const dot = document.getElementById('competition-dot');
+            const stat = document.getElementById('stat-comp');
+            const badge = document.getElementById('stat-comp-badge');
+
+            if (competitionActive) {
+                btn.textContent = "Close Competition";
+                btn.className = "mt-5 w-full rounded-xl bg-red-600 hover:bg-red-700 text-white py-3 text-xs font-black transition shadow-lg shadow-red-600/10";
+                txt.textContent = "Currently OPEN — salons can participate";
+                txt.className = "text-xs text-emerald-600 font-bold mt-0.5";
+                dot.className = "w-3 h-3 rounded-full bg-emerald-500";
+                stat.textContent = "Open";
+                stat.className = "mt-1 text-2xl font-black text-emerald-600";
+                badge.textContent = "Open";
+                badge.className = "text-[10px] font-black uppercase tracking-wider text-emerald-600";
+            } else {
+                btn.textContent = "Open Competition";
+                btn.className = "mt-5 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-3 text-xs font-black transition shadow-lg shadow-emerald-600/10";
+                txt.textContent = "Currently Closed";
+                txt.className = "text-xs text-slate-500 mt-0.5";
+                dot.className = "w-3 h-3 rounded-full bg-slate-400";
+                stat.textContent = "Closed";
+                stat.className = "mt-1 text-2xl font-black text-[#17183d]";
+                badge.textContent = "Closed";
+                badge.className = "text-[10px] font-black uppercase tracking-wider text-slate-400";
+            }
+        }
+
+        async function publishWinner() {
+            const titleCustom = document.getElementById('winner-title').value.trim();
+            const detailsCustom = document.getElementById('winner-details').value.trim();
+
+            if (!confirm("This will automatically calculate the highest-scoring salon for each tier (Suburb, Town, Province, Country) and publish them to the official announcements page. Proceed?")) return;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/admin/competitions/publish-winners`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titleCustom, detailsCustom })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Failed to publish winners');
+
+                document.getElementById('winner-title').value = '';
+                document.getElementById('winner-details').value = '';
+                showToast('Winners Published!', result.message || 'Champions have been calculated and posted successfully.');
+            } catch (err) {
+                console.error(err);
+                showToast('Publish failed', err.message || 'Could not calculate or publish winners.');
+            }
+        }
+
+        async function sendAdminEmail() {
+            const recipient = document.getElementById('email-recipient').value;
+            const subject = document.getElementById('email-subject').value.trim();
+            const body = document.getElementById('email-body').value.trim();
+
+            if (!subject || !body) {
+                showToast('Missing information', 'Please enter an email subject and message.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/admin/send-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipient, subject, body })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Email failed');
+
+                showToast('Email sent', result.message || 'The notification was dispatched successfully.');
+                document.getElementById('email-subject').value = '';
+                document.getElementById('email-body').value = '';
+            } catch (err) {
+                console.error(err);
+                showToast('Email failed', err.message || 'Error dispatching email.');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('salonUser');
+            window.location.href = 'index.html';
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closePostsModal();
+        });
+    </script>
+</body>
+</html>

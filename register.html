@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonConnect - Salon Owner Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600">SalonConnect</h1>
+            <a href="index.html" class="text-gray-600 hover:text-indigo-600 font-medium text-sm">Back to Browse</a>
+        </div>
+    </nav>
+
+    <!-- Registration Container -->
+    <main class="max-w-lg mx-auto px-4 py-8 flex-grow w-full">
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-gray-100 space-y-4">
+            <h2 class="text-2xl font-bold text-center text-gray-900 mb-2">Register Your Salon</h2>
+            <p class="text-xs text-center text-gray-400 mb-4">Enter your salon details to list it on SalonConnect.</p>
+
+            <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4">
+                <!-- Username & Email -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Username (for login)</label>
+                        <input type="text" id="username" required onblur="checkUsernameExists(this.value)" class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g. elitecuts">
+                        <p id="username-feedback" class="text-xs mt-1 font-semibold"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Owner Email</label>
+                        <input type="email" id="email" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="owner@salon.com">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+                </div>
+
+                <hr class="border-gray-100 my-2">
+
+                <!-- Salon Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Salon Name</label>
+                    <input type="text" id="salon-name" required onblur="checkSalonExists(this.value)" class="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g., Supreme Cuts">
+                    <p id="salon-name-feedback" class="text-xs mt-1 font-semibold"></p>
+                </div>
+
+                <!-- Header Picture Upload -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Header Picture (Storefront Banner)</label>
+                    <input type="file" id="header-image-file" accept="image/*" required class="mt-1 w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <p class="text-xs text-gray-400 mt-1">Upload a clear photo of your salon storefront from your device.</p>
+                </div>
+
+                <!-- Location -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Suburb Name</label>
+                        <input type="text" id="suburb" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Braamfontein">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Town / City Name</label>
+                        <input type="text" id="town" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Johannesburg">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Province</label>
+                    <input type="text" id="province" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Gauteng">
+                </div>
+
+                <!-- Staff Count -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Male Barbers</label>
+                        <input type="number" id="male-barbers" min="0" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 4">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Female Stylists</label>
+                        <input type="number" id="female-stylists" min="0" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 3">
+                    </div>
+                </div>
+
+                <!-- Checkboxes -->
+                <div class="bg-indigo-50/60 p-4 rounded-xl space-y-3 border border-indigo-100">
+                    <div class="flex items-start space-x-3">
+                        <input type="checkbox" id="free-hair" class="mt-1 w-4 h-4 text-indigo-600 rounded">
+                        <label for="free-hair" class="text-xs text-gray-700 font-medium cursor-pointer">
+                            Do you want your coming customers to be given a winning chance to do their hair for free?
+                        </label>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <input type="checkbox" id="betaway" class="mt-1 w-4 h-4 text-indigo-600 rounded">
+                        <label for="betaway" class="text-xs text-gray-700 font-medium cursor-pointer">
+                            Do you want to join the Salon Betaway Challenge where salons receive votes?
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 transition font-medium">Register Salon</button>
+            </form>
+            
+            <p class="text-sm text-center text-gray-500 mt-4">
+                Already registered? 
+                <a href="login.html" class="text-indigo-600 font-semibold hover:underline">Log in</a>
+            </p>
+        </div>
+    </main>
+
+    <!-- Frontend Script communicating with Node.js backend -->
+    <script>
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : 'https://your-production-backend-domain.com/api';
+
+        // Helper function to convert uploaded file into Base64 string
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // Check if username exists
+        async function checkUsernameExists(username) {
+            const feedback = document.getElementById('username-feedback');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (!username.trim()) {
+                feedback.innerText = "";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/check-salon`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+
+                const data = await response.json();
+
+                if (data.exists) {
+                    feedback.innerText = "⚠️ Username already taken!";
+                    feedback.className = "text-xs mt-1 text-red-600 font-semibold";
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    feedback.innerText = "✅ Username is available!";
+                    feedback.className = "text-xs mt-1 text-green-600 font-semibold";
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            } catch (error) {
+                console.error("Error checking username:", error);
+            }
+        }
+
+        // Check if salon name exists
+        async function checkSalonExists(salonName) {
+            const feedback = document.getElementById('salon-name-feedback');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (!salonName.trim()) {
+                feedback.innerText = "";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/check-salon`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ salonName })
+                });
+
+                const data = await response.json();
+
+                if (data.exists) {
+                    feedback.innerText = "⚠️ Salon name already exists in database!";
+                    feedback.className = "text-xs mt-1 text-red-600 font-semibold";
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    feedback.innerText = "✅ Salon name is available!";
+                    feedback.className = "text-xs mt-1 text-green-600 font-semibold";
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            } catch (error) {
+                console.error("Error checking salon name:", error);
+            }
+        }
+
+        // Handle form submission to register salon
+        async function handleRegister(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('header-image-file');
+            let headerImageBase64 = "";
+
+            if (fileInput.files && fileInput.files[0]) {
+                try {
+                    // Convert local image file to base64 string
+                    headerImageBase64 = await convertFileToBase64(fileInput.files[0]);
+                } catch (err) {
+                    console.error("Error processing image file:", err);
+                    alert("Failed to process the uploaded image.");
+                    return;
+                }
+            }
+
+            const salonData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                salonName: document.getElementById('salon-name').value,
+                headerImage: headerImageBase64, // Sending base64 data string instead of a URL
+                suburb: document.getElementById('suburb').value,
+                town: document.getElementById('town').value,
+                province: document.getElementById('province').value,
+                maleBarbers: parseInt(document.getElementById('male-barbers').value),
+                femaleStylists: parseInt(document.getElementById('female-stylists').value),
+                freeHairGiveaway: document.getElementById('free-hair').checked,
+                betawayChallenge: document.getElementById('betaway').checked
+            };
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/register-salon`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(salonData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert("Salon successfully registered and listed!");
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Registration failed: " + result.error);
+                }
+            } catch (error) {
+                console.error("Registration error:", error);
+                alert("Could not connect to the server. Make sure your Node.js backend is running!");
+            }
+        }
+    </script>
+</body>
+</html>

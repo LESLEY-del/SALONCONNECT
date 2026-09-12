@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonConnect - Secure Client Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Prevent Flickering & Guard Session Immediately
+        (function() {
+            try {
+                const token = localStorage.getItem('voterToken');
+                const storedVoter = localStorage.getItem('voterUser');
+                if (!token || !storedVoter || storedVoter === 'undefined' || storedVoter === 'null') {
+                    localStorage.removeItem('voterToken');
+                    localStorage.removeItem('voterUser');
+                    window.location.replace('voter-login.html');
+                    return;
+                }
+                const parsed = JSON.parse(storedVoter);
+                if (!parsed || !parsed.id) {
+                    throw new Error("Invalid session");
+                }
+            } catch (err) {
+                localStorage.removeItem('voterToken');
+                localStorage.removeItem('voterUser');
+                window.location.replace('voter-login.html');
+            }
+        })();
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sc: {
+                            navy: '#11132f',
+                            purple: '#6d4aff',
+                            lavender: '#a98cff',
+                            soft: '#f7f5ff'
+                        }
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(24, 20, 72, .10)',
+                        card: '0 12px 35px rgba(24, 20, 72, .10)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scroll-behavior: smooth; }
+        body { opacity: 0; transition: opacity 0.2s ease-in-out; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(15px) scale(0.9); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-300px) scale(1.1); opacity: 0; }
+        }
+        .floating-balloon {
+            position: absolute;
+            bottom: -10px;
+            animation: floatUp 5s ease-in-out infinite;
+        }
+        .balloon-1 { left: 15%; animation-delay: 0s; }
+        .balloon-2 { left: 50%; animation-delay: 1.5s; }
+        .balloon-3 { left: 80%; animation-delay: 3s; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+    <!-- Fixed Secure Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <h1 class="text-2xl font-bold text-indigo-600">SalonConnect <span class="text-xs uppercase bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-black">Secure Portal</span></h1>
+            <div class="flex items-center space-x-4 w-full sm:w-auto justify-center">
+                <a href="#" onclick="toggleWinnersSection(event)" class="text-slate-600 font-semibold text-sm sm:text-base hover:text-indigo-600 transition flex items-center gap-1">🏆 Winners</a>
+                <div id="user-session-info" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-2 rounded-xl flex items-center gap-2">
+                    <span>👤 Verifying session...</span>
+                </div>
+                <button onclick="logoutClient()" class="bg-rose-50 text-rose-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-rose-100 transition border border-rose-100">Log Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN DASHBOARD VIEW -->
+    <main id="dashboard-view" class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-12">
+        <!-- Compact Header & Search Bar with Auto-Suggestions -->
+        <div class="max-w-xl mx-auto text-center space-y-3 relative">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Book & Support Your Favorite Salons</h2>
+            <div class="relative">
+                <input type="text" id="salon-search-input" onkeyup="filterSalons()" placeholder="Search salon by name (e.g. Elite Cuts)..." class="w-full px-4 py-3 pl-10 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none text-sm sm:text-base" autocomplete="off">
+                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                
+                <!-- Live Suggestions Dropdown Container -->
+                <div id="search-suggestions" class="hidden absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto text-left"></div>
+            </div>
+        </div>
+
+        <!-- Dynamic Salon Grid -->
+        <div id="salon-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            <p class="text-sm text-gray-400 col-span-full text-center py-10">Loading approved salons...</p>
+        </div>
+
+        <!-- No results notice -->
+        <div id="no-results" class="hidden text-center py-10 text-gray-500">
+            <p>No salons found matching your search.</p>
+        </div>
+
+        <!-- BOTTOM WINNERS SECTION -->
+        <section id="winners-section" class="hidden pt-10 border-t border-slate-200 space-y-6">
+            <div class="max-w-xl mx-auto text-center space-y-1">
+                <span class="text-[10px] font-black uppercase tracking-widest text-violet-600 bg-violet-50 px-3 py-1 rounded-full border border-violet-100">Official Results</span>
+                <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">Competition Winners & Champions</h3>
+                <p class="text-xs text-slate-500">Celebrating top-performing salons across suburbs, towns, provinces, and the country.</p>
+            </div>
+
+            <div id="bottom-winners-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <p class="text-center text-slate-400 text-xs py-10 col-span-full">Loading winners...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- DETAILED SALON VIEW (HIDDEN BY DEFAULT) -->
+    <div id="salon-detail-view" class="hidden max-w-5xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
+        <div>
+            <button onclick="showDashboardView()" class="text-indigo-600 font-bold text-sm hover:underline flex items-center gap-1 mb-4">
+                ← Back to Salons
+            </button>
+        </div>
+
+        <!-- Salon Banner & Info Card -->
+        <div class="bg-white rounded-3xl shadow-md border border-gray-100 overflow-hidden">
+            <div class="relative h-64 sm:h-80 bg-gray-200">
+                <img id="detail-header-img" src="" alt="Salon Banner" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                <div class="absolute bottom-6 left-6 right-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                    <div>
+                        <h2 id="detail-salon-name" class="text-3xl sm:text-4xl font-black drop-shadow-md"></h2>
+                        <p id="detail-salon-location" class="text-sm text-gray-200 mt-1">📍 Loading location...</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="detail-vote-btn" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
+                            ★ Vote & Support
+                        </button>
+                        <button id="detail-book-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">
+                            Book Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 space-y-4">
+                    <h3 class="text-lg font-black text-gray-900">About Staff & Services</h3>
+                    <p id="detail-staff-info" class="text-sm text-gray-600 font-medium"></p>
+                    <div id="detail-giveaway-badge"></div>
+                </div>
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-2">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-gray-500">Operating Schedule</h4>
+                    <p id="detail-hours" class="text-sm font-bold text-gray-800"></p>
+                    <p id="detail-booking-window" class="text-xs text-gray-500"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salon Gallery Section -->
+        <div class="space-y-4">
+            <h3 class="text-xl font-black text-gray-900">Salon Gallery & Portfolio</h3>
+            <div id="detail-gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <p class="text-xs text-gray-400 col-span-full py-6 text-center">Loading gallery pictures...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white text-gray-600 py-4 border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
+            <p class="text-xs text-gray-500">&copy; 2026 SalonConnect. All rights reserved. Secured Session.</p>
+        </div>
+    </footer>
+
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-xl w-full p-6 rounded-xl shadow-lg relative max-h-[90vh] overflow-y-auto">
+            <h3 id="modal-salon-title" class="text-xl font-bold text-gray-900 mb-4">Book Appointment</h3>
+            <form onsubmit="submitBooking(event)" class="space-y-4">
+                
+                <!-- Logged-in Client Account Info Preview -->
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-xs text-indigo-900 font-semibold flex items-center justify-between">
+                    <span>Booking as: <strong id="modal-client-name-display"></strong></span>
+                    <span class="text-[10px] text-indigo-500 uppercase tracking-wider">Account Linked</span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Type of Style</label>
+                    <input type="text" id="style-type" placeholder="e.g. Fade Cut, Box Braids, Silk Press" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Select Service / Professional Category</label>
+                    <select id="service-type" onchange="onServiceChange()" class="mt-1 w-full px-4 py-2 border rounded-lg outline-none text-sm">
+                        <option value="male">Male Barber (Slot Duration: 35 Mins)</option>
+                        <option value="female">Female Hair Stylist (Slot Duration: 3 Hours)</option>
+                    </select>
+                </div>
+
+                <!-- Professional Date & Time Slot Section -->
+                <div class="border-t pt-4 space-y-3">
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Select Appointment Date</label>
+                            <span id="limit-notice" class="text-[11px] text-gray-500 font-medium"></span>
+                        </div>
+                        <input type="date" id="booking-date" onchange="renderTimeSlots()" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none text-sm">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Available Time Slots</label>
+                            <span id="capacity-badge" class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Parallel capacity: 1</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">Click an open time slot below to secure your spot.</p>
+                        
+                        <!-- Time Slots Grid Container -->
+                        <div id="time-slots-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2 max-h-48 overflow-y-auto p-1 border rounded-lg bg-gray-50">
+                            <p class="text-xs text-gray-400 col-span-full text-center py-4">Please select a date first.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="selected-time-slot" required>
+
+                <div class="flex justify-end space-x-2 pt-4 border-t">
+                    <button type="button" onclick="closeBookingModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">Confirm Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Frontend Script for Fetching & Interactivity -->
+    <script>
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : 'https://your-production-backend-domain.com/api';
+        let currentSalonData = {};
+        let voterSession = null;
+        let globalSalons = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const storedVoter = localStorage.getItem('voterUser');
+                const token = localStorage.getItem('voterToken');
+                if (!token || !storedVoter || storedVoter === 'undefined' || storedVoter === 'null') {
+                    window.location.replace('voter-login.html');
+                    return;
+                }
+                voterSession = JSON.parse(storedVoter);
+            } catch (err) {
+                window.location.replace('voter-login.html');
+                return;
+            }
+
+            document.getElementById('user-session-info').innerHTML = `<span>👤 ${escapeHtml(voterSession.name)}</span>`;
+            fetchApprovedSalons();
+            fetchBottomWinners();
+
+            // Smoothly reveal page once loaded
+            document.body.style.opacity = '1';
+        });
+
+        function logoutClient() {
+            localStorage.removeItem('voterToken');
+            localStorage.removeItem('voterUser');
+            window.location.replace('voter-login.html');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+            }[c]));
+        }
+
+        function toggleWinnersSection(event) {
+            event.preventDefault();
+            const section = document.getElementById('winners-section');
+            section.classList.toggle('hidden');
+            if (!section.classList.contains('hidden')) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function showDashboardView() {
+            document.getElementById('salon-detail-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function showSalonDetailView(salonId) {
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('salon-detail-view').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            document.getElementById('detail-salon-name').innerText = "Loading salon...";
+            document.getElementById('detail-gallery-grid').innerHTML = `<p class="text-xs text-gray-400 col-span-full py-6 text-center">Loading gallery pictures...</p>`;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}`);
+                if (!res.ok) throw new Error("Failed to load salon details");
+                const salon = await res.json();
+                currentSalonData = salon;
+
+                document.getElementById('detail-header-img').src = salon.header_image || "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800";
+                document.getElementById('detail-salon-name').innerText = salon.name;
+                document.getElementById('detail-salon-location').innerText = `📍 ${[salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa'}`;
+                document.getElementById('detail-staff-info').innerText = `Male Barbers: ${salon.male_barbers || 1} | Female Stylists: ${salon.female_stylists || 1}`;
+                document.getElementById('detail-hours').innerText = `${salon.open_time || '08:00'} - ${salon.close_time || '18:00'}`;
+                document.getElementById('detail-booking-window').innerText = `Advance Booking Window: ${salon.advance_booking_days ?? 3} day(s)`;
+                
+                const giveawayBadge = document.getElementById('detail-giveaway-badge');
+                if (salon.free_hair_giveaway) {
+                    giveawayBadge.innerHTML = `<span class="text-xs text-green-600 font-bold bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 inline-block">🎁 Free Hair Giveaway Active!</span>`;
+                } else {
+                    giveawayBadge.innerHTML = '';
+                }
+
+                document.getElementById('detail-vote-btn').onclick = () => voteForSalon(salon.id, salon.name);
+                document.getElementById('detail-book-btn').onclick = () => openBookingModal(salon.id);
+
+                fetchSalonGallery(salonId);
+            } catch (err) {
+                console.error("Error loading salon detail:", err);
+                alert("Could not load salon details.");
+                showDashboardView();
+            }
+        }
+
+        async function fetchSalonGallery(salonId) {
+            const galleryGrid = document.getElementById('detail-gallery-grid');
+            try {
+                const res = await fetch(`${BACKEND_URL}/salon-gallery/${salonId}`);
+                const images = await res.json();
+
+                if (!images || images.length === 0) {
+                    galleryGrid.innerHTML = `<p class="text-xs text-gray-400 col-span-full py-6 text-center">No portfolio images uploaded for this salon yet.</p>`;
+                    return;
+                }
+
+                galleryGrid.innerHTML = '';
+                images.forEach(img => {
+                    const imgEl = document.createElement('div');
+                    imgEl.className = "h-40 rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gray-100";
+                    imgEl.innerHTML = `<img src="${img.image_url}" alt="Gallery work" class="w-full h-full object-cover hover:scale-105 transition duration-300">`;
+                    galleryGrid.appendChild(imgEl);
+                });
+            } catch (err) {
+                console.error("Gallery fetch error:", err);
+                galleryGrid.innerHTML = `<p class="text-xs text-red-400 col-span-full py-6 text-center">Failed to load gallery.</p>`;
+            }
+        }
+
+        async function fetchApprovedSalons() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/salons/approved`);
+                const salons = await response.json();
+                globalSalons = salons || [];
+                const gridContainer = document.getElementById('salon-grid');
+                const noResultsDiv = document.getElementById('no-results');
+
+                if (!gridContainer) return;
+
+                if (!globalSalons || globalSalons.length === 0) {
+                    gridContainer.innerHTML = '';
+                    noResultsDiv.classList.remove('hidden');
+                    return;
+                }
+
+                noResultsDiv.classList.add('hidden');
+                gridContainer.innerHTML = '';
+
+                globalSalons.forEach(salon => {
+                    const card = document.createElement('div');
+                    const isPaid = salon.isPaidActive;
+
+                    card.className = `salon-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 transition flex flex-col justify-between ${isPaid ? 'cursor-pointer hover:shadow-lg' : 'opacity-60 bg-gray-50'}`;
+                    card.setAttribute('data-name', salon.name.toLowerCase());
+                    
+                    card.onclick = (e) => {
+                        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                        if (!isPaid) {
+                            alert("This salon's monthly subscription is unpaid. Gallery and details are locked.");
+                            return;
+                        }
+                        showSalonDetailView(salon.id);
+                    };
+                    
+                    const headerImg = salon.header_image || "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600";
+                    const location = [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa';
+                    const staffText = `Male Staff: ${salon.male_barbers || 1} | Female Staff: ${salon.female_stylists || 1}`;
+                    
+                    const statusBadge = isPaid 
+                        ? (salon.free_hair_giveaway ? `<span class="text-xs text-green-600 font-semibold">Free Hair Giveaway Active!</span>` : `<span></span>`)
+                        : `<span class="text-xs text-rose-600 font-bold bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100 inline-block">🔒 Subscription Unpaid / Locked</span>`;
+
+                    const betawayBadge = salon.betaway_challenge && isPaid ? `<span class="bg-yellow-100 text-yellow-800 text-xs px-2.5 py-1 rounded-full font-semibold">🏆 Betaway Contender</span>` : `<span></span>`;
+
+                    card.innerHTML = `
+                        <div>
+                            <img src="${headerImg}" alt="Salon" class="w-full h-48 object-cover ${!isPaid ? 'grayscale' : ''}">
+                            <div class="p-5">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                    <h3 class="text-xl font-bold text-gray-900 salon-name"></h3>
+                                    ${betawayBadge}
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">${location}</p>
+                                <p class="text-xs text-indigo-600 mt-2 font-medium">${staffText}</p>
+                                <div class="mt-2">${statusBadge}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5 pt-0 flex items-center justify-between gap-2">
+                            <button class="vote-btn bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1 ${!isPaid ? 'opacity-50 cursor-not-allowed' : ''}">
+                                ★ Vote & Support
+                            </button>
+                            <button class="book-now-btn ${isPaid ? 'bg-gray-900 hover:bg-indigo-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} px-4 py-2 rounded-lg text-xs font-bold transition">
+                                ${isPaid ? 'Book Now' : 'Locked'}
+                            </button>
+                        </div>
+                    `;
+
+                    card.querySelector('.salon-name').innerText = salon.name;
+
+                    card.querySelector('.vote-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (!isPaid) {
+                            alert("Voting is locked for salons with unpaid subscriptions.");
+                            return;
+                        }
+                        voteForSalon(salon.id, salon.name);
+                    });
+
+                    card.querySelector('.book-now-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (!isPaid) {
+                            alert("Bookings are disabled because this salon's monthly platform subscription is unpaid.");
+                            return;
+                        }
+                        openBookingModal(salon.id);
+                    });
+
+                    gridContainer.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error loading approved salons:", error);
+            }
+        }
+
+        async function voteForSalon(salonId, salonName) {
+            const token = localStorage.getItem('voterToken');
+            if (!token) {
+                window.location.replace('voter-login.html');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/vote`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert(`⭐ Thank you ${voterSession.name}! Your vote for ${salonName} has been successfully recorded.`);
+                } else {
+                    alert(data.error || "You have already voted for this salon.");
+                }
+            } catch (err) {
+                console.error("Voting error:", err);
+                alert("Server connection error while voting.");
+            }
+        }
+
+        async function fetchBottomWinners() {
+            const container = document.getElementById('bottom-winners-container');
+            try {
+                const res = await fetch(`${BACKEND_URL}/admin/announcements`);
+                if (!res.ok) throw new Error('Failed to load winners');
+                const data = await res.json();
+                const items = data.announcements || [];
+
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs bg-white rounded-2xl border border-slate-200 col-span-full">No competition winners published yet. Check back soon!</div>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const dateStr = new Date(item.published_at).toLocaleDateString();
+                    const locationStr = [item.winner_suburb, item.winner_town, item.winner_province].filter(Boolean).join(', ') || item.location_value || 'South Africa';
+                    
+                    const div = document.createElement('div');
+                    div.className = "relative bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden p-6 space-y-4";
+                    
+                    div.innerHTML = `
+                        <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                            <span class="floating-balloon balloon-1 text-xl">🎈</span>
+                            <span class="floating-balloon balloon-2 text-2xl">🎈</span>
+                            <span class="floating-balloon balloon-3 text-xl">🎈</span>
+                        </div>
+
+                        <div class="relative z-10 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="bg-amber-100 text-amber-950 font-black px-3.5 py-1 rounded-full uppercase tracking-wider text-[11px]">
+                                    🏆 ${escapeHtml(item.tier_category || 'Competition')} Champion — ${escapeHtml(item.location_value || '')}
+                                </span>
+                                <span class="text-slate-400 font-semibold text-xs">📅 ${dateStr}</span>
+                            </div>
+
+                            <div class="w-full bg-slate-50 rounded-2xl overflow-hidden border border-slate-200">
+                                <div class="relative h-48 bg-slate-200 overflow-hidden">
+                                    <img src="${item.winner_header_image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600'}" 
+                                         alt="Storefront" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                                    <div class="absolute bottom-3 left-3 text-white">
+                                        <span class="bg-amber-400 text-amber-950 text-[10px] px-3 py-1 rounded-full font-black uppercase">★ Official Champion</span>
+                                    </div>
+                                </div>
+                                <div class="p-5 space-y-2">
+                                    <h4 class="text-xl font-black text-slate-900 capitalize">${escapeHtml(item.winner_salon_name || 'Champion Salon')}</h4>
+                                    <p class="text-xs font-medium text-slate-500">📍 ${escapeHtml(locationStr)}</p>
+                                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 inline-block px-3 py-1 rounded-lg">
+                                        Male Barbers: ${item.winner_male_barbers || 0} | Female Stylists: ${item.winner_female_stylists || 0}
+                                    </div>
+                                    <div class="text-xs font-black text-emerald-600">
+                                        ✨ Total Verified Score: ${item.points || 0} Points
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-violet-50/60 border border-violet-100 rounded-2xl p-4 space-y-1">
+                                <h5 class="text-xs font-black uppercase tracking-wider text-violet-900">${escapeHtml(item.title)}</h5>
+                                <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">${escapeHtml(item.details)}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="p-8 text-center text-rose-500 text-xs bg-white rounded-2xl border border-slate-200 col-span-full">Error loading winners from server.</div>`;
+            }
+        }
+
+        async function openBookingModal(salonId) {
+            try {
+                if (!voterSession) {
+                    window.location.replace('voter-login.html');
+                    return;
+                }
+
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}`);
+                if (!res.ok) throw new Error("Failed to fetch salon details");
+                
+                currentSalonData = await res.json();
+                
+                document.getElementById('modal-salon-title').innerText = `Book Appointment at ${currentSalonData.name}`;
+                document.getElementById('selected-time-slot').value = '';
+                document.getElementById('modal-client-name-display').innerText = `${voterSession.name} (${voterSession.email})`;
+
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+                const todayStr = todayObj.toISOString().split('T')[0];
+                
+                const maxDays = currentSalonData.advance_booking_days !== undefined && currentSalonData.advance_booking_days !== null ? parseInt(currentSalonData.advance_booking_days) : 3;
+                const maxDateObj = new Date();
+                maxDateObj.setDate(todayObj.getDate() + maxDays);
+                const maxDateStr = maxDateObj.toISOString().split('T')[0];
+
+                const dateInput = document.getElementById('booking-date');
+                dateInput.min = todayStr;
+                dateInput.max = maxDateStr;
+                dateInput.value = todayStr;
+
+                document.getElementById('limit-notice').innerText = `Max booking window: ${maxDays} day(s)`;
+
+                document.getElementById('booking-modal').classList.remove('hidden');
+                renderTimeSlots();
+            } catch (err) {
+                console.error("Error opening booking modal:", err);
+                alert("Could not load latest salon scheduling rules.");
+            }
+        }
+
+        function closeBookingModal() {
+            document.getElementById('booking-modal').classList.add('hidden');
+        }
+
+        function onServiceChange() {
+            renderTimeSlots();
+        }
+
+        function renderTimeSlots() {
+            const serviceType = document.getElementById('service-type').value;
+            const container = document.getElementById('time-slots-container');
+            const capacityBadge = document.getElementById('capacity-badge');
+            const selectedDate = document.getElementById('booking-date').value;
+            
+            document.getElementById('selected-time-slot').value = '';
+
+            if (!selectedDate) {
+                container.innerHTML = `<p class="text-xs text-gray-400 col-span-full text-center py-4">Please select a valid date.</p>`;
+                return;
+            }
+
+            const capacity = serviceType === 'male' ? (currentSalonData.male_barbers || 1) : (currentSalonData.female_stylists || 1);
+            capacityBadge.innerText = `Parallel capacity: ${capacity} staff member(s)`;
+
+            const intervalMins = serviceType === 'male' ? 35 : 180;
+            const openTimeStr = currentSalonData.open_time || "08:00";
+            const closeTimeStr = currentSalonData.close_time || "18:00";
+
+            const slots = generateSlotsList(openTimeStr, closeTimeStr, intervalMins);
+
+            if (slots.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 col-span-full text-center py-4">No slots available for operating hours.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            slots.forEach(slot => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = "time-slot-btn text-xs font-medium py-2 px-1 border rounded-lg bg-white text-gray-700 hover:border-indigo-600 hover:text-indigo-600 transition text-center shadow-sm";
+                btn.innerHTML = `${slot} <br/><span class="text-[10px] text-emerald-600 font-normal">Available</span>`;
+                
+                btn.onclick = () => {
+                    document.querySelectorAll('.time-slot-btn').forEach(b => {
+                        b.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+                        b.classList.add('bg-white', 'text-gray-700');
+                    });
+                    btn.classList.remove('bg-white', 'text-gray-700');
+                    btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+                    document.getElementById('selected-time-slot').value = slot;
+                };
+
+                container.appendChild(btn);
+            });
+        }
+
+        function generateSlotsList(startStr, endStr, intervalMins) {
+            const slots = [];
+            let [startH, startM] = startStr.split(':').map(Number);
+            let [endH, endM] = endStr.split(':').map(Number);
+
+            let currentMinutes = startH * 60 + startM;
+            const endMinutes = endH * 60 + endM;
+
+            while (currentMinutes + intervalMins <= endMinutes) {
+                let h1 = Math.floor(currentMinutes / 60).toString().padStart(2, '0');
+                let m1 = (currentMinutes % 60).toString().padStart(2, '0');
+                
+                let nextMinutes = currentMinutes + intervalMins;
+                let h2 = Math.floor(nextMinutes / 60).toString().padStart(2, '0');
+                let m2 = (nextMinutes % 60).toString().padStart(2, '0');
+
+                slots.push(`${h1}:${m1} - ${h2}:${m2}`);
+                currentMinutes = nextMinutes;
+            }
+            return slots;
+        }
+
+        async function submitBooking(event) {
+            event.preventDefault();
+            
+            const selectedSlot = document.getElementById('selected-time-slot').value;
+            if (!selectedSlot) {
+                alert("Please select an available time slot from the schedule before confirming.");
+                return;
+            }
+
+            if (!voterSession) {
+                window.location.replace('voter-login.html');
+                return;
+            }
+
+            const nameParts = voterSession.name.split(' ');
+            const firstName = nameParts[0] || 'Client';
+            const surname = nameParts.slice(1).join(' ') || 'User';
+
+            const bookingData = {
+                salonId: currentSalonData.id,
+                salonName: currentSalonData.name,
+                firstName: firstName,
+                surname: surname,
+                phone: voterSession.phone || 'N/A',
+                email: voterSession.email,
+                styleType: document.getElementById('style-type').value,
+                serviceCategory: document.getElementById('service-type').value,
+                bookingDate: document.getElementById('booking-date').value,
+                timeSlot: selectedSlot,
+                voterId: voterSession.id
+            };
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${currentSalonData.id}/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Appointment successfully confirmed for ${bookingData.bookingDate} at ${bookingData.timeSlot}!`);
+                    closeBookingModal();
+                } else {
+                    alert(data.error || "Failed to submit booking.");
+                }
+            } catch (err) {
+                console.error("Booking error:", err);
+                alert("Server connection error during booking.");
+            }
+        }
+
+        function filterSalons() {
+            const query = document.getElementById('salon-search-input').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.salon-card');
+            const suggestionsBox = document.getElementById('search-suggestions');
+            let visibleCount = 0;
+
+            suggestionsBox.innerHTML = '';
+
+            if (query.length > 0) {
+                const matches = globalSalons.filter(s => s.name.toLowerCase().includes(query));
+                if (matches.length > 0) {
+                    suggestionsBox.classList.remove('hidden');
+                    matches.forEach(salon => {
+                        const item = document.createElement('div');
+                        item.className = "px-4 py-2 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer border-b border-gray-100 last:border-none";
+                        item.innerText = salon.name;
+                        item.onclick = () => {
+                            document.getElementById('salon-search-input').value = salon.name;
+                            suggestionsBox.classList.add('hidden');
+                            filterSalons();
+                        };
+                        suggestionsBox.appendChild(item);
+                    });
+                } else {
+                    suggestionsBox.classList.add('hidden');
+                }
+            } else {
+                suggestionsBox.classList.add('hidden');
+            }
+
+            cards.forEach(card => {
+                const name = card.querySelector('.salon-name').innerText.toLowerCase();
+                if (name.includes(query)) {
+                    card.style.display = "flex";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+            document.getElementById('no-results').classList.toggle('hidden', visibleCount > 0);
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#salon-search-input') && !e.target.closest('#search-suggestions')) {
+                document.getElementById('search-suggestions').classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeBookingModal();
+                document.getElementById('search-suggestions').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

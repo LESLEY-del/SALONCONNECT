@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonConnect — Discover & Book</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sc: {
+                            navy: '#11132f',
+                            purple: '#6d4aff',
+                            lavender: '#a98cff',
+                            soft: '#f7f5ff'
+                        }
+                    },
+                    boxShadow: {
+                        soft: '0 20px 60px rgba(24, 20, 72, .10)',
+                        card: '0 12px 35px rgba(24, 20, 72, .10)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scroll-behavior: smooth; }
+        body {
+            background:
+                radial-gradient(circle at 10% 10%, rgba(169,140,255,.13), transparent 26%),
+                radial-gradient(circle at 90% 20%, rgba(109,74,255,.09), transparent 25%),
+                #fafaff;
+        }
+        .hero-glow {
+            background:
+                radial-gradient(circle at 15% 30%, rgba(169,140,255,.24), transparent 25%),
+                radial-gradient(circle at 85% 20%, rgba(109,74,255,.20), transparent 30%),
+                linear-gradient(135deg,#11132f 0%,#1c1d46 55%,#34246d 100%);
+        }
+        .glass { background: rgba(255,255,255,.84); backdrop-filter: blur(18px); }
+        .salon-card { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+        .salon-card:hover { transform: translateY(-6px); box-shadow: 0 22px 50px rgba(25,20,70,.14); }
+        .hero-wave { border-radius: 0 0 50% 50% / 0 0 12% 12%; }
+        .spinner {
+            width: 24px; height: 24px; border: 3px solid #ddd8ff;
+            border-top-color: #6d4aff; border-radius: 50%; animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast { animation: toastIn .25s ease-out; }
+        @keyframes toastIn { from { transform:translateY(12px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+    </style>
+</head>
+
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-50 border-b border-white/30 bg-white/90 backdrop-blur-xl shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+            <div class="flex items-center justify-between gap-4">
+                <a href="landing.html" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sc-purple to-sc-lavender text-white flex items-center justify-center shadow-lg shadow-purple-200">
+                        <span class="text-xl font-black">S</span>
+                    </div>
+                    <div>
+                        <div class="text-xl sm:text-2xl font-black tracking-tight text-sc-navy">Salon<span class="text-sc-purple">Connect</span></div>
+                        <div class="hidden sm:block text-[10px] tracking-[.28em] text-slate-400 font-bold">BEAUTY • STYLE • YOU</div>
+                    </div>
+                </a>
+
+                <div class="hidden md:flex items-center gap-7 text-sm font-semibold">
+                    <a href="#salons" class="text-sc-navy hover:text-sc-purple transition">Discover Salons</a>
+                    <a href="announcements.html" class="text-slate-500 hover:text-sc-purple transition">🏆 Winners</a>
+                    <a href="#how-it-works" class="text-slate-500 hover:text-sc-purple transition">How It Works</a>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a href="voter-login.html" class="text-xs font-bold text-slate-600 hover:text-sc-purple px-3 py-2">Client Login</a>
+                    <a href="login.html" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sc-navy text-white text-sm font-bold hover:bg-sc-purple transition shadow-lg">
+                        <span>✦</span> Salon Owner Portal
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-grow">
+
+        <!-- HERO -->
+        <section class="hero-glow hero-wave text-white overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+                <div class="grid lg:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-purple-100 text-xs font-bold mb-5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            Discover • Compare • Book
+                        </div>
+
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight">
+                            Your next beauty
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-300 to-purple-100">experience</span>
+                            starts here.
+                        </h1>
+
+                        <p class="mt-5 text-base sm:text-lg text-slate-200 max-w-xl leading-7">
+                            Find salons, explore their services and book your appointment through one simple platform built for modern beauty businesses.
+                        </p>
+                    </div>
+
+                    <div class="lg:pl-10">
+                        <div class="glass rounded-3xl p-4 sm:p-5 shadow-2xl text-slate-800 border border-white/50">
+                            <div class="flex items-center gap-3 px-2 pb-4">
+                                <div class="w-10 h-10 rounded-xl bg-sc-soft flex items-center justify-center text-xl">🔎</div>
+                                <div>
+                                    <p class="font-black text-sc-navy">Find your salon</p>
+                                    <p class="text-xs text-slate-500">Search by salon name</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <input type="text" id="salon-search-input" oninput="filterSalons()"
+                                    placeholder="Search for a salon..."
+                                    class="w-full px-5 py-4 pr-12 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-4 focus:ring-purple-100 focus:border-sc-purple transition text-sm">
+                                <span class="absolute right-4 top-4 text-lg">⌕</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DISCOVERY -->
+        <section id="salons" class="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-7">
+                <div>
+                    <div class="text-xs font-black tracking-[.2em] text-sc-purple uppercase">Explore</div>
+                    <h2 class="text-3xl sm:text-4xl font-black text-sc-navy mt-1">Discover salons</h2>
+                    <p class="text-slate-500 mt-2">Choose a salon that matches your style and book with confidence.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div id="salon-count" class="px-4 py-2 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-600 shadow-sm">Loading salons...</div>
+                    <button onclick="fetchApprovedSalons()" class="w-10 h-10 rounded-xl bg-white border border-slate-200 hover:border-sc-purple hover:text-sc-purple transition shadow-sm" title="Refresh">↻</button>
+                </div>
+            </div>
+
+            <div id="loading-state" class="flex flex-col items-center justify-center py-16">
+                <div class="spinner"></div>
+                <p class="text-sm text-slate-400 mt-4">Finding approved salons...</p>
+            </div>
+
+            <div id="salon-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+
+            <div id="no-results" class="hidden text-center py-16">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-sc-soft flex items-center justify-center text-2xl">🔎</div>
+                <h3 class="font-black text-sc-navy mt-4">No salons found</h3>
+                <p class="text-sm text-slate-500 mt-1">Try another salon name.</p>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section id="how-it-works" class="bg-white border-y border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+                <div class="text-center max-w-2xl mx-auto">
+                    <div class="text-xs font-black tracking-[.2em] text-sc-purple uppercase">Simple by design</div>
+                    <h2 class="text-3xl font-black text-sc-navy mt-2">Book in three easy steps</h2>
+                </div>
+                <div class="grid md:grid-cols-3 gap-5 mt-9">
+                    <div class="rounded-3xl border border-slate-100 bg-slate-50 p-6">
+                        <div class="w-12 h-12 rounded-2xl bg-sc-purple text-white flex items-center justify-center font-black">01</div>
+                        <h3 class="font-black text-lg mt-5">Find a salon</h3>
+                        <p class="text-sm text-slate-500 mt-2 leading-6">Browse approved salons and choose the one that suits your needs.</p>
+                    </div>
+                    <div class="rounded-3xl border border-slate-100 bg-slate-50 p-6">
+                        <div class="w-12 h-12 rounded-2xl bg-sc-navy text-white flex items-center justify-center font-black">02</div>
+                        <h3 class="font-black text-lg mt-5">Choose your service</h3>
+                        <p class="text-sm text-slate-500 mt-2 leading-6">Select your professional category, style and an available time slot.</p>
+                    </div>
+                    <div class="rounded-3xl border border-slate-100 bg-slate-50 p-6">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sc-purple to-sc-lavender text-white flex items-center justify-center font-black">03</div>
+                        <h3 class="font-black text-lg mt-5">Confirm your booking</h3>
+                        <p class="text-sm text-slate-500 mt-2 leading-6">Enter your details and submit your appointment directly to the salon.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <div class="font-black text-sc-navy">Salon<span class="text-sc-purple">Connect</span></div>
+                <p class="text-xs text-slate-400 mt-1">Beauty • Style • You</p>
+            </div>
+            <p class="text-xs text-slate-400">© 2026 SalonConnect. All rights reserved.</p>
+            <a href="login.html" class="text-xs font-bold text-sc-purple hover:underline">Salon Owner Portal →</a>
+        </div>
+    </footer>
+
+    <div id="toast-container" class="fixed right-4 bottom-4 z-[200] space-y-2 w-[calc(100%-2rem)] max-w-sm"></div>
+
+    <script>
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : 'https://your-production-backend-domain.com/api';
+        let allSalons = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchApprovedSalons();
+        });
+
+        function showToast(message, type = 'info') {
+            const box = document.createElement('div');
+            const icon = type === 'success' ? '✓' : type === 'error' ? '!' : 'i';
+            box.className = `toast rounded-2xl px-4 py-3 shadow-2xl border bg-white flex items-start gap-3 ${type === 'success' ? 'border-emerald-100' : type === 'error' ? 'border-red-100' : 'border-purple-100'}`;
+            box.innerHTML = `
+                <div class="w-7 h-7 rounded-lg ${type === 'success' ? 'bg-emerald-100 text-emerald-700' : type === 'error' ? 'bg-red-100 text-red-700' : 'bg-purple-100 text-purple-700'} flex items-center justify-center font-black">${icon}</div>
+                <div class="text-sm font-semibold text-slate-700 leading-5">${escapeHtml(message)}</div>
+            `;
+            document.getElementById('toast-container').appendChild(box);
+            setTimeout(() => box.remove(), 4000);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+            }[c]));
+        }
+
+        async function fetchApprovedSalons() {
+            const gridContainer = document.getElementById('salon-grid');
+            const loading = document.getElementById('loading-state');
+            const noResults = document.getElementById('no-results');
+            const count = document.getElementById('salon-count');
+
+            loading.classList.remove('hidden');
+            noResults.classList.add('hidden');
+            gridContainer.innerHTML = '';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/salons/approved`);
+                if (!response.ok) throw new Error('Failed to fetch salons');
+
+                const salons = await response.json();
+                allSalons = Array.isArray(salons) ? salons : [];
+
+                loading.classList.add('hidden');
+                count.textContent = `${allSalons.length} salon${allSalons.length === 1 ? '' : 's'} available`;
+
+                if (!allSalons.length) {
+                    noResults.classList.remove('hidden');
+                    return;
+                }
+
+                renderSalons(allSalons);
+            } catch (error) {
+                console.error('Error loading approved salons:', error);
+                loading.classList.add('hidden');
+                count.textContent = 'Unable to load salons';
+            }
+        }
+
+        function renderSalons(salons) {
+            const grid = document.getElementById('salon-grid');
+            const noResults = document.getElementById('no-results');
+            grid.innerHTML = '';
+
+            if (!salons.length) {
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+
+            salons.forEach(salon => {
+                const card = document.createElement('article');
+                card.className = 'salon-card bg-white rounded-[1.5rem] overflow-hidden border border-slate-100 shadow-card cursor-pointer';
+                
+                // Prompt visitor to log in before viewing full details
+                card.onclick = () => {
+                    const action = confirm("Please log in or register as a client to view full salon details and book appointments.");
+                    if (action) window.location.href = 'voter-login.html';
+                };
+
+                const headerImg = salon.header_image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800';
+                const location = [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa';
+                const staff = `Male Barbers: ${salon.male_barbers || 1} • Female Stylists: ${salon.female_stylists || 1}`;
+
+                card.innerHTML = `
+                    <div class="relative h-56 overflow-hidden bg-slate-100">
+                        <img src="${escapeHtml(headerImg)}" alt="${escapeHtml(salon.name || 'Salon')}" class="w-full h-full object-cover transition duration-500 hover:scale-105">
+                        <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute top-4 left-4 flex gap-2 flex-wrap">
+                            <span class="px-3 py-1.5 rounded-full bg-white/90 backdrop-blur text-[11px] font-black text-emerald-700">✓ Approved</span>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4 text-white">
+                            <div class="text-xl font-black drop-shadow">${escapeHtml(salon.name || 'Salon')}</div>
+                            <div class="text-xs text-white/80 mt-1">📍 ${escapeHtml(location)}</div>
+                        </div>
+                    </div>
+
+                    <div class="p-5">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-black uppercase tracking-wider text-sc-purple">Professionals</div>
+                                <div class="text-sm text-slate-600 mt-1">${escapeHtml(staff)}</div>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-sc-soft flex items-center justify-center text-sc-purple">✦</div>
+                        </div>
+
+                        <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                            <div class="text-xs text-slate-400">Log in to unlock booking</div>
+                            <button class="book-now-btn px-4 py-2.5 rounded-xl bg-sc-navy text-white text-sm font-black hover:bg-sc-purple transition shadow-sm">
+                                Book Now →
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                card.querySelector('.book-now-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    const action = confirm("Please log in or register as a client to book appointments.");
+                    if (action) window.location.href = 'voter-login.html';
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function filterSalons() {
+            const query = document.getElementById('salon-search-input').value.trim().toLowerCase();
+            const filtered = allSalons.filter(salon =>
+                String(salon.name || '').toLowerCase().includes(query)
+            );
+
+            document.getElementById('salon-count').textContent =
+                `${filtered.length} result${filtered.length === 1 ? '' : 's'}`;
+
+            renderSalons(filtered);
+        }
+    </script>
+</body>
+</html>

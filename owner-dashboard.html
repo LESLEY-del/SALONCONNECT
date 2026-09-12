@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonConnect - Owner Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+<style id="salonconnect-super-ui">
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+:root{--sc-navy:#10132f;--sc-navy2:#171a3d;--sc-purple:#6d45d6;--sc-purple2:#8b5cf6;--sc-lav:#eee9ff;--sc-text:#171a3d;--sc-muted:#6f748e;--sc-line:#e8e7f2;--sc-bg:#f6f7fb;}
+html{scroll-behavior:smooth}body{font-family:'DM Sans',ui-sans-serif,sans-serif;background:radial-gradient(circle at 10% 0%,rgba(139,92,246,.08),transparent 28%),radial-gradient(circle at 100% 20%,rgba(109,69,214,.06),transparent 24%),var(--sc-bg);color:var(--sc-text)}
+h1,h2,h3,h4{letter-spacing:-.025em}button,input,select{font-family:inherit}
+/* NAV */
+nav{background:rgba(255,255,255,.88)!important;border-color:rgba(226,226,238,.8)!important;box-shadow:0 10px 35px rgba(25,24,65,.06)}
+nav>div{min-height:70px!important}
+nav .w-9{width:42px!important;height:42px!important;border-radius:14px!important;background:linear-gradient(135deg,#6d45d6,#9b73ef)!important;box-shadow:0 9px 20px rgba(109,69,214,.25)!important}
+nav h1{font-family:'Playfair Display',serif!important;font-size:21px!important}
+nav button{border-radius:12px!important;font-weight:800!important}
+/* MAIN HERO */
+main{padding-top:30px!important;padding-bottom:50px!important}
+main>div:first-child{border:1px solid rgba(231,230,242,.9)!important;border-left:0!important;border-radius:28px!important;padding:0!important;min-height:190px;background:linear-gradient(135deg,#111431 0%,#191d45 58%,#28225b 100%)!important;box-shadow:0 22px 60px rgba(20,19,58,.13)!important;color:white;overflow:hidden}
+main>div:first-child:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 82% 30%,rgba(173,136,255,.25),transparent 22%),radial-gradient(circle at 65% 120%,rgba(124,91,220,.18),transparent 28%);pointer-events:none}
+main>div:first-child .absolute.-right-10{background:rgba(139,92,246,.12)!important}
+main>div:first-child>div{padding:34px 38px!important}
+main>div:first-child h2{font-family:'Playfair Display',serif!important;color:#fff!important;font-size:clamp(30px,4vw,48px)!important}
+main>div:first-child p{color:rgba(235,232,248,.72)!important}
+main>div:first-child .bg-indigo-50{background:rgba(255,255,255,.09)!important;border-color:rgba(255,255,255,.14)!important;color:#d9c9ff!important}
+main>div:first-child .bg-slate-50\/80{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.13)!important;color:#fff!important}
+#availability-btn{border-radius:14px!important;padding:12px 16px!important;background:linear-gradient(135deg,#23b26d,#169b5b)!important;box-shadow:0 8px 20px rgba(21,157,91,.22)!important}
+/* SECTION CONTAINERS */
+main>div:not(:first-child){border-radius:28px!important;border-color:rgba(225,225,238,.9)!important;box-shadow:0 16px 45px rgba(35,34,75,.055)!important}
+main>div:not(:first-child)>div:first-child h3{font-family:'Playfair Display',serif!important;color:#171a3d!important}
+/* PUBLIC CARD */
+main>div:nth-child(3){padding:26px!important}
+main>div:nth-child(3)>div:first-child{margin-bottom:2px}
+#preview-header-img{filter:saturate(.88);}
+main>div:nth-child(3) .relative.h-72{height:310px!important;border-radius:22px 22px 0 0!important}
+main>div:nth-child(3) .p-6.sm\:p-8{background:linear-gradient(180deg,#fff,#fbfbfe)!important}
+#card-salon-name{font-family:'Playfair Display',serif!important;font-size:28px!important}
+main>div:nth-child(3) button{border-radius:13px!important}
+/* GLOBAL INTERACTION */
+button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease!important}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
+/* MODAL BACKDROP */
+.modal-backdrop { background:rgba(13,12,34,.75); backdrop-filter:blur(8px); }
+/* BALLOON ANIMATION */
+@keyframes floatUp {
+    0% { transform: translateY(20px) scale(0.9); opacity: 0; }
+    50% { opacity: 0.8; }
+    100% { transform: translateY(-350px) scale(1.1); opacity: 0; }
+}
+.floating-balloon {
+    position: absolute;
+    bottom: -10px;
+    animation: floatUp 6s ease-in-out infinite;
+}
+.balloon-1 { left: 10%; animation-delay: 0s; }
+.balloon-2 { left: 40%; animation-delay: 2s; }
+.balloon-3 { left: 75%; animation-delay: 1s; }
+/* SCROLLBAR */
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:#f0f0f7}::-webkit-scrollbar-thumb{background:#c7c1dc;border-radius:99px}::-webkit-scrollbar-thumb:hover{background:#a999ca}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans flex flex-col min-h-screen selection:bg-indigo-500 selection:text-white">
+
+    <!-- Professional Sticky Navigation -->
+    <nav class="bg-white/85 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-200">S</div>
+                <div>
+                    <h1 class="text-xl font-extrabold text-slate-900 tracking-tight leading-none">SalonConnect</h1>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Owner Portal</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex flex-col text-right">
+                    <span id="nav-owner-name" class="text-xs font-bold text-slate-700">Manager Account</span>
+                    <span class="text-[10px] text-slate-400">Online & Active</span>
+                </div>
+                <button onclick="logout()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 transition border border-slate-200/60">Log Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Full-Screen Unpaid Subscription Blockout Modal -->
+    <div id="subscription-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[100] p-4">
+        <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden p-8 text-center space-y-6 border border-slate-100">
+            <div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-inner">
+                🔒
+            </div>
+            <div class="space-y-2">
+                <span class="bg-rose-100 text-rose-900 text-[10px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider">Subscription Required</span>
+                <h3 class="text-2xl font-black text-slate-900">Pay SalonConnect Platform Fee</h3>
+                <p class="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">Your 30-day rolling monthly platform subscription is unpaid or expired. Complete payment to instantly unlock your dashboard and resume client bookings.</p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center text-xs font-bold">
+                <span class="text-slate-600">30-Day Platform Access:</span>
+                <span class="text-emerald-600 font-black text-sm">R200.00</span>
+            </div>
+            <div class="space-y-3 pt-2">
+                <button onclick="payMonthlySubscription()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl text-xs font-black transition shadow-lg shadow-indigo-100">
+                    💳 Pay R200 via PayFast
+                </button>
+                <button onclick="logout()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl text-xs font-bold transition">
+                    Log Out of Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+
+        <!-- Header Welcome & Status Bar -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 border-l-[6px] border-l-indigo-600 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-50 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="space-y-1.5 relative z-10">
+                <div class="flex items-center gap-2">
+                    <span class="text-[11px] uppercase tracking-wider text-indigo-600 font-extrabold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Management Suite</span>
+                </div>
+                <h2 id="owner-salon-title" class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight capitalize">My Salon Dashboard</h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-medium">Manage your storefront, scheduling hours, calendar availability, and live client logs.</p>
+            </div>
+            
+            <div class="flex items-center space-x-3 bg-slate-50/80 px-4 py-3 rounded-2xl border border-slate-200/80 shadow-sm w-full md:w-auto justify-between md:justify-start relative z-10">
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wide">Live Status:</span>
+                <button id="availability-btn" onclick="toggleBookingAvailability()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm shadow-emerald-200 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    <span>Accepting Bookings (ON)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Executive Dashboard Navigation Strip -->
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-3" style="background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;">
+            <button onclick="toggleSection('bookings-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">📅</span><span class="text-slate-300 group-hover:text-indigo-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Bookings</p><p class="mt-1 text-[10px] text-slate-500">Manage appointments</p>
+            </button>
+            <button onclick="toggleSection('settings-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-lg">⚙️</span><span class="text-slate-300 group-hover:text-violet-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Schedule</p><p class="mt-1 text-[10px] text-slate-500">Hours and rules</p>
+            </button>
+            <button onclick="toggleSection('upload-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center text-lg">🖼️</span><span class="text-slate-300 group-hover:text-fuchsia-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Portfolio</p><p class="mt-1 text-[10px] text-slate-500">Showcase work</p>
+            </button>
+            <button onclick="toggleSection('print-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">✦</span><span class="text-slate-300 group-hover:text-amber-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Marketing</p><p class="mt-1 text-[10px] text-slate-500">Print promotions</p>
+            </button>
+            <button id="competitions-nav-btn" onclick="toggleSection('competitions-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">🏆</span><span class="text-slate-300 group-hover:text-emerald-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Competitions</p><p id="competitions-status-subtitle" class="mt-1 text-[10px] text-slate-500">Leaderboards</p>
+            </button>
+            <button onclick="toggleSection('announcements-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">🎉</span><span class="text-slate-300 group-hover:text-rose-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Winners</p><p class="mt-1 text-[10px] text-slate-500">View announcements</p>
+            </button>
+        </div>
+
+        <!-- Salon Card Preview Section -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 tracking-tight">Public Salon Card Preview</h3>
+                    <p class="text-xs text-slate-500">This is how your storefront appears to clients on the directory.</p>
+                </div>
+            </div>
+
+            <!-- Card Design Frame -->
+            <div class="w-full bg-white rounded-2xl shadow-xl shadow-slate-100 overflow-hidden border border-slate-200/80 transition-all duration-300">
+                <div class="relative h-72 sm:h-96 bg-slate-100 overflow-hidden group">
+                    <img id="preview-header-img" src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600" alt="Salon Header" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80"></div>
+                    
+                    <label class="absolute bottom-5 right-5 bg-white/90 backdrop-blur-md text-slate-900 px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer hover:bg-white transition shadow-lg flex items-center gap-2 border border-slate-200/50">
+                        <span>📷 Change Header Image</span>
+                        <input type="file" accept="image/*" onchange="updateHeaderImage(event)" class="hidden">
+                    </label>
+
+                    <div class="absolute bottom-5 left-5 text-white">
+                        <span id="card-betaway-badge" class="hidden bg-amber-400 text-amber-950 text-[11px] px-3 py-1 rounded-full font-black shadow-md uppercase tracking-wider">🏆 Betaway Contender</span>
+                    </div>
+                </div>
+                
+                <div class="p-6 sm:p-8 space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <h4 id="card-salon-name" class="text-2xl font-extrabold text-slate-900 capitalize tracking-tight">Salon Name</h4>
+                        <span id="card-giveaway-badge" class="hidden text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold px-3 py-1.5 rounded-xl">✨ Free Hair Giveaway Active</span>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500">
+                        <span id="card-salon-location" class="flex items-center gap-1.5">📍 Loading location...</span>
+                        <span class="text-slate-300">•</span>
+                        <span id="card-staff-count" class="text-indigo-600 font-bold bg-indigo-50 px-2.5 py-1 rounded-lg">Male Staff: 0 | Female Staff: 0</span>
+                    </div>
+                    
+                    <hr class="border-slate-100 my-4">
+
+                    <!-- Dashboard Action Control Tabs -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Management Controls</p>
+                        
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <button onclick="toggleSection('upload-section')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm shadow-indigo-100 flex items-center gap-1.5">
+                                <span>🖼️ Upload Gallery</span>
+                            </button>
+                            <button onclick="toggleSection('settings-section')" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                                ⚙️ Settings & Hours
+                            </button>
+                            <button onclick="toggleSection('print-section')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                                🖨️ Print Materials
+                            </button>
+                            <button onclick="toggleSection('bookings-section')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                                📅 Live Bookings
+                            </button>
+                            <button id="card-competitions-btn" onclick="toggleSection('competitions-section')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                                🏆 Competitions
+                            </button>
+                            <button onclick="toggleSection('announcements-section')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                                🎉 Winners
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Uploaded Pictures Gallery Section (Hidden by default) -->
+        <div id="upload-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 tracking-tight">Portfolio Gallery Management</h3>
+                    <p class="text-xs text-slate-500">Upload high-resolution photos or media clips showcasing your hair design work.</p>
+                </div>
+                <label class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition shadow-sm shadow-indigo-100 flex items-center gap-2">
+                    <span>+ Add Picture(s) / Video(s)</span>
+                    <input type="file" id="media-files" accept="image/*,video/*" multiple class="hidden" onchange="handleBatchMediaUpload(event)">
+                </label>
+            </div>
+
+            <div id="salon-gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                <div class="border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center text-slate-400 text-xs flex flex-col items-center justify-center col-span-full gap-2">
+                    <span class="text-2xl">📷</span>
+                    <span class="font-semibold">No gallery media uploaded yet.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS & SCHEDULE CONFIGURATION SECTION -->
+        <div id="settings-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-8 animate-fadeIn">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Salon Operations & Advanced Booking Settings</h3>
+                <p class="text-xs text-slate-500">Configure business hours, rolling booking window ranges, and block out precise time slots.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">⏰</span>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-slate-800">Daily Operating Hours</h4>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Opening Time</label>
+                            <input type="time" id="open-time" value="08:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Closing Time</label>
+                            <input type="time" id="close-time" value="18:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">📅</span>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-slate-800">Booking Range Limit</h4>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Allowed Advance Booking Schedule</label>
+                        <select id="booking-range-days" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="7">Full Week (7 Days Advance)</option>
+                            <option value="3">3 Days Advance Notice</option>
+                            <option value="2">2 Days Advance Notice</option>
+                            <option value="1">Next-Day Only (1 Day)</option>
+                            <option value="14">2 Weeks Advance (14 Days)</option>
+                            <option value="30">Full Month (30 Days)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">🛑</span>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-slate-800">Block Specific Time Range</h4>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Select Date</label>
+                        <input type="date" id="blockout-date" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 mb-3">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">From Time</label>
+                            <input type="time" id="blockout-start" value="10:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">To Time</label>
+                            <input type="time" id="blockout-end" value="14:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                        </div>
+                    </div>
+                    <button onclick="addTimeBlockout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 rounded-xl text-xs font-bold transition border border-rose-200">Block This Time Slot</button>
+                    <div id="active-blockouts-list" class="space-y-2 max-h-40 overflow-y-auto mt-3"></div>
+                </div>
+
+                <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">⚡</span>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-slate-800">Pro Booking Rules</h4>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-medium text-slate-600">Auto-accept client bookings</span>
+                            <input type="checkbox" id="auto-accept" checked class="w-4 h-4 text-indigo-600 rounded">
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-medium text-slate-600">Allow Sunday bookings</span>
+                            <input type="checkbox" id="allow-sunday" class="w-4 h-4 text-indigo-600 rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 flex justify-end">
+                <button onclick="saveAllSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl text-xs font-extrabold transition shadow-md">Save Settings</button>
+            </div>
+        </div>
+
+        <!-- Print Posters Section (Hidden by default) -->
+        <div id="print-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Print Promotional Posters & Flyers</h3>
+                <p class="text-xs text-slate-500">Generate clean printable materials containing your salon identifier and profile layout.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-indigo-50/50 border border-indigo-100 p-6 rounded-2xl flex flex-col justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-indigo-900">Booking Invitation Poster</p>
+                        <p class="text-xs text-slate-500 mt-1">A4 printable poster for clients to scan and book.</p>
+                    </div>
+                    <button onclick="downloadBookingInvitationPoster()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">📥 Download Poster PDF</button>
+                </div>
+                <div class="bg-amber-50/50 border border-amber-100 p-6 rounded-2xl flex flex-col justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-amber-900">Best Salon Vote Poster</p>
+                        <p class="text-xs text-slate-500 mt-1">Promotional poster for the competition challenge.</p>
+                    </div>
+                    <button onclick="downloadVotePoster()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">🏆 Download Vote Poster PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPETITIONS & CHALLENGES SECTION -->
+        <div id="competitions-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-[11px] uppercase tracking-wider text-emerald-600 font-extrabold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Active Challenges</span>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight mt-1">Salon Competitions & Leaderboards</h3>
+                    <p class="text-xs text-slate-500">Select your competition tier below: Suburb, Town, Province, or Country.</p>
+                </div>
+            </div>
+
+            <!-- 4 Hierarchical Competition Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                
+                <!-- 1. Suburb Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-indigo-100 text-indigo-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🏠 Tier 1</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with my Suburb</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Battle against competing salons operating right within your local suburb.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('suburb', 150, 'Regional Competition Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Suburb (R150)</button>
+                        <button onclick="viewCompetitionLeaderboard('suburb')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+                <!-- 2. Town Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-violet-100 text-violet-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🏙️ Tier 2</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with my Town</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Scale up and test your check-in numbers against all salons in your town.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('town', 150, 'Town Competition Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Town (R150)</button>
+                        <button onclick="viewCompetitionLeaderboard('town')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+                <!-- 3. Province Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-amber-100 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🗺️ Tier 3</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with my Province</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Prove your salon dominance across your entire provincial region.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('province', 150, 'Province Competition Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Province (R150)</button>
+                        <button onclick="viewCompetitionLeaderboard('province')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+                <!-- 4. Country Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-rose-100 text-rose-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🏆 Tier 4 • National</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with the Country</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Enter the national arena and compete for the ultimate country-wide championship title.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('country', 300, 'National Championship Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Country (R300)</button>
+                        <button onclick="viewCompetitionLeaderboard('country')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Dynamic Competition Leaderboard Table Container -->
+            <div id="competition-table-container" class="mt-8 pt-6 border-t border-slate-200 hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <h4 id="competition-table-title" class="text-lg font-bold text-slate-900">Leaderboard Table</h4>
+                    <button onclick="document.getElementById('competition-table-container').classList.add('hidden')" class="text-xs font-bold text-slate-500 hover:text-slate-800">Close Table ✕</button>
+                </div>
+                <div id="competition-table-content" class="overflow-x-auto">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS & WINNERS SECTION -->
+        <div id="announcements-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-[11px] uppercase tracking-wider text-rose-600 font-extrabold bg-rose-50 px-3 py-1 rounded-full border border-rose-100">🎉 Official Results</span>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight mt-1">Competition Winners & Champions</h3>
+                    <p class="text-xs text-slate-500">Check out the top-performing salons across suburbs, towns, provinces, and the country.</p>
+                </div>
+                <button onclick="fetchOwnerAnnouncements()" class="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2 text-xs font-black text-slate-700 transition">↻ Refresh Winners</button>
+            </div>
+
+            <div id="owner-announcements-container" class="space-y-6 mt-4">
+                <div class="p-12 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">Loading announcements...</div>
+            </div>
+        </div>
+
+        <!-- Bookings & Client Check-In Tracker Section (Hidden by default) -->
+        <div id="bookings-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 tracking-tight">Client Check-In & Winner Challenge Tracker</h3>
+                    <p class="text-xs text-slate-500">Today's List & upcoming appointments ordered strictly by time.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-3 py-1.5 rounded-xl font-extrabold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Queue Active
+                    </span>
+                    <button onclick="downloadTodayPDF()" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1">
+                        <span>📥 Download Fancy PDF Report</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="bookings-container" class="space-y-3 mt-4">
+                <div class="p-8 text-center text-slate-400 text-xs bg-slate-50/60 rounded-2xl border border-slate-200/60">
+                    No pending bookings recorded in database yet.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Full-Screen Lightbox Modal for Gallery Swipe/View -->
+    <div id="media-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+        <button onclick="closeModal()" class="absolute top-6 right-6 text-white text-2xl font-bold hover:text-slate-300 focus:outline-none bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition">&times;</button>
+        <button onclick="prevMedia()" class="absolute left-4 sm:left-8 text-white text-lg font-bold bg-white/10 hover:bg-white/30 p-3.5 rounded-full transition focus:outline-none">&#10094;</button>
+        <button onclick="nextMedia()" class="absolute right-4 sm:right-8 text-white text-lg font-bold bg-white/10 hover:bg-white/30 p-3.5 rounded-full transition focus:outline-none">&#10095;</button>
+        <div class="max-w-5xl max-h-[85vh] flex items-center justify-center px-12">
+            <img id="modal-img" src="" alt="Full View" class="hidden max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl">
+            <video id="modal-video" src="" controls class="hidden max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"></video>
+        </div>
+        <div id="modal-counter" class="absolute bottom-6 text-white/70 text-xs font-bold tracking-widest bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm"></div>
+    </div>
+
+    <!-- Script Engine -->
+    <script>
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : 'https://your-production-backend-domain.com/api';
+        
+        let userSession = {};
+        try {
+            userSession = JSON.parse(localStorage.getItem('salonUser') || '{}');
+        } catch (e) {
+            userSession = {};
+        }
+
+        const salonId = userSession.salonId || userSession.id;
+        let isAccepting = true;
+
+        let currentGalleryItems = [];
+        let currentModalIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!salonId) {
+                alert("Please log in as a salon owner first.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const displayName = userSession.salonName || userSession.name || "Manager Account";
+            document.getElementById('owner-salon-title').innerText = displayName;
+            document.getElementById('card-salon-name').innerText = displayName;
+            document.getElementById('nav-owner-name').innerText = displayName;
+
+            // Clear URL parameters smoothly if returning from payment success/cancel without showing ugly text
+            if (window.location.search) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            fetchSalonDetails();
+            fetchBookings();
+            fetchGalleryMedia();
+            fetchBlockouts();
+            checkCompetitionAccess();
+            fetchOwnerAnnouncements();
+
+            document.addEventListener('keydown', (e) => {
+                const modal = document.getElementById('media-modal');
+                if (modal.classList.contains('hidden')) return;
+
+                if (e.key === 'ArrowRight') nextMedia();
+                if (e.key === 'ArrowLeft') prevMedia();
+                if (e.key === 'Escape') closeModal();
+            });
+        });
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        async function fetchOwnerAnnouncements() {
+            const container = document.getElementById('owner-announcements-container');
+            try {
+                const res = await fetch(`${BACKEND_URL}/admin/announcements`);
+                if (!res.ok) throw new Error('Failed to load announcements');
+                const data = await res.json();
+                const items = data.announcements || [];
+
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="p-12 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">No competition winners published yet. Check back soon!</div>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const dateStr = new Date(item.published_at).toLocaleDateString();
+                    const locationStr = [item.winner_suburb, item.winner_town, item.winner_province].filter(Boolean).join(', ') || item.location_value || 'South Africa';
+                    
+                    const div = document.createElement('div');
+                    div.className = "relative bg-white rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-100 overflow-hidden transition-all duration-300 p-6 sm:p-8 space-y-6";
+                    
+                    div.innerHTML = `
+                        <!-- Celebratory Floating Balloons -->
+                        <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                            <span class="floating-balloon balloon-1 text-2xl">🎈</span>
+                            <span class="floating-balloon balloon-2 text-3xl">🎈</span>
+                            <span class="floating-balloon balloon-3 text-2xl">🎈</span>
+                        </div>
+
+                        <div class="relative z-10 space-y-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <span class="bg-amber-100 text-amber-950 font-black px-3.5 py-1 rounded-full uppercase tracking-wider text-[11px] shadow-sm">
+                                    🏆 ${escapeHtml(item.tier_category || 'Competition')} Champion — ${escapeHtml(item.location_value || '')}
+                                </span>
+                                <span class="text-slate-400 font-semibold text-xs">📅 ${dateStr}</span>
+                            </div>
+
+                            <div class="w-full bg-slate-50 rounded-2xl overflow-hidden border border-slate-200/80 shadow-md">
+                                <div class="relative h-56 sm:h-72 bg-slate-200 overflow-hidden">
+                                    <img src="${item.winner_header_image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600'}" 
+                                         alt="Storefront" class="w-full h-full object-cover"
+                                         onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600'">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                                    <div class="absolute bottom-4 left-4 text-white">
+                                        <span class="bg-amber-400 text-amber-950 text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-wider shadow">★ Official Champion</span>
+                                    </div>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <h3 class="text-2xl font-black text-slate-900 capitalize tracking-tight">${escapeHtml(item.winner_salon_name || 'Champion Salon')}</h3>
+                                    <p class="text-xs font-medium text-slate-500">📍 ${escapeHtml(locationStr)}</p>
+                                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 inline-block px-3 py-1 rounded-lg">
+                                        Male Barbers: ${item.winner_male_barbers || 0} | Female Stylists: ${item.winner_female_stylists || 0}
+                                    </div>
+                                    <div class="pt-2 text-xs font-black text-emerald-600">
+                                        ✨ Total Verified Check-In Score: ${item.points || 0} Points
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-violet-50/60 border border-violet-100 rounded-2xl p-5 space-y-1">
+                                <h4 class="text-xs font-black uppercase tracking-wider text-violet-900">${escapeHtml(item.title)}</h4>
+                                <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">${escapeHtml(item.details)}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="p-12 text-center text-rose-500 text-xs bg-slate-50 rounded-2xl border border-slate-200">Error loading announcements from server.</div>`;
+            }
+        }
+
+        async function checkCompetitionAccess() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/admin/competition-status`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const isOpen = Boolean(data.isOpen);
+
+                    const navBtn = document.getElementById('competitions-nav-btn');
+                    const cardBtn = document.getElementById('card-competitions-btn');
+                    const subtitle = document.getElementById('competitions-status-subtitle');
+
+                    if (!isOpen) {
+                        if (navBtn) { navBtn.style.opacity = '0.5'; navBtn.title = "Competitions are currently closed by the administrator."; }
+                        if (cardBtn) { cardBtn.style.opacity = '0.5'; cardBtn.title = "Competitions are currently closed by the administrator."; }
+                        if (subtitle) { subtitle.innerText = "🔒 Locked by Admin"; subtitle.className = "mt-1 text-[10px] text-rose-500 font-bold"; }
+                    } else {
+                        if (subtitle) { subtitle.innerText = "Leaderboards"; subtitle.className = "mt-1 text-[10px] text-slate-500"; }
+                    }
+                }
+            } catch (err) {
+                console.error("Could not verify competition lock status", err);
+            }
+        }
+
+        async function toggleSection(sectionId) {
+            if (sectionId === 'competitions-section') {
+                try {
+                    const res = await fetch(`${BACKEND_URL}/admin/competition-status`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (!data.isOpen) {
+                            alert("🔒 Competitions are currently closed by the administrator. Please wait for an official opening announcement.");
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error checking competition status:", e);
+                }
+            }
+
+            const target = document.getElementById(sectionId);
+            if (!target) return;
+
+            const isOpen = !target.classList.contains('hidden');
+
+            const sections = ['upload-section', 'settings-section', 'print-section', 'bookings-section', 'competitions-section', 'announcements-section'];
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+
+            if (!isOpen) {
+                target.classList.remove('hidden');
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        async function fetchSalonDetails() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}`);
+                if (res.ok) {
+                    const salon = await res.json();
+                    window.currentSalonData = salon;
+                    
+                    const salonTitle = salon.name || userSession.salonName || "My Salon Dashboard";
+                    document.getElementById('owner-salon-title').innerText = salonTitle;
+                    document.getElementById('card-salon-name').innerText = salonTitle;
+                    document.getElementById('nav-owner-name').innerText = salonTitle;
+                    
+                    const location = [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa';
+                    document.getElementById('card-salon-location').innerText = `📍 ${location}`;
+                    document.getElementById('card-staff-count').innerText = `Male Staff: ${salon.male_barbers || 0} | Female Staff: ${salon.female_stylists || 0}`;
+
+                    // Check if monthly subscription is paid or expired (30 days)
+                    let isPaidActive = salon.monthly_paid;
+                    if (isPaidActive && salon.monthly_paid_at) {
+                        const diffDays = (new Date() - new Date(salon.monthly_paid_at)) / (1000 * 60 * 60 * 24);
+                        if (diffDays > 30) isPaidActive = false;
+                    }
+
+                    // Display full-screen payment modal if unpaid upon login
+                    const subModal = document.getElementById('subscription-modal');
+                    if (!isPaidActive) {
+                        subModal.classList.remove('hidden');
+                        subModal.classList.add('flex');
+                    } else {
+                        subModal.classList.add('hidden');
+                        subModal.classList.remove('flex');
+                    }
+
+                    if (salon.header_image) {
+                        document.getElementById('preview-header-img').src = salon.header_image;
+                    }
+
+                    isAccepting = salon.is_accepting_bookings !== false;
+                    const btn = document.getElementById('availability-btn');
+                    if (btn) {
+                        if (isAccepting) {
+                            btn.className = "bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm shadow-emerald-200 flex items-center gap-1.5";
+                            btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span><span>Accepting Bookings (ON)</span>`;
+                        } else {
+                            btn.className = "bg-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-rose-700 transition shadow-sm shadow-rose-200 flex items-center gap-1.5";
+                            btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white"></span><span>Bookings Closed (OFF)</span>`;
+                        }
+                    }
+
+                    if (salon.advance_booking_days && document.getElementById('booking-range-days')) {
+                        document.getElementById('booking-range-days').value = salon.advance_booking_days;
+                    }
+                    if (salon.open_time && document.getElementById('open-time')) document.getElementById('open-time').value = salon.open_time;
+                    if (salon.close_time && document.getElementById('close-time')) document.getElementById('close-time').value = salon.close_time;
+                }
+            } catch (err) {
+                console.error("Error fetching salon details:", err);
+            }
+        }
+
+        async function updateHeaderImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const base64Img = await convertFileToBase64(file);
+                const imgRes = await fetch(`${BACKEND_URL}/salons/${salonId}/header-image`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ headerImage: base64Img })
+                });
+
+                if (imgRes.ok) {
+                    document.getElementById('preview-header-img').src = base64Img;
+                    alert("Header image successfully updated in database!");
+                } else {
+                    alert("Failed to update header image.");
+                }
+            } catch (err) {
+                console.error("Error updating image:", err);
+                alert("Error processing image file.");
+            }
+        }
+
+        async function toggleBookingAvailability() {
+            isAccepting = !isAccepting;
+            const btn = document.getElementById('availability-btn');
+            
+            try {
+                await fetch(`${BACKEND_URL}/salons/${salonId}/settings`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isAcceptingBookings: isAccepting })
+                });
+
+                if (isAccepting) {
+                    btn.className = "bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm shadow-emerald-200 flex items-center gap-1.5";
+                    btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span><span>Accepting Bookings (ON)</span>`;
+                } else {
+                    btn.className = "bg-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-rose-700 transition shadow-sm shadow-rose-200 flex items-center gap-1.5";
+                    btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white"></span><span>Bookings Closed (OFF)</span>`;
+                }
+            } catch (err) {
+                console.error("Error updating availability status", err);
+            }
+        }
+
+        async function saveAllSettings() {
+            const advanceDays = document.getElementById('booking-range-days').value;
+            const openTime = document.getElementById('open-time').value;
+            const closeTime = document.getElementById('close-time').value;
+            const autoAccept = document.getElementById('auto-accept').checked;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/settings`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        advanceBookingDays: parseInt(advanceDays),
+                        openTime,
+                        closeTime,
+                        autoAccept
+                    })
+                });
+                if (res.ok) {
+                    alert(`Settings successfully saved! Operating hours set to ${openTime} - ${closeTime}, and booking range set to ${advanceDays} days.`);
+                } else {
+                    alert("Failed to save settings.");
+                }
+            } catch (err) {
+                console.error("Error saving settings:", err);
+                alert("Error connecting to server.");
+            }
+        }
+
+        async function addTimeBlockout() {
+            const dateVal = document.getElementById('blockout-date').value;
+            const startTime = document.getElementById('blockout-start').value;
+            const endTime = document.getElementById('blockout-end').value;
+
+            if (!dateVal) {
+                alert("Please select a date for the block-out.");
+                return;
+            }
+
+            if (startTime >= endTime) {
+                alert("The 'From' time must be earlier than the 'To' time.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/blockout-times`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        blockoutDate: dateVal, 
+                        startTime: startTime, 
+                        endTime: endTime 
+                    })
+                });
+
+                if (res.ok) {
+                    alert(`Successfully blocked out ${dateVal} from ${startTime} to ${endTime}.`);
+                    document.getElementById('blockout-date').value = '';
+                    fetchBlockouts();
+                } else {
+                    alert("Failed to block out time range.");
+                }
+            } catch (err) {
+                console.error("Error blocking time:", err);
+                alert("Server connection error.");
+            }
+        }
+
+        async function fetchBlockouts() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/blockout-times`);
+                if (!res.ok) return;
+                const blockouts = await res.json();
+                const container = document.getElementById('active-blockouts-list');
+                if (!container) return;
+
+                if (!blockouts || blockouts.length === 0) {
+                    container.innerHTML = `<p class="text-[11px] text-slate-400">No active time block-outs configured.</p>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                blockouts.forEach(b => {
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200 text-xs shadow-sm";
+                    div.innerHTML = `
+                        <div>
+                            <span class="font-semibold text-slate-800">${b.blockout_date}</span> 
+                            <span class="text-slate-500">(${b.start_time} - ${b.end_time})</span>
+                        </div>
+                        <button onclick="deleteBlockout(${b.id})" class="text-rose-600 hover:text-rose-800 font-semibold text-[11px] bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 transition">Remove</button>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                console.error("Error fetching blockouts:", err);
+            }
+        }
+
+        async function deleteBlockout(blockoutId) {
+            if (!confirm("Are you sure you want to remove this time block-out?")) return;
+            try {
+                const res = await fetch(`${BACKEND_URL}/blockout-times/${blockoutId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert("Block-out removed successfully!");
+                    fetchBlockouts();
+                } else {
+                    alert("Failed to remove block-out.");
+                }
+            } catch (err) {
+                console.error("Error deleting blockout:", err);
+            }
+        }
+
+        async function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function handleBatchMediaUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            try {
+                const base64Promises = Array.from(files).map(file => convertFileToBase64(file));
+                const base64Images = await Promise.all(base64Promises);
+
+                const res = await fetch(`${BACKEND_URL}/salon-gallery/batch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ salonId, images: base64Images })
+                });
+
+                if (res.ok) {
+                    alert(`${files.length} media file(s) uploaded successfully!`);
+                    event.target.value = '';
+                    fetchGalleryMedia();
+                } else {
+                    alert("Batch upload failed.");
+                }
+            } catch (err) {
+                console.error("Batch upload error:", err);
+                alert("Error processing files.");
+            }
+        }
+
+        async function fetchGalleryMedia() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/salon-gallery/${salonId}`);
+                if (!res.ok) return;
+                currentGalleryItems = await res.json();
+                const grid = document.getElementById('salon-gallery-grid');
+                if (!grid) return;
+
+                if (!currentGalleryItems || currentGalleryItems.length === 0) return;
+
+                grid.innerHTML = '';
+                currentGalleryItems.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = "relative rounded-2xl overflow-hidden border border-slate-200 h-36 bg-slate-100 cursor-pointer group shadow-sm";
+                    div.onclick = () => openModal(index);
+                    
+                    const isVideo = item.image_url.startsWith('data:video') || item.image_url.endsWith('.mp4') || item.image_url.endsWith('.webm');
+                    
+                    if (isVideo) {
+                        div.innerHTML = `
+                            <video src="${item.image_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500"></video>
+                            <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/0 transition flex items-center justify-center">
+                                <span class="bg-slate-950/70 text-white rounded-full px-3 py-1 text-[10px] font-semibold tracking-wider backdrop-blur-sm">▶ Video</span>
+                            </div>
+                        `;
+                    } else {
+                        div.innerHTML = `<img src="${item.image_url}" alt="Gallery Item" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">`;
+                    }
+                    grid.appendChild(div);
+                });
+            } catch (err) {
+                console.error("Error fetching gallery items:", err);
+            }
+        }
+
+        function openModal(index) {
+            currentModalIndex = index;
+            document.getElementById('media-modal').classList.remove('hidden');
+            document.getElementById('media-modal').classList.add('flex');
+            updateModalContent();
+        }
+
+        function closeModal() {
+            document.getElementById('media-modal').classList.add('hidden');
+            document.getElementById('media-modal').classList.remove('flex');
+            document.getElementById('modal-video').pause();
+        }
+
+        function nextMedia() {
+            if (currentGalleryItems.length === 0) return;
+            currentModalIndex = (currentModalIndex + 1) % currentGalleryItems.length;
+            updateModalContent();
+        }
+
+        function prevMedia() {
+            if (currentGalleryItems.length === 0) return;
+            currentModalIndex = (currentModalIndex - 1 + currentGalleryItems.length) % currentGalleryItems.length;
+            updateModalContent();
+        }
+
+        function updateModalContent() {
+            const item = currentGalleryItems[currentModalIndex];
+            if (!item) return;
+
+            const modalImg = document.getElementById('modal-img');
+            const modalVideo = document.getElementById('modal-video');
+            const counter = document.getElementById('modal-counter');
+
+            const isVideo = item.image_url.startsWith('data:video') || item.image_url.endsWith('.mp4') || item.image_url.endsWith('.webm');
+
+            if (isVideo) {
+                modalImg.classList.add('hidden');
+                modalVideo.classList.remove('hidden');
+                modalVideo.src = item.image_url;
+            } else {
+                modalVideo.classList.add('hidden');
+                modalVideo.pause();
+                modalImg.classList.remove('hidden');
+                modalImg.src = item.image_url;
+            }
+
+            counter.innerText = `${currentModalIndex + 1} of ${currentGalleryItems.length}`;
+        }
+
+        async function fetchBookings() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/bookings`);
+                if (!res.ok) return;
+                const bookings = await res.json();
+                const container = document.getElementById('bookings-container');
+                if (!container) return;
+
+                if (!bookings || bookings.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">No active bookings recorded in database yet.</div>`;
+                    return;
+                }
+
+                const extractDateOnly = (dateVal) => {
+                    if (!dateVal) return '';
+                    return String(dateVal).split('T')[0].split(' ')[0];
+                };
+
+                const todayStr = new Date().toISOString().split('T')[0];
+
+                const validBookings = bookings.filter(b => {
+                    const bDate = extractDateOnly(b.booking_date);
+                    return bDate && bDate >= todayStr;
+                });
+
+                if (validBookings.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">No active or upcoming bookings found.</div>`;
+                    return;
+                }
+
+                validBookings.sort((a, b) => {
+                    const dateA = extractDateOnly(a.booking_date);
+                    const dateB = extractDateOnly(b.booking_date);
+                    if (dateA !== dateB) return dateA.localeCompare(dateB);
+                    return (a.time_slot || '').localeCompare(b.time_slot || '');
+                });
+
+                const groupedByDate = {};
+                validBookings.forEach(b => {
+                    const bDate = extractDateOnly(b.booking_date) || 'Unscheduled';
+                    if (!groupedByDate[bDate]) groupedByDate[bDate] = [];
+                    groupedByDate[bDate].push(b);
+                });
+
+                container.innerHTML = '';
+                
+                Object.keys(groupedByDate).sort().forEach(dateKey => {
+                    const isToday = (dateKey === todayStr);
+                    const subheadingLabel = isToday ? `Today's List (${dateKey})` : `Upcoming Appointments (${dateKey})`;
+
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = "pt-4 pb-2";
+                    headerDiv.innerHTML = `
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                            <span>📅 ${subheadingLabel}</span>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">${groupedByDate[dateKey].length} client(s)</span>
+                        </h4>
+                    `;
+                    container.appendChild(headerDiv);
+
+                    groupedByDate[dateKey].forEach(b => {
+                        const clientFullName = `${b.first_name || ''} ${b.surname || ''}`.trim() || b.customer_name || 'Valued Client';
+                        
+                        const div = document.createElement('div');
+                        div.className = "p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition shadow-sm";
+                        div.innerHTML = `
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-slate-900 text-sm">${clientFullName}</span>
+                                    <span class="bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded">Confirmed</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-normal">
+                                    <span>⏰ Time: <strong class="text-slate-800 font-semibold">${b.time_slot || 'N/A'}</strong></span>
+                                    <span>• Service: <strong class="text-slate-800 font-semibold">${b.style_type || b.service_type || 'Hair Session'}</strong></span>
+                                    <span>• Tel: <strong class="text-slate-800 font-semibold">${b.phone || b.phone_number || 'N/A'}</strong></span>
+                                </div>
+                            </div>
+                            <button onclick="markClientCame(${b.id}, '${b.email || ''}')" class="w-full sm:w-auto bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                                <span>✅ Check-In Client</span>
+                            </button>
+                        `;
+                        container.appendChild(div);
+                    });
+                });
+            } catch (err) {
+                console.error("Error fetching bookings:", err);
+            }
+        }
+
+        // --- SECURE PAYFAST CHECKOUT INTEGRATION ---
+        async function triggerPayFastCheckout(paymentType, tierKey = null, amount = 200.00, itemName = "Salon Monthly Subscription") {
+            try {
+                const res = await fetch(`${BACKEND_URL}/payments/payfast-init`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        salonId: salonId, 
+                        paymentType, 
+                        tierKey, 
+                        amount, 
+                        itemName 
+                    })
+                });
+                const data = await res.json();
+
+                if (data.payfastUrl && data.paymentData) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = data.payfastUrl;
+
+                    for (let key in data.paymentData) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = data.paymentData[key];
+                        form.appendChild(input);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    alert("Failed to initialize PayFast checkout session.");
+                }
+            } catch (err) {
+                console.error("Checkout error:", err);
+                alert("Payment gateway connection error.");
+            }
+        }
+
+        function payMonthlySubscription() {
+            triggerPayFastCheckout('monthly', null, 200.00, 'SalonConnect 30-Day Platform Subscription');
+        }
+
+        function payCompetitionEntry(tierKey, amount, itemName) {
+            triggerPayFastCheckout('competition', tierKey, amount, itemName);
+        }
+
+        async function viewCompetitionLeaderboard(competitionKey) {
+            const container = document.getElementById('competition-table-container');
+            const titleEl = document.getElementById('competition-table-title');
+            const contentEl = document.getElementById('competition-table-content');
+
+            container.classList.remove('hidden');
+            const tierNames = { suburb: 'Suburb', town: 'Town', province: 'Province', country: 'Country' };
+            titleEl.innerText = `Compete with my ${tierNames[competitionKey] || competitionKey} — Leaderboard Table`;
+            contentEl.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center">Loading leaderboard table...</p>`;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/competitions/${competitionKey}/leaderboard`);
+                if (!res.ok) {
+                    contentEl.innerHTML = `<p class="text-xs text-rose-500 p-4 text-center">Failed to load leaderboard table data.</p>`;
+                    return;
+                }
+                const data = await res.json();
+                const entries = data.entries || [];
+
+                if (entries.length === 0) {
+                    contentEl.innerHTML = `<p class="text-xs text-slate-500 p-4 text-center">No salons enrolled in this competition table yet. Click 'Join' to register yours!</p>`;
+                    return;
+                }
+
+                let html = `
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] font-black border-b border-slate-200">
+                                <th class="p-3">Rank</th>
+                                <th class="p-3">Salon Name</th>
+                                <th class="p-3">Location Group</th>
+                                <th class="p-3 text-right">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                `;
+
+                entries.forEach((entry, idx) => {
+                    const isCurrentSalon = entry.salon_id === salonId;
+                    html += `
+                        <tr class="${isCurrentSalon ? 'bg-indigo-50/70 font-bold' : 'hover:bg-slate-50'}">
+                            <td class="p-3">#${idx + 1}</td>
+                            <td class="p-3 text-slate-900">${entry.salon_name} ${isCurrentSalon ? '<span class="text-[9px] bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">You</span>' : ''}</td>
+                            <td class="p-3 text-slate-500">${entry.location || 'South Africa'}</td>
+                            <td class="p-3 text-right font-black text-indigo-600">${entry.points || 0}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table>`;
+                contentEl.innerHTML = html;
+
+            } catch (err) {
+                console.error("Error fetching leaderboard:", err);
+                contentEl.innerHTML = `<p class="text-xs text-rose-500 p-4 text-center">Error connecting to leaderboard service.</p>`;
+            }
+        }
+
+        async function downloadTodayPDF() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const chosenDate = prompt("Enter the date you want to download (YYYY-MM-DD):", todayStr);
+            if (!chosenDate) return;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/bookings`);
+                if (!res.ok) {
+                    alert("Failed to fetch bookings from database.");
+                    return;
+                }
+
+                const bookings = await res.json();
+                const filtered = (bookings || []).filter(b => {
+                    const bDate = b.booking_date ? String(b.booking_date).split('T')[0].split(' ')[0] : '';
+                    return bDate === chosenDate;
+                });
+
+                if (filtered.length === 0) {
+                    alert(`No bookings found in database for date: ${chosenDate}`);
+                    return;
+                }
+
+                filtered.sort((a, b) => (a.time_slot || '').localeCompare(b.time_slot || ''));
+
+                const JsPDF = await ensureSalonConnectJsPDF();
+                const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                const generatedAt = new Date().toLocaleString();
+
+                function drawHeader() {
+                    doc.setFillColor(255, 255, 255);
+                    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+                    
+                    doc.setTextColor(20, 32, 68);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(19);
+                    doc.text('Official Executive Schedule Report', margin, 27);
+
+                    doc.setTextColor(91, 103, 139);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(9.5);
+                    doc.text('Your daily client bookings at a glance.', margin, 34);
+
+                    doc.setFillColor(244, 241, 255);
+                    doc.roundedRect(pageWidth - 67, 18, 52, 20, 4, 4, 'F');
+                    doc.setTextColor(101, 87, 190);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(8);
+                    doc.text('DATE', pageWidth - 60, 26);
+                    doc.setTextColor(20, 32, 68);
+                    doc.setFontSize(9);
+                    doc.text(chosenDate, pageWidth - 60, 32.5);
+
+                    return 44;
+                }
+
+                function drawFooter(pageNumber, totalPages) {
+                    const footerY = pageHeight - 20;
+                    doc.setFillColor(15, 20, 45);
+                    doc.rect(0, footerY, pageWidth, 20, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(9);
+                    doc.text('SalonConnect', 15, footerY + 11);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(6.5);
+                    doc.text(`Generated: ${generatedAt}`, pageWidth - 15, footerY + 8, { align: 'right' });
+                    doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth - 15, footerY + 14, { align: 'right' });
+                }
+
+                let y = drawHeader();
+
+                doc.setTextColor(20, 32, 68);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(14);
+                doc.text("Today's Bookings", margin, y + 5);
+                y += 11;
+
+                const footerReserve = 25;
+                const cardHeight = 20;
+                const cardGap = 2.5;
+
+                filtered.forEach((b, index) => {
+                    if (y + cardHeight > pageHeight - footerReserve) {
+                        drawFooter(doc.internal.getNumberOfPages(), doc.internal.getNumberOfPages());
+                        doc.addPage();
+                        y = drawHeader();
+                    }
+
+                    const clientName = `${b.first_name || ''} ${b.surname || ''}`.trim() || b.customer_name || 'Valued Client';
+                    const service = b.style_type || b.service_type || 'Hair Session';
+                    const phone = b.phone || b.phone_number || 'N/A';
+                    const time = b.time_slot || 'N/A';
+
+                    doc.setFillColor(255, 255, 255);
+                    doc.setDrawColor(220, 225, 238);
+                    doc.setLineWidth(0.35);
+                    doc.roundedRect(margin, y, pageWidth - margin * 2, cardHeight, 3.5, 3.5, 'FD');
+
+                    doc.setTextColor(20, 32, 68);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(9.5);
+                    doc.text(String(clientName).substring(0, 32), margin + 8, y + 8);
+
+                    doc.setTextColor(91, 103, 139);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(7.5);
+                    doc.text(`✂ ${String(service).substring(0, 32)} | ☎ ${String(phone)}`, margin + 8, y + 14);
+
+                    doc.setFillColor(244, 241, 255);
+                    doc.roundedRect(pageWidth - margin - 30, y + 5, 30, 10, 5, 5, 'F');
+                    doc.setTextColor(69, 54, 173);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(8);
+                    doc.text(`◷ ${String(time)}`, pageWidth - margin - 15, y + 11.7, { align: 'center' });
+
+                    y += cardHeight + cardGap;
+                });
+
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let page = 1; page <= totalPages; page++) {
+                    doc.setPage(page);
+                    drawFooter(page, totalPages);
+                }
+
+                doc.save(`SalonConnect_Report_${chosenDate}.pdf`);
+
+            } catch (err) {
+                console.error("PDF generation error:", err);
+                alert("Failed to generate PDF report.");
+            }
+        }
+
+        async function ensureSalonConnectJsPDF() {
+            if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+            return window.jspdf.jsPDF;
+        }
+
+        function getPosterSalonData() {
+            const salon = window.currentSalonData || {};
+            const session = userSession || {};
+            return {
+                name: salon.name || session.salonName || 'Your Salon',
+                location: [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'Find our location on SalonConnect',
+                website: 'www.salonconnect.co.za'
+            };
+        }
+
+        async function downloadBookingInvitationPoster() {
+            try {
+                const JsPDF = await ensureSalonConnectJsPDF();
+                const salon = getPosterSalonData();
+                const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                const W = doc.internal.pageSize.getWidth();
+
+                doc.setFillColor(18, 20, 50);
+                doc.rect(0, 0, W, 72, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(24);
+                doc.text('SalonConnect', 20, 30);
+
+                doc.setFontSize(16);
+                doc.text('BOOK WITH US!', 20, 100);
+                doc.setFontSize(14);
+                doc.text(salon.name, 20, 115);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                doc.text(`Location: ${salon.location}`, 20, 130);
+
+                doc.save(`${salon.name.replace(/[^a-z0-9]+/gi, '_')}_Booking_Invitation.pdf`);
+            } catch (err) {
+                console.error('Poster error:', err);
+                alert('Could not create poster.');
+            }
+        }
+
+        async function downloadVotePoster() {
+            try {
+                const JsPDF = await ensureSalonConnectJsPDF();
+                const salon = getPosterSalonData();
+                const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                const W = doc.internal.pageSize.getWidth();
+
+                doc.setFillColor(18, 20, 50);
+                doc.rect(0, 0, W, 72, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(24);
+                doc.text('VOTE FOR US!', 20, 100);
+                doc.setFontSize(18);
+                doc.text(salon.name, 20, 120);
+
+                doc.save(`${salon.name.replace(/[^a-z0-9]+/gi, '_')}_Vote_For_Me.pdf`);
+            } catch (err) {
+                console.error('Vote poster error:', err);
+                alert('Could not create vote poster.');
+            }
+        }
+
+        async function markClientCame(bookingId, customerEmail) {
+            try {
+                const res = await fetch(`${BACKEND_URL}/bookings/came`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId, customerEmail, salonId })
+                });
+
+                if (res.ok) {
+                    alert("Visit confirmed! Logged to database for the challenge tally.");
+                    fetchBookings();
+                } else {
+                    alert("Failed to log visit.");
+                }
+            } catch (err) {
+                console.error("Error recording visit:", err);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('salonUser');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

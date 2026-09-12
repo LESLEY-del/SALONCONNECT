@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonConnect - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-indigo-600">SalonConnect</h1>
+            <a href="index.html" class="text-gray-600 hover:text-indigo-600 font-medium text-sm">Back to Browse</a>
+        </div>
+    </nav>
+
+    <!-- Login Container -->
+    <main class="max-w-md mx-auto px-4 py-16 flex-grow w-full flex items-center justify-center">
+        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 w-full space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl font-bold text-gray-900">Welcome Back</h2>
+                <p class="text-xs text-gray-400">Log in with your username or email to manage your salon or access the admin portal.</p>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <!-- Username / Email -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username or Email</label>
+                    <input type="text" id="login-identifier" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="e.g., elitecuts or owner@salon.com">
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="login-password" required class="mt-1 w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="••••••••">
+                </div>
+
+                <!-- Error Feedback Box -->
+                <p id="error-message" class="text-xs text-red-600 font-semibold hidden"></p>
+
+                <!-- Submit Button -->
+                <button type="submit" id="login-btn" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium text-sm">Log In</button>
+            </form>
+
+            <div class="text-center pt-2 border-t border-gray-100">
+                <p class="text-sm text-gray-500">
+                    Don't have a salon listed? 
+                    <a href="register.html" class="text-indigo-600 font-semibold hover:underline">Register here</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Frontend Script -->
+    <script>
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : 'https://your-production-backend-domain.com/api';
+
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const identifier = document.getElementById('login-identifier').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('error-message');
+            const loginBtn = document.getElementById('login-btn');
+
+            errorBox.classList.add('hidden');
+            errorBox.innerText = '';
+            loginBtn.disabled = true;
+            loginBtn.innerText = "Authenticating...";
+
+            try {
+                // Updated to point to your unified /login-salon route
+                const response = await fetch(`${BACKEND_URL}/login-salon`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifier, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Save user session details in localStorage including salonId
+                    localStorage.setItem('salonUser', JSON.stringify({
+                        token: result.token || '',
+                        username: result.username,
+                        role: result.role, 
+                        salonName: result.salonName || '',
+                        salonId: result.salonId || result.id || ''
+                    }));
+
+                    // Redirect based on role returned from the backend
+                    if (result.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'owner-dashboard.html';
+                    }
+                } else {
+                    errorBox.innerText = result.error || "Invalid username or password.";
+                    errorBox.classList.remove('hidden');
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = "Log In";
+                }
+            } catch (error) {
+                console.error("Login connection error:", error);
+                errorBox.innerText = "Could not connect to the server. Make sure your backend is running.";
+                errorBox.classList.remove('hidden');
+                loginBtn.disabled = false;
+                loginBtn.innerText = "Log In";
+            }
+        }
+    </script>
+</body>
+</html>
