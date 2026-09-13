@@ -5,7 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SalonConnect - Owner Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style id="salonconnect-super-ui">
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+:root{--sc-navy:#10132f;--sc-navy2:#171a3d;--sc-purple:#6d45d6;--sc-purple2:#8b5cf6;--sc-lav:#eee9ff;--sc-text:#171a3d;--sc-muted:#6f748e;--sc-line:#e8e7f2;--sc-bg:#f6f7fb;}
+html{scroll-behavior:smooth}body{font-family:'DM Sans',ui-sans-serif,sans-serif;background:radial-gradient(circle at 10% 0%,rgba(139,92,246,.08),transparent 28%),radial-gradient(circle at 100% 20%,rgba(109,69,214,.06),transparent 24%),var(--sc-bg);color:var(--sc-text)}
+h1,h2,h3,h4{letter-spacing:-.025em}button,input,select{font-family:inherit}
+/* NAV */
+nav{background:rgba(255,255,255,.88)!important;border-color:rgba(226,226,238,.8)!important;box-shadow:0 10px 35px rgba(25,24,65,.06)}
+nav>div{min-height:70px!important}
+nav .w-9{width:42px!important;height:42px!important;border-radius:14px!important;background:linear-gradient(135deg,#6d45d6,#9b73ef)!important;box-shadow:0 9px 20px rgba(109,69,214,.25)!important}
+nav h1{font-family:'Playfair Display',serif!important;font-size:21px!important}
+nav button{border-radius:12px!important;font-weight:800!important}
+/* MAIN HERO */
+main{padding-top:30px!important;padding-bottom:50px!important}
+main>div:first-child{border:1px solid rgba(231,230,242,.9)!important;border-left:0!important;border-radius:28px!important;padding:0!important;min-height:190px;background:linear-gradient(135deg,#111431 0%,#191d45 58%,#28225b 100%)!important;box-shadow:0 22px 60px rgba(20,19,58,.13)!important;color:white;overflow:hidden}
+main>div:first-child:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 82% 30%,rgba(173,136,255,.25),transparent 22%),radial-gradient(circle at 65% 120%,rgba(124,91,220,.18),transparent 28%);pointer-events:none}
+main>div:first-child .absolute.-right-10{background:rgba(139,92,246,.12)!important}
+main>div:first-child>div{padding:34px 38px!important}
+main>div:first-child h2{font-family:'Playfair Display',serif!important;color:#fff!important;font-size:clamp(30px,4vw,48px)!important}
+main>div:first-child p{color:rgba(235,232,248,.72)!important}
+main>div:first-child .bg-indigo-50{background:rgba(255,255,255,.09)!important;border-color:rgba(255,255,255,.14)!important;color:#d9c9ff!important}
+main>div:first-child .bg-slate-50\/80{background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.13)!important;color:#fff!important}
+#availability-btn{border-radius:14px!important;padding:12px 16px!important;background:linear-gradient(135deg,#23b26d,#169b5b)!important;box-shadow:0 8px 20px rgba(21,157,91,.22)!important}
+/* SECTION CONTAINERS */
+main>div:not(:first-child){border-radius:28px!important;border-color:rgba(225,225,238,.9)!important;box-shadow:0 16px 45px rgba(35,34,75,.055)!important}
+main>div:not(:first-child)>div:first-child h3{font-family:'Playfair Display',serif!important;color:#171a3d!important}
+/* PUBLIC CARD */
+main>div:nth-child(3){padding:26px!important}
+main>div:nth-child(3)>div:first-child{margin-bottom:2px}
+#preview-header-img{filter:saturate(.88);}
+main>div:nth-child(3) .relative.h-72{height:310px!important;border-radius:22px 22px 0 0!important}
+main>div:nth-child(3) .p-6.sm\:p-8{background:linear-gradient(180deg,#fff,#fbfbfe)!important}
+#card-salon-name{font-family:'Playfair Display',serif!important;font-size:28px!important}
+main>div:nth-child(3) button{border-radius:13px!important}
+/* GLOBAL INTERACTION */
+button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease!important}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
+/* MODAL BACKDROP */
+.modal-backdrop { background:rgba(13,12,34,.75); backdrop-filter:blur(8px); }
+/* BALLOON ANIMATION */
+@keyframes floatUp {
+    0% { transform: translateY(20px) scale(0.9); opacity: 0; }
+    50% { opacity: 0.8; }
+    100% { transform: translateY(-350px) scale(1.1); opacity: 0; }
+}
+.floating-balloon {
+    position: absolute;
+    bottom: -10px;
+    animation: floatUp 6s ease-in-out infinite;
+}
+.balloon-1 { left: 10%; animation-delay: 0s; }
+.balloon-2 { left: 40%; animation-delay: 2s; }
+.balloon-3 { left: 75%; animation-delay: 1s; }
+/* PAYMENT STATUS BANNER */
+@keyframes slideDown { from { transform: translateY(-120%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+#payment-status-banner {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 200; max-width: 92vw; width: 480px;
+    animation: slideDown .35s ease;
+    border-radius: 16px; padding: 14px 18px; font-size: 12.5px; font-weight: 700;
+    box-shadow: 0 18px 40px rgba(20,19,58,.22); display: flex; align-items: center; gap: 10px;
+}
+#payment-status-banner.pb-success { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+#payment-status-banner.pb-pending { background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe; }
+#payment-status-banner.pb-cancelled { background:#fff1f2; color:#9f1239; border:1px solid #fecdd3; }
+#payment-status-banner button.pb-close { margin-left:auto; background:transparent; border:0; font-size:14px; opacity:.6; cursor:pointer; }
+#payment-status-banner button.pb-close:hover { opacity:1; }
+.pb-spin { display:inline-block; width:13px; height:13px; border-radius:50%; border:2px solid currentColor; border-top-color:transparent; animation:pb-spin-anim .7s linear infinite; flex-shrink:0; }
+@keyframes pb-spin-anim { to { transform: rotate(360deg); } }
+/* SCROLLBAR */
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:#f0f0f7}::-webkit-scrollbar-thumb{background:#c7c1dc;border-radius:99px}::-webkit-scrollbar-thumb:hover{background:#a999ca}
+</style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans flex flex-col min-h-screen selection:bg-indigo-500 selection:text-white">
 
@@ -29,6 +102,35 @@
         </div>
     </nav>
 
+    <!-- Full-Screen Unpaid Subscription Blockout Modal -->
+    <div id="subscription-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[100] p-4">
+        <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden p-8 text-center space-y-6 border border-slate-100">
+            <div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-inner">
+                🔒
+            </div>
+            <div class="space-y-2">
+                <span class="bg-rose-100 text-rose-900 text-[10px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider">Subscription Required</span>
+                <h3 class="text-2xl font-black text-slate-900">Pay SalonConnect Platform Fee</h3>
+                <p class="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">Your 30-day rolling monthly platform subscription is unpaid or expired. Complete payment to instantly unlock your dashboard and resume client bookings.</p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center text-xs font-bold">
+                <span class="text-slate-600">30-Day Platform Access:</span>
+                <span class="text-emerald-600 font-black text-sm">R200.00</span>
+            </div>
+            <div class="space-y-3 pt-2">
+                <button onclick="payMonthlySubscription()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl text-xs font-black transition shadow-lg shadow-indigo-100">
+                    💳 Pay R200 via PayFast
+                </button>
+                <button onclick="manualRefreshPaymentStatus()" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-3 rounded-xl text-xs font-bold transition border border-emerald-200">
+                    🔄 I've Already Paid — Refresh Status
+                </button>
+                <button onclick="logout()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl text-xs font-bold transition">
+                    Log Out of Account
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
 
@@ -50,6 +152,34 @@
                     <span>Accepting Bookings (ON)</span>
                 </button>
             </div>
+        </div>
+
+        <!-- Executive Dashboard Navigation Strip -->
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-3" style="background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;">
+            <button onclick="toggleSection('bookings-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">📅</span><span class="text-slate-300 group-hover:text-indigo-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Bookings</p><p class="mt-1 text-[10px] text-slate-500">Manage appointments</p>
+            </button>
+            <button onclick="toggleSection('settings-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-lg">⚙️</span><span class="text-slate-300 group-hover:text-violet-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Schedule</p><p class="mt-1 text-[10px] text-slate-500">Hours and rules</p>
+            </button>
+            <button onclick="toggleSection('upload-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center text-lg">🖼️</span><span class="text-slate-300 group-hover:text-fuchsia-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Portfolio</p><p class="mt-1 text-[10px] text-slate-500">Showcase work</p>
+            </button>
+            <button onclick="toggleSection('print-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">✦</span><span class="text-slate-300 group-hover:text-amber-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Marketing</p><p class="mt-1 text-[10px] text-slate-500">Print promotions</p>
+            </button>
+            <button id="competitions-nav-btn" onclick="toggleSection('competitions-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">🏆</span><span class="text-slate-300 group-hover:text-emerald-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Competitions</p><p id="competitions-status-subtitle" class="mt-1 text-[10px] text-slate-500">Leaderboards</p>
+            </button>
+            <button onclick="toggleSection('announcements-section')" class="group text-left bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm hover:shadow-md">
+                <div class="flex items-center justify-between"><span class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">🎉</span><span class="text-slate-300 group-hover:text-rose-500">→</span></div>
+                <p class="mt-3 text-xs font-black text-slate-900">Winners</p><p class="mt-1 text-[10px] text-slate-500">View announcements</p>
+            </button>
         </div>
 
         <!-- Salon Card Preview Section -->
@@ -108,6 +238,12 @@
                             <button onclick="toggleSection('bookings-section')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition">
                                 📅 Live Bookings
                             </button>
+                            <button id="card-competitions-btn" onclick="toggleSection('competitions-section')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                                🏆 Competitions
+                            </button>
+                            <button onclick="toggleSection('announcements-section')" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                                🎉 Winners
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -143,8 +279,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                <!-- 1. Opening & Closing Hours -->
                 <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
                     <div class="flex items-center gap-2">
                         <span class="text-base">⏰</span>
@@ -160,10 +294,8 @@
                             <input type="time" id="close-time" value="18:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400">Clients will only be allowed to book slots within these designated store hours.</p>
                 </div>
 
-                <!-- 2. Booking Window Range -->
                 <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
                     <div class="flex items-center gap-2">
                         <span class="text-base">📅</span>
@@ -180,43 +312,31 @@
                             <option value="30">Full Month (30 Days)</option>
                         </select>
                     </div>
-                    <p class="text-[11px] text-slate-400">Restricts how far into the future customers are allowed to secure an appointment slot.</p>
                 </div>
 
-                <!-- 3. Block-Out Specific Hours (Partial Day Break) -->
                 <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
                     <div class="flex items-center gap-2">
                         <span class="text-base">🛑</span>
-                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-slate-800">Block Specific Time Range (Partial Day)</h4>
+                        <h4 class="text-xs font-extrabold uppercase tracking-wide text-slate-800">Block Specific Time Range</h4>
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Select Date</label>
-                        <input type="date" id="blockout-date" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none mb-3">
+                        <input type="date" id="blockout-date" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 mb-3">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">From Time</label>
-                            <input type="time" id="blockout-start" value="10:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <input type="time" id="blockout-start" value="10:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 mb-1">To Time</label>
-                            <input type="time" id="blockout-end" value="14:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <input type="time" id="blockout-end" value="14:00" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
                         </div>
                     </div>
                     <button onclick="addTimeBlockout()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 rounded-xl text-xs font-bold transition border border-rose-200">Block This Time Slot</button>
-                    
-                    <!-- Added: Active Blockouts List Tracker -->
-                    <div class="mt-4 pt-4 border-t border-slate-200 space-y-2">
-                        <h5 class="text-[11px] font-extrabold uppercase tracking-wide text-slate-700">Active Time Block-Outs</h5>
-                        <div id="active-blockouts-list" class="space-y-2 max-h-40 overflow-y-auto">
-                            <p class="text-[11px] text-slate-400">No active time block-outs configured.</p>
-                        </div>
-                    </div>
-                    
-                    <p class="text-[11px] text-slate-400">This keeps your morning and evening slots open for bookings, only blocking out the specified hours.</p>
+                    <div id="active-blockouts-list" class="space-y-2 max-h-40 overflow-y-auto mt-3"></div>
                 </div>
 
-                <!-- 4. Recommended Pro Settings -->
                 <div class="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80 space-y-4">
                     <div class="flex items-center gap-2">
                         <span class="text-base">⚡</span>
@@ -232,151 +352,146 @@
                             <input type="checkbox" id="allow-sunday" class="w-4 h-4 text-indigo-600 rounded">
                         </div>
                     </div>
-                    <p class="text-[11px] text-indigo-600 font-semibold">💡 Recommended: Keep auto-accept active so queue counts sync instantly with the challenge tracker.</p>
                 </div>
-
             </div>
 
             <div class="pt-4 border-t border-slate-200 flex justify-end">
-                <button onclick="saveAllSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl text-xs font-extrabold transition shadow-md shadow-indigo-100">Save Complete Configuration Settings</button>
+                <button onclick="saveAllSettings()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl text-xs font-extrabold transition shadow-md">Save Settings</button>
             </div>
         </div>
 
-        <!-- PREMIUM PRINT POSTERS -->
-        <div id="print-section" class="hidden bg-white rounded-[2rem] border border-slate-200/80 shadow-sm overflow-hidden animate-fadeIn">
-            <div class="relative overflow-hidden bg-[#121432] px-6 sm:px-10 py-9 text-white">
-                <div class="absolute -right-24 -top-28 h-80 w-80 rounded-full border-[35px] border-violet-300/10"></div>
-                <div class="absolute -left-20 -bottom-32 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl"></div>
-                <div class="relative z-10">
-                    <span class="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[.2em] text-violet-200">
-                        ✦ SalonConnect Marketing Studio
-                    </span>
-                    <h3 class="mt-4 text-3xl sm:text-4xl font-black tracking-tight">Your Salon. Your Poster. Your Brand.</h3>
-                    <p class="mt-2 max-w-2xl text-sm text-violet-100/75">
-                        Beautiful A4 promotional posters designed in the SalonConnect style. Your salon name and location are added automatically.
-                    </p>
-                </div>
+        <!-- Print Posters Section (Hidden by default) -->
+        <div id="print-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Print Promotional Posters & Flyers</h3>
+                <p class="text-xs text-slate-500">Generate clean printable materials containing your salon identifier and profile layout.</p>
             </div>
-
-            <div class="p-5 sm:p-8">
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-7">
-
-                    <!-- BOOKING POSTER CARD -->
-                    <div class="rounded-[2rem] border border-violet-100 bg-slate-50/70 p-4 sm:p-5">
-                        <div class="flex items-center justify-between gap-3 mb-4">
-                            <div>
-                                <p class="text-[10px] font-black uppercase tracking-[.18em] text-violet-600">Poster 01</p>
-                                <h4 class="text-lg font-black text-slate-900">Client Booking Invitation</h4>
-                            </div>
-                            <span class="rounded-full bg-white border border-slate-200 px-3 py-1 text-[9px] font-black text-slate-500">A4 • PDF</span>
-                        </div>
-
-                        <div class="mx-auto w-full max-w-[390px] aspect-[1/1.414] rounded-xl overflow-hidden shadow-2xl border border-slate-200 bg-white">
-                            <div class="h-[22%] bg-[#121432] relative px-5 pt-5 text-white overflow-hidden">
-                                <div class="absolute -right-10 -top-12 w-32 h-32 rounded-full border-[14px] border-violet-300/10"></div>
-                                <div class="flex items-center gap-2 relative z-10">
-                                    <div class="w-9 h-9 rounded-full bg-violet-500 flex items-center justify-center font-black">S</div>
-                                    <div>
-                                        <div class="font-black text-lg leading-none">Salon<span class="text-violet-300">Connect</span></div>
-                                        <div class="text-[6px] tracking-[.22em] text-violet-200 mt-1">BEAUTY • STYLE • YOU</div>
-                                    </div>
-                                </div>
-                                <div class="absolute bottom-2 left-0 right-0 h-4 bg-white rounded-[50%]"></div>
-                            </div>
-                            <div class="h-[78%] px-5 py-4 bg-white">
-                                <p class="text-[7px] font-black tracking-[.18em] text-violet-600">LOOKING FOR A PROFESSIONAL SALON?</p>
-                                <p class="mt-1 text-[22px] leading-[.95] font-black text-[#17183d]">BOOK<br><span class="text-violet-600">WITH US!</span></p>
-                                <p id="booking-preview-name" class="mt-3 text-[13px] font-black text-[#17183d] capitalize">Your Salon</p>
-                                <p id="booking-preview-location" class="text-[7px] text-slate-500 mt-1">📍 Your salon location</p>
-                                <div class="mt-4 space-y-2">
-                                    <div class="flex gap-2 items-center rounded-lg border border-violet-100 bg-violet-50/60 p-2">
-                                        <span class="w-7 h-7 rounded-full bg-violet-600 text-white flex items-center justify-center text-[10px]">⌕</span>
-                                        <div><b class="text-[7px] text-[#17183d]">FIND OUR SALON</b><p class="text-[6px] text-slate-500">Discover our location</p></div>
-                                    </div>
-                                    <div class="flex gap-2 items-center rounded-lg border border-violet-100 bg-violet-50/60 p-2">
-                                        <span class="w-7 h-7 rounded-full bg-violet-600 text-white flex items-center justify-center text-[10px]">▣</span>
-                                        <div><b class="text-[7px] text-[#17183d]">BOOK ONLINE</b><p class="text-[6px] text-slate-500">Choose your appointment</p></div>
-                                    </div>
-                                    <div class="flex gap-2 items-center rounded-lg border border-violet-100 bg-violet-50/60 p-2">
-                                        <span class="w-7 h-7 rounded-full bg-violet-600 text-white flex items-center justify-center text-[10px]">♡</span>
-                                        <div><b class="text-[7px] text-[#17183d]">STAY CONNECTED</b><p class="text-[6px] text-slate-500">Keep your bookings organised</p></div>
-                                    </div>
-                                </div>
-                                <div class="mt-4 rounded-xl bg-[#17183d] p-3 text-white text-center">
-                                    <p class="text-[9px] font-black italic text-violet-200">SCAN • VISIT • BOOK!</p>
-                                    <p class="mt-1 text-[7px]">Find us on SalonConnect</p>
-                                    <p class="mt-1 text-[8px] font-black">www.salonconnect.co.za</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onclick="downloadBookingInvitationPoster()" class="mt-5 w-full rounded-2xl bg-[#17183d] hover:bg-violet-700 text-white py-4 text-xs font-black shadow-lg transition flex items-center justify-center gap-2">
-                            🖨️ Download Booking Invitation
-                        </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-indigo-50/50 border border-indigo-100 p-6 rounded-2xl flex flex-col justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-indigo-900">Booking Invitation Poster</p>
+                        <p class="text-xs text-slate-500 mt-1">A4 printable poster for clients to scan and book.</p>
                     </div>
-
-                    <!-- VOTE POSTER CARD -->
-                    <div class="rounded-[2rem] border border-violet-100 bg-slate-50/70 p-4 sm:p-5">
-                        <div class="flex items-center justify-between gap-3 mb-4">
-                            <div>
-                                <p class="text-[10px] font-black uppercase tracking-[.18em] text-violet-600">Poster 02</p>
-                                <h4 class="text-lg font-black text-slate-900">Vote For My Salon</h4>
-                            </div>
-                            <span class="rounded-full bg-amber-50 border border-amber-100 px-3 py-1 text-[9px] font-black text-amber-700">🏆 COMPETITION</span>
-                        </div>
-
-                        <div class="mx-auto w-full max-w-[390px] aspect-[1/1.414] rounded-xl overflow-hidden shadow-2xl border border-slate-200 bg-white">
-                            <div class="h-[22%] bg-[#121432] relative px-5 pt-5 text-white overflow-hidden">
-                                <div class="absolute -right-10 -top-12 w-32 h-32 rounded-full border-[14px] border-violet-300/10"></div>
-                                <div class="flex items-center gap-2 relative z-10">
-                                    <div class="w-9 h-9 rounded-full bg-violet-500 flex items-center justify-center font-black">S</div>
-                                    <div>
-                                        <div class="font-black text-lg leading-none">Salon<span class="text-violet-300">Connect</span></div>
-                                        <div class="text-[6px] tracking-[.22em] text-violet-200 mt-1">BEAUTY • STYLE • YOU</div>
-                                    </div>
-                                </div>
-                                <div class="absolute bottom-2 left-0 right-0 h-4 bg-white rounded-[50%]"></div>
-                            </div>
-                            <div class="h-[78%] px-5 py-4 bg-white text-center">
-                                <p class="text-[7px] font-black tracking-[.18em] text-violet-600">BEST SALON COMPETITION</p>
-                                <p class="mt-2 text-[27px] leading-none font-black text-[#17183d]">VOTE<br><span class="text-violet-600">FOR ME!</span></p>
-                                <p id="vote-preview-name" class="mt-3 text-[15px] font-black text-[#17183d] capitalize">Your Salon</p>
-                                <p class="mt-1 text-[7px] text-slate-500">Help us become SalonConnect's Best Salon.</p>
-                                <div class="mt-4 rounded-xl bg-[#17183d] p-3 text-white">
-                                    <p class="text-[8px] font-black text-amber-300">★ ★ ★ ★ ★</p>
-                                    <p class="mt-2 text-[8px] font-black">THE MOST-VOTED SALON</p>
-                                    <p class="text-[11px] font-black">WINS THE GRAND PRIZE!</p>
-                                </div>
-                                <div class="mt-4 space-y-2 text-left">
-                                    <div class="flex gap-2 items-center"><span class="w-6 h-6 rounded-full bg-violet-600 text-white text-[8px] flex items-center justify-center font-black">1</span><b class="text-[7px]">VISIT SALONCONNECT</b></div>
-                                    <div class="flex gap-2 items-center"><span class="w-6 h-6 rounded-full bg-violet-600 text-white text-[8px] flex items-center justify-center font-black">2</span><b class="text-[7px]">FIND OUR SALON</b></div>
-                                    <div class="flex gap-2 items-center"><span class="w-6 h-6 rounded-full bg-violet-600 text-white text-[8px] flex items-center justify-center font-black">3</span><b class="text-[7px]">CAST YOUR VOTE</b></div>
-                                </div>
-                                <div class="mt-4 rounded-xl bg-violet-50 p-2 text-left">
-                                    <p class="text-[6px] font-black uppercase tracking-wider text-violet-600">📍 FIND OUR SALON</p>
-                                    <p id="vote-preview-location" class="text-[7px] font-bold text-slate-700 mt-1">Your salon location</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onclick="downloadVotePoster()" class="mt-5 w-full rounded-2xl bg-violet-600 hover:bg-[#17183d] text-white py-4 text-xs font-black shadow-lg transition flex items-center justify-center gap-2">
-                            🏆 Download Vote For Me
-                        </button>
-                    </div>
+                    <button onclick="downloadBookingInvitationPoster()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">📥 Download Poster PDF</button>
                 </div>
-
-                <div class="mt-7 rounded-2xl bg-[#121432] p-5 text-white flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div class="w-11 h-11 shrink-0 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-xl">✦</div>
-                    <div class="flex-1">
-                        <p class="text-xs font-black">Designed for real-world promotion</p>
-                        <p class="mt-1 text-[11px] text-violet-100/70 leading-relaxed">
-                            No salon photos are used. The posters use the same premium purple, navy, white and lavender visual language as the SalonConnect campaign.
-                        </p>
+                <div class="bg-amber-50/50 border border-amber-100 p-6 rounded-2xl flex flex-col justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-bold text-amber-900">Best Salon Vote Poster</p>
+                        <p class="text-xs text-slate-500 mt-1">Promotional poster for the competition challenge.</p>
                     </div>
+                    <button onclick="downloadVotePoster()" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">🏆 Download Vote Poster PDF</button>
                 </div>
             </div>
         </div>
 
+        <!-- COMPETITIONS & CHALLENGES SECTION -->
+        <div id="competitions-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-[11px] uppercase tracking-wider text-emerald-600 font-extrabold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Active Challenges</span>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight mt-1">Salon Competitions & Leaderboards</h3>
+                    <p class="text-xs text-slate-500">Select your competition tier below: Suburb, Town, Province, or Country.</p>
+                </div>
+            </div>
+
+            <!-- 4 Hierarchical Competition Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                
+                <!-- 1. Suburb Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-indigo-100 text-indigo-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🏠 Tier 1</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with my Suburb</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Battle against competing salons operating right within your local suburb.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('suburb', 150, 'Regional Competition Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Suburb (R150)</button>
+                        <button onclick="viewCompetitionLeaderboard('suburb')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+                <!-- 2. Town Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-violet-100 text-violet-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🏙️ Tier 2</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with my Town</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Scale up and test your check-in numbers against all salons in your town.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('town', 150, 'Town Competition Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Town (R150)</button>
+                        <button onclick="viewCompetitionLeaderboard('town')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+                <!-- 3. Province Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-amber-100 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🗺️ Tier 3</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with my Province</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Prove your salon dominance across your entire provincial region.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('province', 150, 'Province Competition Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Province (R150)</button>
+                        <button onclick="viewCompetitionLeaderboard('province')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+                <!-- 4. Country Competition -->
+                <div class="rounded-2xl border border-slate-200 p-6 bg-slate-50/50 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-rose-100 text-rose-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">🏆 Tier 4 • National</span>
+                            <span class="text-xs font-bold text-emerald-600">● Open</span>
+                        </div>
+                        <h4 class="text-lg font-black text-slate-900">Compete with the Country</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">Enter the national arena and compete for the ultimate country-wide championship title.</p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-3">
+                        <button onclick="payCompetitionEntry('country', 300, 'National Championship Entry')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">Join Country (R300)</button>
+                        <button onclick="viewCompetitionLeaderboard('country')" class="bg-slate-900 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold transition">View Table</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Dynamic Competition Leaderboard Table Container -->
+            <div id="competition-table-container" class="mt-8 pt-6 border-t border-slate-200 hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <h4 id="competition-table-title" class="text-lg font-bold text-slate-900">Leaderboard Table</h4>
+                    <button onclick="document.getElementById('competition-table-container').classList.add('hidden')" class="text-xs font-bold text-slate-500 hover:text-slate-800">Close Table ✕</button>
+                </div>
+                <div id="competition-table-content" class="overflow-x-auto">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS & WINNERS SECTION -->
+        <div id="announcements-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-[11px] uppercase tracking-wider text-rose-600 font-extrabold bg-rose-50 px-3 py-1 rounded-full border border-rose-100">🎉 Official Results</span>
+                    <h3 class="text-xl font-black text-slate-900 tracking-tight mt-1">Competition Winners & Champions</h3>
+                    <p class="text-xs text-slate-500">Check out the top-performing salons across suburbs, towns, provinces, and the country.</p>
+                </div>
+                <button onclick="fetchOwnerAnnouncements()" class="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2 text-xs font-black text-slate-700 transition">↻ Refresh Winners</button>
+            </div>
+
+            <div id="owner-announcements-container" class="space-y-6 mt-4">
+                <div class="p-12 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">Loading announcements...</div>
+            </div>
+        </div>
+
+        <!-- Bookings & Client Check-In Tracker Section (Hidden by default) -->
         <div id="bookings-section" class="hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-6 animate-fadeIn">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -403,30 +518,102 @@
     </main>
 
     <!-- Full-Screen Lightbox Modal for Gallery Swipe/View -->
-    <div id="media-modal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div id="media-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
         <button onclick="closeModal()" class="absolute top-6 right-6 text-white text-2xl font-bold hover:text-slate-300 focus:outline-none bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition">&times;</button>
-        
         <button onclick="prevMedia()" class="absolute left-4 sm:left-8 text-white text-lg font-bold bg-white/10 hover:bg-white/30 p-3.5 rounded-full transition focus:outline-none">&#10094;</button>
         <button onclick="nextMedia()" class="absolute right-4 sm:right-8 text-white text-lg font-bold bg-white/10 hover:bg-white/30 p-3.5 rounded-full transition focus:outline-none">&#10095;</button>
-        
         <div class="max-w-5xl max-h-[85vh] flex items-center justify-center px-12">
             <img id="modal-img" src="" alt="Full View" class="hidden max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl">
             <video id="modal-video" src="" controls class="hidden max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"></video>
         </div>
-        
         <div id="modal-counter" class="absolute bottom-6 text-white/70 text-xs font-bold tracking-widest bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm"></div>
     </div>
 
     <!-- Script Engine -->
     <script>
-        const BACKEND_URL = 'https://salonconnect-jbo2.onrender.com/api';
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : 'https://salonconnect-jbo2.onrender.com/api';
         
-        const userSession = JSON.parse(localStorage.getItem('salonUser') || '{}');
-        const salonId = userSession.salonId;
+        let userSession = {};
+        try {
+            userSession = JSON.parse(localStorage.getItem('salonUser') || '{}');
+        } catch (e) {
+            userSession = {};
+        }
+
+        const salonId = userSession.salonId || userSession.id;
         let isAccepting = true;
 
         let currentGalleryItems = [];
         let currentModalIndex = 0;
+
+        // ------------------------------------------------------------------
+        // PAYMENT STATUS BANNER + POLLING
+        // PayFast's server-to-server webhook (ITN) can lag a few seconds
+        // behind the browser redirect, especially on a free Render instance
+        // that has to "wake up". Rather than silently showing the paywall
+        // again and looking broken, we show a clear status and re-check.
+        // ------------------------------------------------------------------
+        let paymentBannerTimeout = null;
+
+        function showPaymentBanner(message, kind) {
+            let banner = document.getElementById('payment-status-banner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'payment-status-banner';
+                document.body.appendChild(banner);
+            }
+            banner.className = `pb-${kind}`;
+            const spinner = kind === 'pending' ? '<span class="pb-spin"></span>' : '';
+            banner.innerHTML = `${spinner}<span>${message}</span><button class="pb-close" onclick="this.parentElement.remove()">✕</button>`;
+
+            if (paymentBannerTimeout) clearTimeout(paymentBannerTimeout);
+            if (kind === 'success') {
+                paymentBannerTimeout = setTimeout(() => {
+                    const el = document.getElementById('payment-status-banner');
+                    if (el) el.remove();
+                }, 8000);
+            }
+        }
+
+        async function pollForPaymentConfirmation(paymentTypeParam, attempt = 0) {
+            const maxAttempts = 8; // ~24 seconds of polling
+            await fetchSalonDetails();
+
+            if (paymentTypeParam === 'monthly') {
+                const subModal = document.getElementById('subscription-modal');
+                const stillLocked = subModal && !subModal.classList.contains('hidden');
+                if (!stillLocked) {
+                    showPaymentBanner('🎉 Subscription active! Your dashboard is unlocked.', 'success');
+                    return;
+                }
+            } else if (paymentTypeParam === 'competition') {
+                if (attempt >= 2) {
+                    showPaymentBanner('✅ Payment confirmed. Open the Competitions tab to see your entry.', 'success');
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            if (attempt < maxAttempts) {
+                setTimeout(() => pollForPaymentConfirmation(paymentTypeParam, attempt + 1), 3000);
+            } else {
+                showPaymentBanner('⏳ Still confirming with the server. If this takes more than a minute (the server may be waking up), click "I\'ve Already Paid — Refresh Status".', 'pending');
+            }
+        }
+
+        async function manualRefreshPaymentStatus() {
+            showPaymentBanner('🔄 Checking your subscription status...', 'pending');
+            await fetchSalonDetails();
+            const subModal = document.getElementById('subscription-modal');
+            if (subModal && subModal.classList.contains('hidden')) {
+                showPaymentBanner('🎉 Subscription active! Your dashboard is unlocked.', 'success');
+            } else {
+                showPaymentBanner('⚠️ Still showing unpaid. If you completed the sandbox payment, wait a minute for the server to process it, then try again.', 'pending');
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!salonId) {
@@ -435,16 +622,33 @@
                 return;
             }
 
-            if (userSession.salonName) {
-                document.getElementById('owner-salon-title').innerText = userSession.salonName;
-                document.getElementById('card-salon-name').innerText = userSession.salonName;
-                document.getElementById('nav-owner-name').innerText = userSession.salonName;
+            const displayName = userSession.salonName || userSession.name || "Manager Account";
+            document.getElementById('owner-salon-title').innerText = displayName;
+            document.getElementById('card-salon-name').innerText = displayName;
+            document.getElementById('nav-owner-name').innerText = displayName;
+
+            // Read PayFast's return params BEFORE we wipe them from the URL.
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('payment');
+            const paymentTypeParam = urlParams.get('type');
+
+            if (window.location.search) {
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
 
             fetchSalonDetails();
             fetchBookings();
             fetchGalleryMedia();
             fetchBlockouts();
+            checkCompetitionAccess();
+            fetchOwnerAnnouncements();
+
+            if (paymentStatus === 'success') {
+                showPaymentBanner('✅ Payment received! Confirming with the server, this can take a few seconds...', 'pending');
+                pollForPaymentConfirmation(paymentTypeParam);
+            } else if (paymentStatus === 'cancelled') {
+                showPaymentBanner('⚠️ Payment was cancelled. You can try again anytime.', 'cancelled');
+            }
 
             document.addEventListener('keydown', (e) => {
                 const modal = document.getElementById('media-modal');
@@ -456,15 +660,137 @@
             });
         });
 
-        function toggleSection(sectionId) {
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        async function fetchOwnerAnnouncements() {
+            const container = document.getElementById('owner-announcements-container');
+            try {
+                const res = await fetch(`${BACKEND_URL}/admin/announcements`);
+                if (!res.ok) throw new Error('Failed to load announcements');
+                const data = await res.json();
+                const items = data.announcements || [];
+
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="p-12 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">No competition winners published yet. Check back soon!</div>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const dateStr = new Date(item.published_at).toLocaleDateString();
+                    const locationStr = [item.winner_suburb, item.winner_town, item.winner_province].filter(Boolean).join(', ') || item.location_value || 'South Africa';
+                    
+                    const div = document.createElement('div');
+                    div.className = "relative bg-white rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-100 overflow-hidden transition-all duration-300 p-6 sm:p-8 space-y-6";
+                    
+                    div.innerHTML = `
+                        <!-- Celebratory Floating Balloons -->
+                        <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                            <span class="floating-balloon balloon-1 text-2xl">🎈</span>
+                            <span class="floating-balloon balloon-2 text-3xl">🎈</span>
+                            <span class="floating-balloon balloon-3 text-2xl">🎈</span>
+                        </div>
+
+                        <div class="relative z-10 space-y-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <span class="bg-amber-100 text-amber-950 font-black px-3.5 py-1 rounded-full uppercase tracking-wider text-[11px] shadow-sm">
+                                    🏆 ${escapeHtml(item.tier_category || 'Competition')} Champion — ${escapeHtml(item.location_value || '')}
+                                </span>
+                                <span class="text-slate-400 font-semibold text-xs">📅 ${dateStr}</span>
+                            </div>
+
+                            <div class="w-full bg-slate-50 rounded-2xl overflow-hidden border border-slate-200/80 shadow-md">
+                                <div class="relative h-56 sm:h-72 bg-slate-200 overflow-hidden">
+                                    <img src="${item.winner_header_image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600'}" 
+                                         alt="Storefront" class="w-full h-full object-cover"
+                                         onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600'">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                                    <div class="absolute bottom-4 left-4 text-white">
+                                        <span class="bg-amber-400 text-amber-950 text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-wider shadow">★ Official Champion</span>
+                                    </div>
+                                </div>
+                                <div class="p-6 space-y-3">
+                                    <h3 class="text-2xl font-black text-slate-900 capitalize tracking-tight">${escapeHtml(item.winner_salon_name || 'Champion Salon')}</h3>
+                                    <p class="text-xs font-medium text-slate-500">📍 ${escapeHtml(locationStr)}</p>
+                                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 inline-block px-3 py-1 rounded-lg">
+                                        Male Barbers: ${item.winner_male_barbers || 0} | Female Stylists: ${item.winner_female_stylists || 0}
+                                    </div>
+                                    <div class="pt-2 text-xs font-black text-emerald-600">
+                                        ✨ Total Verified Check-In Score: ${item.points || 0} Points
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-violet-50/60 border border-violet-100 rounded-2xl p-5 space-y-1">
+                                <h4 class="text-xs font-black uppercase tracking-wider text-violet-900">${escapeHtml(item.title)}</h4>
+                                <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">${escapeHtml(item.details)}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="p-12 text-center text-rose-500 text-xs bg-slate-50 rounded-2xl border border-slate-200">Error loading announcements from server.</div>`;
+            }
+        }
+
+        async function checkCompetitionAccess() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/admin/competition-status`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const isOpen = Boolean(data.isOpen);
+
+                    const navBtn = document.getElementById('competitions-nav-btn');
+                    const cardBtn = document.getElementById('card-competitions-btn');
+                    const subtitle = document.getElementById('competitions-status-subtitle');
+
+                    if (!isOpen) {
+                        if (navBtn) { navBtn.style.opacity = '0.5'; navBtn.title = "Competitions are currently closed by the administrator."; }
+                        if (cardBtn) { cardBtn.style.opacity = '0.5'; cardBtn.title = "Competitions are currently closed by the administrator."; }
+                        if (subtitle) { subtitle.innerText = "🔒 Locked by Admin"; subtitle.className = "mt-1 text-[10px] text-rose-500 font-bold"; }
+                    } else {
+                        if (subtitle) { subtitle.innerText = "Leaderboards"; subtitle.className = "mt-1 text-[10px] text-slate-500"; }
+                    }
+                }
+            } catch (err) {
+                console.error("Could not verify competition lock status", err);
+            }
+        }
+
+        async function toggleSection(sectionId) {
+            if (sectionId === 'competitions-section') {
+                try {
+                    const res = await fetch(`${BACKEND_URL}/admin/competition-status`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (!data.isOpen) {
+                            alert("🔒 Competitions are currently closed by the administrator. Please wait for an official opening announcement.");
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error checking competition status:", e);
+                }
+            }
+
             const target = document.getElementById(sectionId);
             if (!target) return;
 
             const isOpen = !target.classList.contains('hidden');
 
-            const sections = ['upload-section', 'settings-section', 'print-section', 'bookings-section'];
+            const sections = ['upload-section', 'settings-section', 'print-section', 'bookings-section', 'competitions-section', 'announcements-section'];
             sections.forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
             });
 
             if (!isOpen) {
@@ -480,39 +806,53 @@
                     const salon = await res.json();
                     window.currentSalonData = salon;
                     
-                    document.getElementById('owner-salon-title').innerText = salon.name;
-                    document.getElementById('card-salon-name').innerText = salon.name;
-                    document.getElementById('nav-owner-name').innerText = salon.name;
+                    const salonTitle = salon.name || userSession.salonName || "My Salon Dashboard";
+                    document.getElementById('owner-salon-title').innerText = salonTitle;
+                    document.getElementById('card-salon-name').innerText = salonTitle;
+                    document.getElementById('nav-owner-name').innerText = salonTitle;
                     
                     const location = [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa';
                     document.getElementById('card-salon-location').innerText = `📍 ${location}`;
                     document.getElementById('card-staff-count').innerText = `Male Staff: ${salon.male_barbers || 0} | Female Staff: ${salon.female_stylists || 0}`;
 
+                    // Check if monthly subscription is paid or expired (30 days)
+                    let isPaidActive = salon.monthly_paid;
+                    if (isPaidActive && salon.monthly_paid_at) {
+                        const diffDays = (new Date() - new Date(salon.monthly_paid_at)) / (1000 * 60 * 60 * 24);
+                        if (diffDays > 30) isPaidActive = false;
+                    }
+
+                    // Display full-screen payment modal if unpaid upon login
+                    const subModal = document.getElementById('subscription-modal');
+                    if (!isPaidActive) {
+                        subModal.classList.remove('hidden');
+                        subModal.classList.add('flex');
+                    } else {
+                        subModal.classList.add('hidden');
+                        subModal.classList.remove('flex');
+                    }
+
                     if (salon.header_image) {
                         document.getElementById('preview-header-img').src = salon.header_image;
-                    }
-                    if (salon.betaway_challenge) {
-                        document.getElementById('card-betaway-badge').classList.remove('hidden');
-                    }
-                    if (salon.free_hair_giveaway) {
-                        document.getElementById('card-giveaway-badge').classList.remove('hidden');
                     }
 
                     isAccepting = salon.is_accepting_bookings !== false;
                     const btn = document.getElementById('availability-btn');
-                    if (isAccepting) {
-                        btn.className = "bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm shadow-emerald-200 flex items-center gap-1.5";
-                        btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span><span>Accepting Bookings (ON)</span>`;
-                    } else {
-                        btn.className = "bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-rose-700 transition shadow-sm shadow-rose-200 flex items-center gap-1.5";
-                        btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white"></span><span>Bookings Closed (OFF)</span>`;
+                    if (btn) {
+                        if (isAccepting) {
+                            btn.className = "bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm shadow-emerald-200 flex items-center gap-1.5";
+                            btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span><span>Accepting Bookings (ON)</span>`;
+                        } else {
+                            btn.className = "bg-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-rose-700 transition shadow-sm shadow-rose-200 flex items-center gap-1.5";
+                            btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white"></span><span>Bookings Closed (OFF)</span>`;
+                        }
                     }
 
-                    if (salon.advance_booking_days) {
+                    if (salon.advance_booking_days && document.getElementById('booking-range-days')) {
                         document.getElementById('booking-range-days').value = salon.advance_booking_days;
                     }
-                    if (salon.open_time) document.getElementById('open-time').value = salon.open_time;
-                    if (salon.close_time) document.getElementById('close-time').value = salon.close_time;
+                    if (salon.open_time && document.getElementById('open-time')) document.getElementById('open-time').value = salon.open_time;
+                    if (salon.close_time && document.getElementById('close-time')) document.getElementById('close-time').value = salon.close_time;
                 }
             } catch (err) {
                 console.error("Error fetching salon details:", err);
@@ -555,10 +895,10 @@
                 });
 
                 if (isAccepting) {
-                    btn.className = "bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm shadow-emerald-200 flex items-center gap-1.5";
+                    btn.className = "bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-sm shadow-emerald-200 flex items-center gap-1.5";
                     btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span><span>Accepting Bookings (ON)</span>`;
                 } else {
-                    btn.className = "bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-rose-700 transition shadow-sm shadow-rose-200 flex items-center gap-1.5";
+                    btn.className = "bg-rose-600 text-white px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-rose-700 transition shadow-sm shadow-rose-200 flex items-center gap-1.5";
                     btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-white"></span><span>Bookings Closed (OFF)</span>`;
                 }
             } catch (err) {
@@ -639,6 +979,7 @@
                 if (!res.ok) return;
                 const blockouts = await res.json();
                 const container = document.getElementById('active-blockouts-list');
+                if (!container) return;
 
                 if (!blockouts || blockouts.length === 0) {
                     container.innerHTML = `<p class="text-[11px] text-slate-400">No active time block-outs configured.</p>`;
@@ -720,6 +1061,7 @@
                 if (!res.ok) return;
                 currentGalleryItems = await res.json();
                 const grid = document.getElementById('salon-gallery-grid');
+                if (!grid) return;
 
                 if (!currentGalleryItems || currentGalleryItems.length === 0) return;
 
@@ -751,11 +1093,13 @@
         function openModal(index) {
             currentModalIndex = index;
             document.getElementById('media-modal').classList.remove('hidden');
+            document.getElementById('media-modal').classList.add('flex');
             updateModalContent();
         }
 
         function closeModal() {
             document.getElementById('media-modal').classList.add('hidden');
+            document.getElementById('media-modal').classList.remove('flex');
             document.getElementById('modal-video').pause();
         }
 
@@ -795,13 +1139,13 @@
             counter.innerText = `${currentModalIndex + 1} of ${currentGalleryItems.length}`;
         }
 
-        // --- GROUPED BY DATE SUBHEADINGS & CHRONOLOGICAL QUEUE ---
         async function fetchBookings() {
             try {
                 const res = await fetch(`${BACKEND_URL}/salons/${salonId}/bookings`);
                 if (!res.ok) return;
                 const bookings = await res.json();
                 const container = document.getElementById('bookings-container');
+                if (!container) return;
 
                 if (!bookings || bookings.length === 0) {
                     container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-slate-200">No active bookings recorded in database yet.</div>`;
@@ -884,7 +1228,112 @@
             }
         }
 
-        // --- FANCY PDF DOWNLOAD (SALONCONNECT BRANDED EXECUTIVE REPORT) ---
+        // --- SECURE PAYFAST CHECKOUT INTEGRATION ---
+        async function triggerPayFastCheckout(paymentType, tierKey = null, amount = 200.00, itemName = "Salon Monthly Subscription") {
+            try {
+                const res = await fetch(`${BACKEND_URL}/payments/payfast-init`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        salonId: salonId, 
+                        paymentType, 
+                        tierKey, 
+                        amount, 
+                        itemName 
+                    })
+                });
+                const data = await res.json();
+
+                if (data.payfastUrl && data.paymentData) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = data.payfastUrl;
+
+                    for (let key in data.paymentData) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = data.paymentData[key];
+                        form.appendChild(input);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    alert("Failed to initialize PayFast checkout session.");
+                }
+            } catch (err) {
+                console.error("Checkout error:", err);
+                alert("Payment gateway connection error.");
+            }
+        }
+
+        function payMonthlySubscription() {
+            triggerPayFastCheckout('monthly', null, 200.00, 'SalonConnect 30-Day Platform Subscription');
+        }
+
+        function payCompetitionEntry(tierKey, amount, itemName) {
+            triggerPayFastCheckout('competition', tierKey, amount, itemName);
+        }
+
+        async function viewCompetitionLeaderboard(competitionKey) {
+            const container = document.getElementById('competition-table-container');
+            const titleEl = document.getElementById('competition-table-title');
+            const contentEl = document.getElementById('competition-table-content');
+
+            container.classList.remove('hidden');
+            const tierNames = { suburb: 'Suburb', town: 'Town', province: 'Province', country: 'Country' };
+            titleEl.innerText = `Compete with my ${tierNames[competitionKey] || competitionKey} — Leaderboard Table`;
+            contentEl.innerHTML = `<p class="text-xs text-slate-400 p-4 text-center">Loading leaderboard table...</p>`;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/competitions/${competitionKey}/leaderboard`);
+                if (!res.ok) {
+                    contentEl.innerHTML = `<p class="text-xs text-rose-500 p-4 text-center">Failed to load leaderboard table data.</p>`;
+                    return;
+                }
+                const data = await res.json();
+                const entries = data.entries || [];
+
+                if (entries.length === 0) {
+                    contentEl.innerHTML = `<p class="text-xs text-slate-500 p-4 text-center">No salons enrolled in this competition table yet. Click 'Join' to register yours!</p>`;
+                    return;
+                }
+
+                let html = `
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] font-black border-b border-slate-200">
+                                <th class="p-3">Rank</th>
+                                <th class="p-3">Salon Name</th>
+                                <th class="p-3">Location Group</th>
+                                <th class="p-3 text-right">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                `;
+
+                entries.forEach((entry, idx) => {
+                    const isCurrentSalon = entry.salon_id === salonId;
+                    html += `
+                        <tr class="${isCurrentSalon ? 'bg-indigo-50/70 font-bold' : 'hover:bg-slate-50'}">
+                            <td class="p-3">#${idx + 1}</td>
+                            <td class="p-3 text-slate-900">${entry.salon_name} ${isCurrentSalon ? '<span class="text-[9px] bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">You</span>' : ''}</td>
+                            <td class="p-3 text-slate-500">${entry.location || 'South Africa'}</td>
+                            <td class="p-3 text-right font-black text-indigo-600">${entry.points || 0}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table>`;
+                contentEl.innerHTML = html;
+
+            } catch (err) {
+                console.error("Error fetching leaderboard:", err);
+                contentEl.innerHTML = `<p class="text-xs text-rose-500 p-4 text-center">Error connecting to leaderboard service.</p>`;
+            }
+        }
+
         async function downloadTodayPDF() {
             const todayStr = new Date().toISOString().split('T')[0];
             const chosenDate = prompt("Enter the date you want to download (YYYY-MM-DD):", todayStr);
@@ -910,195 +1359,63 @@
 
                 filtered.sort((a, b) => (a.time_slot || '').localeCompare(b.time_slot || ''));
 
-                // Load jsPDF directly if it is not already available.
-                if (!window.jspdf || !window.jspdf.jsPDF) {
-                    try {
-                        await new Promise((resolve, reject) => {
-                            const existing = document.querySelector('script[data-salonconnect-jspdf]');
-                            if (existing) {
-                                if (window.jspdf && window.jspdf.jsPDF) { resolve(); return; }
-                                existing.addEventListener('load', resolve, { once: true });
-                                existing.addEventListener('error', reject, { once: true });
-                                return;
-                            }
-
-                            const script = document.createElement('script');
-                            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-                            script.async = true;
-                            script.setAttribute('data-salonconnect-jspdf', 'true');
-                            script.onload = resolve;
-                            script.onerror = reject;
-                            document.head.appendChild(script);
-                        });
-                    } catch (loadError) {
-                        console.error('jsPDF load error:', loadError);
-                        alert('The PDF library could not be loaded. Please check your internet connection and refresh the page.');
-                        return;
-                    }
-                }
-
-                const JsPDF = window.jspdf && window.jspdf.jsPDF;
-                if (!JsPDF) {
-                    alert('PDF library is unavailable. Please refresh the page and try again.');
-                    return;
-                }
-
-                const doc = new JsPDF({
-                    orientation: 'portrait',
-                    unit: 'mm',
-                    format: 'a4'
-                });
-
+                const JsPDF = await ensureSalonConnectJsPDF();
+                const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const pageHeight = doc.internal.pageSize.getHeight();
                 const margin = 15;
-                const salonName = userSession.salonName || 'SalonConnect';
                 const generatedAt = new Date().toLocaleString();
 
-                // SalonConnect branded header image.
-                const headerImage = "data:image/jpeg;base64,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";
-                const logoImage = "data:image/jpeg;base64,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";
-
-                // ---------- PAGE DESIGN HELPERS ----------
-                function drawHeader(showLargeHeader = true) {
-                    if (showLargeHeader) {
-                        // White base + branded banner from the SalonConnect artwork.
-                        doc.setFillColor(255, 255, 255);
-                        doc.rect(0, 0, pageWidth, pageHeight, 'F');
-
-                        doc.addImage(headerImage, 'JPEG', 0, 0, pageWidth, 50);
-
-                        // Soft curved-looking separator made from overlapping lavender shapes.
-                        doc.setFillColor(235, 229, 255);
-                        doc.ellipse(pageWidth * 0.18, 48, 38, 7, 'F');
-                        doc.ellipse(pageWidth * 0.52, 47, 45, 7, 'F');
-                        doc.ellipse(pageWidth * 0.85, 48, 40, 7, 'F');
-
-                        doc.setTextColor(20, 32, 68);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(19);
-                        doc.text('Official Executive Schedule Report', margin, 67);
-
-                        doc.setTextColor(91, 103, 139);
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(9.5);
-                        doc.text('Your daily client bookings at a glance.', margin, 74);
-
-                        // Date badge.
-                        doc.setFillColor(244, 241, 255);
-                        doc.roundedRect(pageWidth - 67, 58, 52, 20, 4, 4, 'F');
-                        doc.setTextColor(101, 87, 190);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(8);
-                        doc.text('DATE', pageWidth - 60, 66);
-                        doc.setTextColor(20, 32, 68);
-                        doc.setFontSize(9);
-                        doc.text(chosenDate, pageWidth - 60, 72.5);
-
-                        return 84;
-                    }
-
-                    // Compact header for extra pages.
-                    doc.setFillColor(15, 20, 45);
-                    doc.rect(0, 0, pageWidth, 20, 'F');
-                    doc.setTextColor(255, 255, 255);
+                function drawHeader() {
+                    doc.setFillColor(255, 255, 255);
+                    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+                    
+                    doc.setTextColor(20, 32, 68);
                     doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(11);
-                    doc.text('SalonConnect', margin, 13);
+                    doc.setFontSize(19);
+                    doc.text('Official Executive Schedule Report', margin, 27);
+
+                    doc.setTextColor(91, 103, 139);
                     doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(7.5);
-                    doc.text('Executive Schedule Report', pageWidth - margin, 13, { align: 'right' });
-                    return 28;
+                    doc.setFontSize(9.5);
+                    doc.text('Your daily client bookings at a glance.', margin, 34);
+
+                    doc.setFillColor(244, 241, 255);
+                    doc.roundedRect(pageWidth - 67, 18, 52, 20, 4, 4, 'F');
+                    doc.setTextColor(101, 87, 190);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(8);
+                    doc.text('DATE', pageWidth - 60, 26);
+                    doc.setTextColor(20, 32, 68);
+                    doc.setFontSize(9);
+                    doc.text(chosenDate, pageWidth - 60, 32.5);
+
+                    return 44;
                 }
 
                 function drawFooter(pageNumber, totalPages) {
-                    const footerY = pageHeight - 25;
-
-                    // Elegant dark footer.
+                    const footerY = pageHeight - 20;
                     doc.setFillColor(15, 20, 45);
-                    doc.rect(0, footerY, pageWidth, 25, 'F');
-
-                    // Lavender accent line.
-                    doc.setFillColor(193, 164, 255);
-                    doc.rect(0, footerY, pageWidth, 1.2, 'F');
-
-                    // Small SalonConnect logo.
-                    try {
-                        doc.addImage(logoImage, 'JPEG', 10, footerY + 3, 12, 15);
-                    } catch (logoError) {
-                        console.warn('Logo could not be drawn:', logoError);
-                    }
-
+                    doc.rect(0, footerY, pageWidth, 20, 'F');
                     doc.setTextColor(255, 255, 255);
                     doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(10);
-                    doc.text('SalonConnect', 25, footerY + 9);
-
-                    doc.setTextColor(202, 193, 226);
-                    doc.setFont('helvetica', 'italic');
-                    doc.setFontSize(7);
-                    doc.text('Beauty • Style • You', 25, footerY + 15);
-
-                    doc.setTextColor(222, 218, 238);
+                    doc.setFontSize(9);
+                    doc.text('SalonConnect', 15, footerY + 11);
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(6.5);
-                    doc.text('Thank you for choosing SalonConnect!', pageWidth / 2, footerY + 9, { align: 'center' });
-
-                    doc.setTextColor(180, 174, 202);
-                    doc.setFontSize(6);
-                    doc.text(`Generated: ${generatedAt}`, pageWidth - 10, footerY + 8, { align: 'right' });
-                    doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth - 10, footerY + 15, { align: 'right' });
+                    doc.text(`Generated: ${generatedAt}`, pageWidth - 15, footerY + 8, { align: 'right' });
+                    doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth - 15, footerY + 14, { align: 'right' });
                 }
 
-                // ---------- FIRST PAGE ----------
-                let y = drawHeader(true);
-
-                // Summary card.
-                doc.setFillColor(248, 246, 255);
-                doc.setDrawColor(221, 211, 255);
-                doc.roundedRect(margin, y, pageWidth - (margin * 2), 25, 4, 4, 'FD');
-
-                doc.setFillColor(101, 82, 224);
-                doc.circle(margin + 12, y + 12.5, 7, 'F');
-
-                doc.setTextColor(255, 255, 255);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(10);
-                doc.text('✓', margin + 9.2, y + 15.5);
-
-                doc.setTextColor(78, 87, 120);
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(8.5);
-                doc.text('Total Verified Appointments', margin + 23, y + 9);
+                let y = drawHeader();
 
                 doc.setTextColor(20, 32, 68);
                 doc.setFont('helvetica', 'bold');
-                doc.setFontSize(13);
-                doc.text(`${filtered.length} Client(s) Scheduled`, margin + 23, y + 17);
-
-                // Status pill.
-                doc.setFillColor(42, 191, 130);
-                doc.roundedRect(pageWidth - margin - 48, y + 8, 41, 9, 4, 4, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(7);
-                doc.text('✓ CONFIRMED & ACTIVE', pageWidth - margin - 44.5, y + 14);
-
-                y += 31;
-
-                // Section title.
-                doc.setTextColor(20, 32, 68);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(15);
+                doc.setFontSize(14);
                 doc.text("Today's Bookings", margin, y + 5);
-
-                doc.setDrawColor(118, 93, 232);
-                doc.setLineWidth(0.7);
-                doc.line(margin + 58, y + 1, pageWidth - margin, y + 1);
-
                 y += 11;
 
-                // ---------- BOOKING CARDS ----------
-                const footerReserve = 29;
+                const footerReserve = 25;
                 const cardHeight = 20;
                 const cardGap = 2.5;
 
@@ -1106,7 +1423,7 @@
                     if (y + cardHeight > pageHeight - footerReserve) {
                         drawFooter(doc.internal.getNumberOfPages(), doc.internal.getNumberOfPages());
                         doc.addPage();
-                        y = drawHeader(false);
+                        y = drawHeader();
                     }
 
                     const clientName = `${b.first_name || ''} ${b.surname || ''}`.trim() || b.customer_name || 'Valued Client';
@@ -1114,57 +1431,31 @@
                     const phone = b.phone || b.phone_number || 'N/A';
                     const time = b.time_slot || 'N/A';
 
-                    // Card.
                     doc.setFillColor(255, 255, 255);
                     doc.setDrawColor(220, 225, 238);
                     doc.setLineWidth(0.35);
                     doc.roundedRect(margin, y, pageWidth - margin * 2, cardHeight, 3.5, 3.5, 'FD');
 
-                    // Number circle.
-                    doc.setFillColor(237, 231, 255);
-                    doc.circle(margin + 9, y + 10, 5.5, 'F');
-                    doc.setTextColor(39, 32, 105);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(9);
-                    doc.text(String(index + 1), margin + 9, y + 13, { align: 'center' });
-
-                    // Client icon circle.
-                    doc.setFillColor(246, 243, 255);
-                    doc.circle(margin + 25, y + 10, 6, 'F');
-                    doc.setDrawColor(70, 53, 170);
-                    doc.setLineWidth(0.8);
-                    doc.circle(margin + 25, y + 8.2, 2.1, 'S');
-                    doc.line(margin + 21.8, y + 13.5, margin + 28.2, y + 13.5);
-
-                    // Client name.
                     doc.setTextColor(20, 32, 68);
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(9.5);
-                    doc.text(String(clientName).substring(0, 32), margin + 35, y + 8);
+                    doc.text(String(clientName).substring(0, 32), margin + 8, y + 8);
 
-                    // Service.
                     doc.setTextColor(91, 103, 139);
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(7.5);
-                    doc.text(`✂  ${String(service).substring(0, 32)}`, margin + 35, y + 14);
+                    doc.text(`✂ ${String(service).substring(0, 32)} | ☎ ${String(phone)}`, margin + 8, y + 14);
 
-                    // Phone.
-                    doc.setTextColor(65, 76, 111);
-                    doc.setFontSize(7.5);
-                    doc.text(`☎  ${String(phone).substring(0, 20)}`, 112, y + 11);
-
-                    // Time pill.
                     doc.setFillColor(244, 241, 255);
                     doc.roundedRect(pageWidth - margin - 30, y + 5, 30, 10, 5, 5, 'F');
                     doc.setTextColor(69, 54, 173);
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(8);
-                    doc.text(`◷  ${String(time)}`, pageWidth - margin - 15, y + 11.7, { align: 'center' });
+                    doc.text(`◷ ${String(time)}`, pageWidth - margin - 15, y + 11.7, { align: 'center' });
 
                     y += cardHeight + cardGap;
                 });
 
-                // Footer on all pages, including pages created above.
                 const totalPages = doc.internal.getNumberOfPages();
                 for (let page = 1; page <= totalPages; page++) {
                     doc.setPage(page);
@@ -1175,32 +1466,20 @@
 
             } catch (err) {
                 console.error("PDF generation error:", err);
-                alert("Failed to generate PDF report. Check the browser console for details.");
+                alert("Failed to generate PDF report.");
             }
         }
 
-        // ================================================================
-        // SALONCONNECT PERSONALIZED A4 POSTERS
-        // ================================================================
         async function ensureSalonConnectJsPDF() {
             if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
             await new Promise((resolve, reject) => {
-                const existing = document.querySelector('script[data-salonconnect-jspdf]');
-                if (existing) {
-                    if (window.jspdf && window.jspdf.jsPDF) { resolve(); return; }
-                    existing.addEventListener('load', resolve, { once: true });
-                    existing.addEventListener('error', reject, { once: true });
-                    return;
-                }
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
                 script.async = true;
-                script.setAttribute('data-salonconnect-jspdf', 'true');
                 script.onload = resolve;
                 script.onerror = reject;
                 document.head.appendChild(script);
             });
-            if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('jsPDF could not be loaded.');
             return window.jspdf.jsPDF;
         }
 
@@ -1214,178 +1493,32 @@
             };
         }
 
-        function posterWrap(doc, text, x, y, width, lineHeight = 4.5) {
-            const lines = doc.splitTextToSize(String(text), width);
-            doc.text(lines, x, y);
-            return y + lines.length * lineHeight;
-        }
-
-        function drawPosterBrand(doc, competition = false) {
-            const W = doc.internal.pageSize.getWidth();
-            const H = doc.internal.pageSize.getHeight();
-
-            doc.setFillColor(18, 20, 50);
-            doc.rect(0, 0, W, 72, 'F');
-
-            // Elegant decorative rings; no external image.
-            doc.setDrawColor(82, 60, 145);
-            doc.setLineWidth(1.2);
-            doc.circle(W - 23, 22, 29, 'S');
-            doc.setDrawColor(151, 113, 226);
-            doc.setLineWidth(0.7);
-            doc.circle(W - 23, 22, 21, 'S');
-            doc.circle(W - 23, 22, 14, 'S');
-
-            doc.setFillColor(126, 82, 216);
-            doc.circle(20, 20, 10, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(13);
-            doc.text('S', 20, 24, { align: 'center' });
-
-            doc.setFontSize(24);
-            doc.text('Salon', 35, 22);
-            doc.setTextColor(190, 150, 250);
-            doc.text('Connect', 62, 22);
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(7.5);
-            doc.setTextColor(225, 218, 241);
-            doc.text('BEAUTY  •  STYLE  •  YOU', 35, 30);
-
-            doc.setFont('helvetica', 'italic');
-            doc.setFontSize(10);
-            doc.setTextColor(210, 193, 239);
-            doc.text('Your Beauty, Our Priority', 35, 42);
-
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7.5);
-            doc.setTextColor(226, 216, 248);
-            doc.text(competition ? 'BEST SALON COMPETITION' : 'CLIENT BOOKING INVITATION', W - 15, 55, { align: 'right' });
-
-            // Layered white/lavender wave.
-            doc.setFillColor(235, 228, 252);
-            doc.ellipse(W / 2, 70, W * 0.65, 14, 'F');
-            doc.setFillColor(255, 255, 255);
-            doc.ellipse(W / 2, 75, W * 0.62, 12, 'F');
-
-            // Premium footer.
-            doc.setFillColor(18, 20, 50);
-            doc.rect(0, H - 34, W, 34, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(10);
-            doc.text('Salon', 15, H - 20);
-            doc.setTextColor(190, 150, 250);
-            doc.text('Connect', 30, H - 20);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(6.8);
-            doc.setTextColor(210, 204, 229);
-            doc.text('Real Salons  •  Real People  •  Real Beauty', 15, H - 12);
-
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(255, 255, 255);
-            doc.text('www.salonconnect.co.za', W - 15, H - 20, { align: 'right' });
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(210, 204, 229);
-            doc.text('Discover  •  Book  •  Vote  •  Support local salons', W - 15, H - 12, { align: 'right' });
-        }
-
-        function posterStep(doc, x, y, number, icon, title, text) {
-            doc.setFillColor(249, 247, 255);
-            doc.setDrawColor(225, 216, 247);
-            doc.roundedRect(x, y, 178, 28, 5, 5, 'FD');
-
-            doc.setFillColor(111, 73, 202);
-            doc.circle(x + 11, y + 14, 7, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(8);
-            doc.text(String(number), x + 11, y + 17, { align: 'center' });
-
-            doc.setTextColor(30, 31, 70);
-            doc.setFontSize(8.5);
-            doc.text(`${icon}  ${title}`, x + 22, y + 12);
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(6.8);
-            doc.setTextColor(93, 99, 128);
-            posterWrap(doc, text, x + 22, y + 19, 148, 3.5);
-        }
-
         async function downloadBookingInvitationPoster() {
             try {
                 const JsPDF = await ensureSalonConnectJsPDF();
                 const salon = getPosterSalonData();
-
-                const previewName = document.getElementById('booking-preview-name');
-                const previewLocation = document.getElementById('booking-preview-location');
-                if (previewName) previewName.innerText = salon.name;
-                if (previewLocation) previewLocation.innerText = `📍 ${salon.location}`;
-
                 const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 const W = doc.internal.pageSize.getWidth();
-                drawPosterBrand(doc, false);
 
-                doc.setTextColor(31, 29, 72);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(9.5);
-                doc.text('LOOKING FOR A PROFESSIONAL SALON?', 15, 88);
-
-                doc.setTextColor(106, 70, 199);
-                doc.setFontSize(29);
-                doc.text('BOOK WITH US!', 15, 103);
-
-                doc.setTextColor(28, 29, 68);
-                doc.setFontSize(17);
-                const nameLines = doc.splitTextToSize(salon.name, 178);
-                doc.text(nameLines, 15, 120);
-
-                const nameBottom = 120 + nameLines.length * 7.5;
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(9.5);
-                doc.setTextColor(82, 88, 119);
-                posterWrap(doc, 'We are proud to be on SalonConnect. Find our salon, view our location and book your appointment online with ease.', 15, nameBottom + 5, 175, 5);
-
-                doc.setTextColor(105, 68, 191);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(8);
-                doc.text(`📍 ${salon.location}`.substring(0, 85), 15, nameBottom + 22);
-
-                posterStep(doc, 15, 157, 1, '⌕', 'FIND OUR SALON', 'Discover our salon and see where to find us.');
-                posterStep(doc, 15, 189, 2, '▣', 'BOOK YOUR APPOINTMENT', 'Choose a convenient time and book online.');
-                posterStep(doc, 15, 221, 3, '♡', 'STAY CONNECTED', 'Keep your salon booking journey simple.');
-
-                doc.setFillColor(28, 23, 72);
-                doc.roundedRect(15, 257, 178, 43, 7, 7, 'F');
-                doc.setTextColor(194, 158, 247);
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(17);
-                doc.text('SCAN • VISIT • BOOK!', W / 2, 272, { align: 'center' });
+                doc.setFillColor(18, 20, 50);
+                doc.rect(0, 0, W, 72, 'F');
                 doc.setTextColor(255, 255, 255);
                 doc.setFont('helvetica', 'bold');
-                doc.setFontSize(8.5);
-                doc.text('Visit our website and search for our salon by name or location.', W / 2, 283, { align: 'center' });
-                doc.setFontSize(12);
-                doc.text(salon.website, W / 2, 294, { align: 'center' });
+                doc.setFontSize(24);
+                doc.text('SalonConnect', 20, 30);
 
-                doc.setFillColor(246, 242, 255);
-                doc.setDrawColor(226, 216, 247);
-                doc.roundedRect(15, 308, 178, 35, 6, 6, 'FD');
-                doc.setTextColor(105, 68, 191);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(9);
-                doc.text('HOW TO FIND US', 22, 320);
-                doc.setTextColor(69, 75, 106);
+                doc.setFontSize(16);
+                doc.text('BOOK WITH US!', 20, 100);
+                doc.setFontSize(14);
+                doc.text(salon.name, 20, 115);
                 doc.setFont('helvetica', 'normal');
-                doc.setFontSize(7.5);
-                doc.text('1. Visit www.salonconnect.co.za', 22, 328);
-                doc.text(`2. Search for ${salon.name.substring(0, 38)}`, 22, 335);
+                doc.setFontSize(10);
+                doc.text(`Location: ${salon.location}`, 20, 130);
 
                 doc.save(`${salon.name.replace(/[^a-z0-9]+/gi, '_')}_Booking_Invitation.pdf`);
             } catch (err) {
-                console.error('Booking invitation poster error:', err);
-                alert('Could not create the booking invitation poster. Please check your internet connection and try again.');
+                console.error('Poster error:', err);
+                alert('Could not create poster.');
             }
         }
 
@@ -1393,72 +1526,22 @@
             try {
                 const JsPDF = await ensureSalonConnectJsPDF();
                 const salon = getPosterSalonData();
-
-                const previewName = document.getElementById('vote-preview-name');
-                const previewLocation = document.getElementById('vote-preview-location');
-                if (previewName) previewName.innerText = salon.name;
-                if (previewLocation) previewLocation.innerText = salon.location;
-
                 const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 const W = doc.internal.pageSize.getWidth();
-                drawPosterBrand(doc, true);
 
-                doc.setTextColor(104, 68, 190);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(9.5);
-                doc.text('SALONCONNECT BEST SALON COMPETITION', W / 2, 90, { align: 'center' });
-
-                doc.setTextColor(28, 28, 69);
-                doc.setFontSize(32);
-                doc.text('VOTE', W / 2, 108, { align: 'center' });
-                doc.setTextColor(106, 70, 199);
-                doc.text('FOR ME!', W / 2, 122, { align: 'center' });
-
-                doc.setTextColor(30, 31, 70);
-                doc.setFontSize(18);
-                const voteNameLines = doc.splitTextToSize(salon.name, 165);
-                doc.text(voteNameLines, W / 2, 139, { align: 'center' });
-
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(9);
-                doc.setTextColor(82, 88, 119);
-                posterWrap(doc, 'We are competing to become SalonConnect’s Best Salon. Your vote can help our salon reach the top!', 28, 153, 154, 4.8);
-
-                doc.setFillColor(28, 23, 72);
-                doc.roundedRect(15, 174, 178, 33, 6, 6, 'F');
-                doc.setTextColor(255, 209, 77);
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(9.5);
-                doc.text('THE MOST-VOTED SALON WINS', W / 2, 187, { align: 'center' });
+                doc.setFillColor(18, 20, 50);
+                doc.rect(0, 0, W, 72, 'F');
                 doc.setTextColor(255, 255, 255);
-                doc.setFontSize(15);
-                doc.text('THE GRAND PRIZE!', W / 2, 199, { align: 'center' });
-
-                posterStep(doc, 15, 216, 1, '→', 'VISIT SALONCONNECT', 'Go to www.salonconnect.co.za.');
-                posterStep(doc, 15, 248, 2, '⌕', 'FIND OUR SALON', `Search for ${salon.name.substring(0, 38)}.`);
-                posterStep(doc, 15, 280, 3, '★', 'CAST YOUR VOTE', 'Support us in the Best Salon Competition.');
-
-                doc.setFillColor(246, 242, 255);
-                doc.setDrawColor(226, 216, 247);
-                doc.roundedRect(15, 313, 178, 28, 5, 5, 'FD');
-                doc.setTextColor(105, 68, 191);
                 doc.setFont('helvetica', 'bold');
-                doc.setFontSize(8);
-                doc.text('📍 FIND OUR SALON', 22, 324);
-                doc.setTextColor(69, 75, 106);
-                doc.setFont('helvetica', 'normal');
-                doc.setFontSize(7.5);
-                doc.text(salon.location.substring(0, 78), 22, 333);
-
-                doc.setTextColor(106, 70, 199);
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(12);
-                doc.text('HELP US WIN!  Share your support with friends.', W / 2, 351, { align: 'center' });
+                doc.setFontSize(24);
+                doc.text('VOTE FOR US!', 20, 100);
+                doc.setFontSize(18);
+                doc.text(salon.name, 20, 120);
 
                 doc.save(`${salon.name.replace(/[^a-z0-9]+/gi, '_')}_Vote_For_Me.pdf`);
             } catch (err) {
                 console.error('Vote poster error:', err);
-                alert('Could not create the vote poster. Please check your internet connection and try again.');
+                alert('Could not create vote poster.');
             }
         }
 
