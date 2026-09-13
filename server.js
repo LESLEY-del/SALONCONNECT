@@ -27,6 +27,16 @@ const session = require('express-session');
 
 const crypto = require('crypto');
 
+// ------------------------------------------------------------------
+// PRODUCTION URLS
+// FRONTEND_URL  -> where the customer's browser lives (GitHub Pages)
+// BACKEND_URL   -> where this Express server lives (Render)
+// PayFast needs both: it sends the *browser* back to FRONTEND_URL,
+// and it sends its server-to-server ITN callback to BACKEND_URL.
+// ------------------------------------------------------------------
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lesley-del.github.io/SALONCONNECT';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://salonconnect-jbo2.onrender.com';
+
 // Generate PayFast Sandbox or Live Payment Parameters securely
 app.post('/api/payments/payfast-init', async (req, res) => {
     try {
@@ -37,11 +47,11 @@ app.post('/api/payments/payfast-init', async (req, res) => {
         const merchantKey = process.env.PAYFAST_MERCHANT_KEY;
         const passphrase = process.env.PAYFAST_PASSPHRASE || '';
 
-        const tunnelUrl = 'https://sweet-carrots-invite.loca.lt';
-
-        const returnUrl = `${tunnelUrl}/owner-dashboard.html?payment=success&type=${paymentType}`;
-        const cancelUrl = `${tunnelUrl}/owner-dashboard.html?payment=cancelled`;
-        const notifyUrl = `${tunnelUrl}/api/payments/payfast-webhook`;
+        // FIXED: was pointing at a dead LocalTunnel URL (sweet-carrots-invite.loca.lt).
+        // Now points at your real GitHub Pages frontend and Render backend.
+        const returnUrl = `${FRONTEND_URL}/owner-dashboard.html?payment=success&type=${paymentType}`;
+        const cancelUrl = `${FRONTEND_URL}/owner-dashboard.html?payment=cancelled`;
+        const notifyUrl = `${BACKEND_URL}/api/payments/payfast-webhook`;
 
         let paymentData = {
             merchant_id: merchantId,
@@ -766,7 +776,7 @@ app.post('/api/admin/send-email', async (req, res) => {
                             <td class="content">
                                 <p>${formattedBody}</p>
                                 <div class="btn-container">
-                                    <a href="http://localhost:5000" class="btn">Open Salon Dashboard</a>
+                                    <a href="${FRONTEND_URL}" class="btn">Open Salon Dashboard</a>
                                 </div>
                             </td>
                         </tr>
