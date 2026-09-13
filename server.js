@@ -117,11 +117,48 @@ app.post('/api/payments/payfast-webhook', express.urlencoded({ extended: true })
                     .eq('id', salonId);
                 console.log(`Salon ${salonId} monthly subscription marked as paid via webhook.`);
             } else if (paymentType === 'competition') {
-                await supabase
+                // FIXED: the dashboard's "Join Competition" buttons go straight to PayFast
+                // and never call /api/salons/:id/competitions/join first, so no row existed
+                // yet for this UPDATE to match — the payment succeeded but nothing happened.
+                // Now the webhook creates the entry itself if it isn't there already.
+                const { data: existingEntry } = await supabase
                     .from('salon_competitions')
-                    .update({ payment_status: 'paid', payment_reference: pfData.pf_payment_id })
+                    .select('id')
                     .eq('salon_id', salonId)
-                    .eq('competition_key', tierKey);
+                    .eq('competition_key', tierKey)
+                    .maybeSingle();
+
+                if (existingEntry) {
+                    await supabase
+                        .from('salon_competitions')
+                        .update({ payment_status: 'paid', payment_reference: pfData.pf_payment_id })
+                        .eq('id', existingEntry.id);
+                } else {
+                    const { data: salonRow } = await supabase
+                        .from('salons')
+                        .select('suburb, town, province')
+                        .eq('id', salonId)
+                        .maybeSingle();
+
+                    let competitionValue = 'South Africa';
+                    if (salonRow) {
+                        if (tierKey === 'suburb') competitionValue = salonRow.suburb || 'Unspecified Suburb';
+                        else if (tierKey === 'town') competitionValue = salonRow.town || 'Unspecified Town';
+                        else if (tierKey === 'province') competitionValue = salonRow.province || 'Unspecified Province';
+                        else if (tierKey === 'country') competitionValue = 'South Africa';
+                    }
+
+                    await supabase
+                        .from('salon_competitions')
+                        .insert([{
+                            salon_id: salonId,
+                            competition_key: tierKey,
+                            competition_value: competitionValue,
+                            points: 0,
+                            payment_status: 'paid',
+                            payment_reference: pfData.pf_payment_id
+                        }]);
+                }
                 console.log(`Salon ${salonId} competition entry for ${tierKey} marked as paid via webhook.`);
             }
         }
