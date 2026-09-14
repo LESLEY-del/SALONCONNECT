@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SalonConnect - Secure Client Dashboard</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // BACKEND / SESSION LOGIC — intentionally kept compatible with the existing app.
+        // Prevent Flickering & Guard Session Immediately
         (function() {
             try {
                 const token = localStorage.getItem('voterToken');
@@ -19,7 +18,9 @@
                     return;
                 }
                 const parsed = JSON.parse(storedVoter);
-                if (!parsed || !parsed.id) throw new Error("Invalid session");
+                if (!parsed || !parsed.id) {
+                    throw new Error("Invalid session");
+                }
             } catch (err) {
                 localStorage.removeItem('voterToken');
                 localStorage.removeItem('voterUser');
@@ -32,74 +33,355 @@
                 extend: {
                     colors: {
                         sc: {
-                            navy: '#11132f',
-                            purple: '#6d4aff',
+                            navy: '#171526',
+                            purple: '#6d3df5',
                             lavender: '#a98cff',
-                            soft: '#f7f5ff'
+                            soft: '#f7f3ff'
                         }
                     },
                     boxShadow: {
-                        soft: '0 24px 70px rgba(24, 20, 72, .12)',
-                        card: '0 14px 40px rgba(24, 20, 72, .10)'
+                        soft: '0 20px 60px rgba(24, 20, 72, .10)',
+                        card: '0 12px 35px rgba(24, 20, 72, .10)'
                     }
                 }
             }
-        };
+        }
     </script>
-
     <style>
         * { scroll-behavior: smooth; box-sizing: border-box; }
+        body { opacity: 0; transition: opacity 0.2s ease-in-out; background: #faf9fd; color: #171526; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
 
-        body {
-            opacity: 0;
-            transition: opacity .25s ease;
-            background:
-                radial-gradient(circle at 5% 0%, rgba(109,74,255,.09), transparent 28%),
-                radial-gradient(circle at 95% 15%, rgba(169,140,255,.10), transparent 25%),
-                #f8f9fc;
-        }
-
-        .glass {
-            background: rgba(255,255,255,.82);
+        .sc-nav {
+            background: rgba(255,255,255,.96);
             backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid #eeeaf5;
         }
 
-        .hero-glow {
-            background:
-                radial-gradient(circle at 15% 30%, rgba(169,140,255,.28), transparent 25%),
-                radial-gradient(circle at 85% 20%, rgba(109,74,255,.22), transparent 24%),
-                linear-gradient(135deg, #11132f 0%, #211a55 52%, #3a2a86 100%);
+        .sc-logo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #6d3df5;
+            font-weight: 900;
+            letter-spacing: -.5px;
         }
 
-        .salon-card {
+        .sc-logo-mark {
+            width: 39px;
+            height: 39px;
+            border-radius: 13px;
+            background: linear-gradient(135deg,#7d52ff,#5426cf);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 20px rgba(109,61,245,.25);
+            flex-shrink: 0;
+        }
+
+        .sc-hero {
             position: relative;
-            transform: translateY(0);
-            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+            overflow: hidden;
+            background: radial-gradient(circle at 90% 15%, rgba(125,82,255,.16), transparent 35%),
+                        radial-gradient(circle at 0% 100%, rgba(169,140,255,.12), transparent 35%),
+                        linear-gradient(135deg,#fff 0%,#f7f3ff 100%);
+            border: 1px solid #eee9fa;
+            border-radius: 30px;
+            padding: 28px 22px 24px;
+            box-shadow: 0 14px 40px rgba(48,35,92,.06);
         }
 
-        .salon-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 22px 55px rgba(24,20,72,.15);
-            border-color: rgba(109,74,255,.25);
+        .sc-hero h2 {
+            font-size: clamp(28px,5vw,44px);
+            line-height: 1.07;
+            letter-spacing: -1.6px;
+            color: #171526;
         }
 
-        .salon-image {
-            transition: transform .45s ease;
+        .sc-hero-gradient { color: #6d3df5; }
+
+        .sc-search-wrapper { position: relative; margin-top: 22px; }
+
+        .sc-search {
+            width: 100%;
+            height: 56px;
+            border: 1px solid #e6e1f1;
+            border-radius: 18px;
+            background: white;
+            padding: 0 57px 0 48px;
+            font-size: 14px;
+            color: #252133;
+            outline: none;
+            box-shadow: 0 10px 30px rgba(47,31,91,.08);
         }
 
-        .salon-card:hover .salon-image {
-            transform: scale(1.045);
+        .sc-search:focus {
+            border-color: #8d69f8;
+            box-shadow: 0 0 0 4px rgba(109,61,245,.10);
         }
 
-        .premium-ring {
-            box-shadow: 0 0 0 1px rgba(109,74,255,.08), 0 18px 50px rgba(109,74,255,.08);
+        .sc-search-icon {
+            position: absolute;
+            left: 17px;
+            top: 17px;
+            width: 22px;
+            height: 22px;
+            color: #817b94;
+            pointer-events: none;
         }
 
-        .modal-backdrop {
-            background: rgba(8, 9, 25, .64);
-            backdrop-filter: blur(7px);
-            -webkit-backdrop-filter: blur(7px);
+        .sc-search-button {
+            position: absolute;
+            right: 7px;
+            top: 7px;
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 13px;
+            background: #6d3df5;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .sc-categories {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 13px;
+            margin-top: 25px;
+        }
+
+        .sc-category {
+            border: 0;
+            background: transparent;
+            text-align: center;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .sc-category-icon {
+            width: 48px;
+            height: 48px;
+            margin: auto;
+            border-radius: 16px;
+            background: #f1ecff;
+            color: #6d3df5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            transition: .2s ease;
+        }
+
+        .sc-category:hover .sc-category-icon {
+            transform: translateY(-3px);
+            background: #e7ddff;
+        }
+
+        .sc-category span {
+            display: block;
+            margin-top: 7px;
+            color: #706b7e;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .sc-section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 28px 0 14px;
+        }
+
+        .sc-section-title h3 {
+            font-size: 19px;
+            font-weight: 900;
+            color: #181528;
+        }
+
+        .sc-view-all {
+            color: #6d3df5;
+            font-size: 11px;
+            font-weight: 900;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        #salon-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+            gap: 14px !important;
+        }
+
+        .salon-card.sc-salon-card {
+            background: white !important;
+            border: 1px solid #eeeaf5 !important;
+            border-radius: 20px !important;
+            overflow: hidden !important;
+            box-shadow: 0 8px 24px rgba(36,27,68,.07) !important;
+            transition: .25s ease !important;
+            opacity: 1 !important;
+        }
+
+        .salon-card.sc-salon-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(36,27,68,.12) !important;
+        }
+
+        .sc-salon-image-wrap {
+            position: relative;
+            height: 135px;
+            overflow: hidden;
+            background: #eeeaf5;
+        }
+
+        .sc-salon-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .35s ease;
+        }
+
+        .sc-salon-card:hover .sc-salon-image { transform: scale(1.05); }
+
+        .sc-salon-heart {
+            position: absolute;
+            right: 9px;
+            top: 9px;
+            width: 31px;
+            height: 31px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.93);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6d3df5;
+            font-size: 14px;
+            box-shadow: 0 5px 14px rgba(0,0,0,.08);
+        }
+
+        .sc-salon-content { padding: 11px; }
+
+        .sc-salon-name {
+            font-size: 13px;
+            font-weight: 900;
+            color: #181528;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sc-salon-location {
+            color: #858091;
+            font-size: 9px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sc-salon-rating {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 6px;
+            color: #6b6578;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .sc-salon-rating .star { color: #f3b51b; }
+
+        .sc-salon-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 9px;
+        }
+
+        .sc-book-button {
+            flex: 1;
+            border: 0;
+            background: #6d3df5;
+            color: white;
+            border-radius: 10px;
+            padding: 8px 5px;
+            font-size: 9px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .sc-vote-button {
+            width: 34px;
+            border: 1px solid #e8e2f7;
+            background: #f8f5ff;
+            color: #6d3df5;
+            border-radius: 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .sc-locked { filter: grayscale(.7); }
+
+        .sc-featured-label {
+            position: absolute;
+            left: 9px;
+            top: 9px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.94);
+            color: #6d3df5;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .sc-giveaway {
+            color: #16834b;
+            background: #ecfbf3;
+            border: 1px solid #d2f3e0;
+            border-radius: 8px;
+            padding: 4px 7px;
+            font-size: 8px;
+            font-weight: 900;
+            display: inline-block;
+            margin-top: 6px;
+        }
+
+        .sc-betaway {
+            color: #7b4c00;
+            background: #fff7db;
+            border: 1px solid #f7e5a0;
+            border-radius: 999px;
+            padding: 4px 7px;
+            font-size: 8px;
+            font-weight: 900;
+            display: inline-block;
+        }
+
+        .sc-detail-card {
+            border-radius: 28px !important;
+            overflow: hidden;
+            box-shadow: 0 15px 45px rgba(36,27,68,.08);
+        }
+
+        .sc-winner-card {
+            position: relative;
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #eeeaf5;
+            box-shadow: 0 12px 35px rgba(36,27,68,.08);
+            overflow: hidden;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(15px) scale(.9); opacity: 0; }
+            50% { opacity: .8; }
+            100% { transform: translateY(-300px) scale(1.1); opacity: 0; }
         }
 
         .floating-balloon {
@@ -112,355 +394,323 @@
         .balloon-2 { left: 50%; animation-delay: 1.5s; }
         .balloon-3 { left: 80%; animation-delay: 3s; }
 
-        @keyframes floatUp {
-            0% { transform: translateY(15px) scale(.9); opacity: 0; }
-            50% { opacity: .8; }
-            100% { transform: translateY(-300px) scale(1.1); opacity: 0; }
+        @media (min-width: 768px) {
+            .sc-hero { padding: 38px 38px 32px; }
+            .sc-categories { grid-template-columns: repeat(8,1fr); }
+            #salon-grid { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+            .sc-salon-image-wrap { height: 190px; }
         }
 
-        .slot-selected {
-            background: #6d4aff !important;
-            color: white !important;
-            border-color: #6d4aff !important;
-        }
-
-        .section-label {
-            letter-spacing: .16em;
-        }
-
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { scrollbar-width: none; }
-
-        @media (max-width: 640px) {
-            .hero-title { font-size: 2rem; line-height: 1.05; }
+        @media (max-width: 380px) {
+            .sc-categories { gap: 8px; }
+            .sc-category-icon { width: 42px; height: 42px; }
+            .sc-salon-image-wrap { height: 115px; }
+            .sc-salon-content { padding: 9px; }
         }
     </style>
 </head>
 
-<body class="text-slate-800 font-sans min-h-screen flex flex-col">
+<body class="text-gray-800 font-sans flex flex-col min-h-screen">
 
-    <!-- NAVBAR: UI ONLY -->
-    <nav class="sticky top-0 z-50 border-b border-white/70 glass shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-            <div class="flex items-center justify-between gap-4">
-                <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-500 text-white flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
-                        <span class="text-xl">✂️</span>
-                    </div>
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2">
-                            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-950">SalonConnect</h1>
-                            <span class="hidden sm:inline-flex text-[9px] uppercase tracking-widest bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-black border border-indigo-100">Secure Portal</span>
-                        </div>
-                        <p class="hidden sm:block text-[10px] text-slate-400 font-semibold">Discover • Vote • Book</p>
-                    </div>
+    <!-- Fixed Secure Navbar -->
+    <nav class="sc-nav sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="sc-logo-mark">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 21C12 21 5 17.4 5 11.3C5 7.5 8.1 5 12 5C15.9 5 19 7.5 19 11.3C19 17.4 12 21 12 21Z" stroke="white" stroke-width="1.8"/>
+                        <path d="M8.5 11.5C9.4 9.9 10.6 9.1 12 9.1C13.4 9.1 14.6 9.9 15.5 11.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
                 </div>
-
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <a href="#" onclick="toggleWinnersSection(event)"
-                       class="hidden sm:flex items-center gap-1.5 text-slate-600 font-bold text-sm hover:text-indigo-600 transition px-3 py-2 rounded-xl hover:bg-indigo-50">
-                        🏆 Winners
-                    </a>
-
-                    <div id="user-session-info"
-                         class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-2 rounded-xl flex items-center gap-2 max-w-[150px] sm:max-w-none truncate">
-                        <span>👤 Verifying session...</span>
-                    </div>
-
-                    <button onclick="logoutClient()"
-                            class="bg-rose-50 text-rose-600 px-3 py-2.5 rounded-xl text-xs font-black hover:bg-rose-100 transition border border-rose-100">
-                        Log Out
-                    </button>
+                <div>
+                    <div class="sc-logo text-lg">SalonConnect</div>
+                    <div class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Beauty • Style • Booking</div>
                 </div>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-center">
+                <a href="#" onclick="toggleWinnersSection(event)" class="text-slate-600 font-bold text-xs hover:text-purple-600 transition">🏆 Winners</a>
+                <div id="user-session-info" class="text-[10px] font-bold text-purple-700 bg-purple-50 px-3 py-2 rounded-xl flex items-center gap-2">
+                    <span>👤 Verifying session...</span>
+                </div>
+                <button onclick="logoutClient()" class="bg-rose-50 text-rose-600 px-3 py-2 rounded-xl text-[10px] font-bold hover:bg-rose-100 transition border border-rose-100">Log Out</button>
             </div>
         </div>
     </nav>
 
-    <main id="dashboard-view" class="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10 flex-grow w-full">
-
-        <!-- HERO / SEARCH -->
-        <section class="hero-glow rounded-[2rem] overflow-hidden shadow-soft relative mb-10">
-            <div class="absolute inset-0 opacity-50">
-                <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full border border-white/10"></div>
-                <div class="absolute -bottom-28 -left-20 w-80 h-80 rounded-full border border-white/10"></div>
-            </div>
-
-            <div class="relative px-5 sm:px-10 py-9 sm:py-12">
-                <div class="max-w-3xl">
-                    <span class="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-violet-100 px-3 py-1.5 rounded-full text-[10px] font-black uppercase section-label">
-                        ✨ Your salon marketplace
-                    </span>
-
-                    <h2 class="hero-title text-4xl sm:text-5xl font-black text-white tracking-tight mt-4">
-                        Book & support your favorite salons.
-                    </h2>
-
-                    <p class="text-sm sm:text-base text-indigo-100/80 mt-4 max-w-2xl leading-relaxed">
-                        Explore approved salons, view their work, vote in the competition and reserve an appointment directly through SalonConnect.
-                    </p>
-
-                    <div class="mt-7 max-w-2xl relative">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </div>
-
-                        <input type="text" id="salon-search-input" onkeyup="filterSalons()"
-                               placeholder="Search by salon name..."
-                               class="w-full pl-12 pr-4 py-4 bg-white border border-white/30 rounded-2xl shadow-xl focus:ring-4 focus:ring-violet-300/30 focus:border-white outline-none text-sm sm:text-base text-slate-800"
-                               autocomplete="off">
-
-                        <div id="search-suggestions"
-                             class="hidden absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-52 overflow-y-auto text-left">
-                        </div>
-                    </div>
+    <!-- MAIN DASHBOARD VIEW -->
+    <main id="dashboard-view" class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+        <!-- APP-STYLE HERO -->
+        <section class="sc-hero">
+            <div class="flex items-center gap-2 mb-5">
+                <div class="sc-logo-mark">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 21C12 21 5 17.4 5 11.3C5 7.5 8.1 5 12 5C15.9 5 19 7.5 19 11.3C19 17.4 12 21 12 21Z" stroke="white" stroke-width="1.8"/>
+                        <path d="M8.5 11.5C9.4 9.9 10.6 9.1 12 9.1C13.4 9.1 14.6 9.9 15.5 11.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
                 </div>
-
-                <div class="mt-8 flex flex-wrap gap-2 text-[11px] font-bold text-white/80">
-                    <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/10">🔒 Secure client account</span>
-                    <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/10">📅 Direct booking</span>
-                    <span class="px-3 py-1.5 rounded-full bg-white/10 border border-white/10">🏆 Salon competition</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- SALON SECTION -->
-        <section>
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
                 <div>
-                    <p class="text-[10px] uppercase section-label font-black text-indigo-600">Explore salons</p>
-                    <h3 class="text-2xl sm:text-3xl font-black text-slate-950 mt-1">Approved Salons</h3>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Choose a salon to view its portfolio or book an appointment.</p>
-                </div>
-                <div class="hidden sm:flex items-center gap-2 text-[11px] font-bold text-slate-500 bg-white border border-slate-200 rounded-xl px-3 py-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    Live salon directory
+                    <div class="sc-logo text-xl">SalonConnect</div>
+                    <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Your beauty marketplace</div>
                 </div>
             </div>
 
-            <div id="salon-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <div class="col-span-full bg-white rounded-3xl border border-slate-200 p-10 text-center shadow-sm">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 mx-auto flex items-center justify-center text-xl">✂️</div>
-                    <p class="text-sm text-slate-400 mt-3">Loading approved salons...</p>
-                </div>
+            <h2 class="font-black">
+                Find &amp; Book<br>
+                <span class="sc-hero-gradient">Your Perfect Salon</span>
+            </h2>
+
+            <p class="text-xs sm:text-sm text-gray-500 mt-3 max-w-lg">
+                Discover trusted salons, explore their work and book your next appointment.
+            </p>
+
+            <!-- Search -->
+            <div class="sc-search-wrapper">
+                <svg class="sc-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" id="salon-search-input" onkeyup="filterSalons()" placeholder="Search for a salon..." class="sc-search" autocomplete="off">
+                <button class="sc-search-button" type="button" onclick="document.getElementById('salon-search-input').focus()">
+                    <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+                <div id="search-suggestions" class="hidden absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto text-left"></div>
             </div>
 
-            <div id="no-results" class="hidden text-center py-14">
-                <div class="w-16 h-16 rounded-3xl bg-white border border-slate-200 mx-auto flex items-center justify-center text-2xl shadow-sm">🔎</div>
-                <h4 class="font-black text-slate-800 mt-4">No salons found</h4>
-                <p class="text-sm text-slate-500 mt-1">Try searching with another salon name.</p>
+            <!-- Categories -->
+            <div class="sc-categories">
+                <button class="sc-category" onclick="filterCategory('hair')">
+                    <div class="sc-category-icon">💇</div>
+                    <span>Hair</span>
+                </button>
+                <button class="sc-category" onclick="filterCategory('nails')">
+                    <div class="sc-category-icon">💅</div>
+                    <span>Nails</span>
+                </button>
+                <button class="sc-category" onclick="filterCategory('beauty')">
+                    <div class="sc-category-icon">✨</div>
+                    <span>Beauty</span>
+                </button>
+                <button class="sc-category" onclick="filterCategory('makeup')">
+                    <div class="sc-category-icon">💄</div>
+                    <span>Makeup</span>
+                </button>
+                <button class="sc-category" onclick="filterCategory('massage')">
+                    <div class="sc-category-icon">💆</div>
+                    <span>Massage</span>
+                </button>
+                <button class="sc-category" onclick="filterCategory('facials')">
+                    <div class="sc-category-icon">🧖</div>
+                    <span>Facials</span>
+                </button>
+                <button class="sc-category" onclick="filterCategory('barber')">
+                    <div class="sc-category-icon">✂️</div>
+                    <span>Barber</span>
+                </button>
+                <button class="sc-category" onclick="clearSalonFilter()">
+                    <div class="sc-category-icon">•••</div>
+                    <span>More</span>
+                </button>
             </div>
         </section>
 
-        <!-- WINNERS -->
-        <section id="winners-section" class="hidden pt-12 mt-12 border-t border-slate-200 space-y-7">
-            <div class="text-center">
-                <span class="text-[10px] font-black uppercase tracking-widest text-violet-600 bg-violet-50 px-3 py-1.5 rounded-full border border-violet-100">Official Results</span>
-                <h3 class="text-2xl sm:text-3xl font-black text-slate-950 mt-3">Competition Winners & Champions</h3>
-                <p class="text-xs sm:text-sm text-slate-500 mt-1">Celebrating top-performing salons across suburbs, towns, provinces and the country.</p>
-            </div>
+        <!-- Featured salons title -->
+        <div class="sc-section-title">
+            <h3>Featured Salons</h3>
+            <button onclick="clearSalonFilter()" class="sc-view-all">View All →</button>
+        </div>
 
+        <!-- Dynamic Salon Grid -->
+        <div id="salon-grid">
+            <p class="text-sm text-gray-400 col-span-full text-center py-10">Loading approved salons...</p>
+        </div>
+
+        <!-- No results -->
+        <div id="no-results" class="hidden text-center py-10 text-gray-500">
+            <div class="text-3xl mb-2">🔍</div>
+            <p class="text-sm">No salons found matching your search.</p>
+            <button onclick="clearSalonFilter()" class="mt-3 text-xs font-bold text-purple-600">Show all salons</button>
+        </div>
+
+        <!-- BOTTOM WINNERS SECTION -->
+        <section id="winners-section" class="hidden pt-10 mt-10 border-t border-slate-200 space-y-6">
+            <div class="max-w-xl mx-auto text-center space-y-1">
+                <span class="text-[10px] font-black uppercase tracking-widest text-violet-600 bg-violet-50 px-3 py-1 rounded-full border border-violet-100">Official Results</span>
+                <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">Competition Winners &amp; Champions</h3>
+                <p class="text-xs text-slate-500">Celebrating top-performing salons across suburbs, towns, provinces and the country.</p>
+            </div>
             <div id="bottom-winners-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <p class="text-center text-slate-400 text-xs py-10 col-span-full">Loading winners...</p>
             </div>
         </section>
     </main>
 
-    <!-- DETAIL VIEW -->
-    <div id="salon-detail-view" class="hidden max-w-6xl mx-auto px-4 sm:px-6 py-7 sm:py-10 flex-grow w-full">
-        <button onclick="showDashboardView()"
-                class="text-indigo-600 font-black text-sm hover:text-indigo-800 transition flex items-center gap-2 mb-5">
-            ← Back to Salons
-        </button>
+    <!-- DETAILED SALON VIEW (HIDDEN BY DEFAULT) -->
+    <div id="salon-detail-view" class="hidden max-w-5xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
+        <button onclick="showDashboardView()" class="text-purple-600 font-bold text-sm hover:underline flex items-center gap-1 mb-4">← Back to Salons</button>
 
-        <div class="bg-white rounded-[2rem] shadow-soft border border-slate-200 overflow-hidden">
-            <div class="relative h-72 sm:h-[25rem] bg-slate-200">
+        <div class="bg-white sc-detail-card border border-gray-100">
+            <div class="relative h-64 sm:h-80 bg-gray-200">
                 <img id="detail-header-img" src="" alt="Salon Banner" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"></div>
-
-                <div class="absolute top-5 left-5">
-                    <span class="bg-white/90 backdrop-blur text-slate-800 px-3 py-1.5 rounded-full text-[10px] font-black uppercase shadow-lg">
-                        SalonConnect Approved
-                    </span>
-                </div>
-
-                <div class="absolute bottom-6 left-5 right-5 text-white">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-5">
-                        <div>
-                            <h2 id="detail-salon-name" class="text-3xl sm:text-4xl font-black drop-shadow-md"></h2>
-                            <p id="detail-salon-location" class="text-sm text-slate-200 mt-2">📍 Loading location...</p>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            <button id="detail-vote-btn" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-xs font-black transition shadow-lg">
-                                ★ Vote & Support
-                            </button>
-                            <button id="detail-book-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-black transition shadow-lg">
-                                Book Now
-                            </button>
-                        </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent"></div>
+                <div class="absolute bottom-6 left-6 right-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                    <div>
+                        <h2 id="detail-salon-name" class="text-3xl sm:text-4xl font-black drop-shadow-md"></h2>
+                        <p id="detail-salon-location" class="text-sm text-gray-200 mt-1">📍 Loading location...</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="detail-vote-btn" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">★ Vote &amp; Support</button>
+                        <button id="detail-book-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm">Book Now</button>
                     </div>
                 </div>
             </div>
 
-            <div class="p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2">
-                    <p class="text-[10px] uppercase section-label font-black text-indigo-600">Salon information</p>
-                    <h3 class="text-xl font-black text-slate-950 mt-1">About Staff & Services</h3>
-                    <p id="detail-staff-info" class="text-sm text-slate-600 font-medium mt-3"></p>
-                    <div id="detail-giveaway-badge" class="mt-4"></div>
+            <div class="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-2 space-y-4">
+                    <h3 class="text-lg font-black text-gray-900">About Staff &amp; Services</h3>
+                    <p id="detail-staff-info" class="text-sm text-gray-600 font-medium"></p>
+                    <div id="detail-giveaway-badge"></div>
                 </div>
-
-                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400">Operating Schedule</h4>
-                    <p id="detail-hours" class="text-lg font-black text-slate-900 mt-2"></p>
-                    <p id="detail-booking-window" class="text-xs text-slate-500 mt-1"></p>
+                <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-2">
+                    <h4 class="text-xs font-black uppercase tracking-wider text-gray-500">Operating Schedule</h4>
+                    <p id="detail-hours" class="text-sm font-bold text-gray-800"></p>
+                    <p id="detail-booking-window" class="text-xs text-gray-500"></p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-10">
-            <div class="flex items-end justify-between mb-5">
-                <div>
-                    <p class="text-[10px] uppercase section-label font-black text-indigo-600">Portfolio</p>
-                    <h3 class="text-xl sm:text-2xl font-black text-slate-950 mt-1">Salon Gallery & Portfolio</h3>
-                </div>
-            </div>
-
-            <div id="detail-gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <p class="text-xs text-slate-400 col-span-full py-8 text-center">Loading gallery pictures...</p>
+        <!-- Gallery -->
+        <div class="space-y-4">
+            <h3 class="text-xl font-black text-gray-900">Salon Gallery &amp; Portfolio</h3>
+            <div id="detail-gallery-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <p class="text-xs text-gray-400 col-span-full py-6 text-center">Loading gallery pictures...</p>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="bg-white/80 border-t border-slate-200 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left">
+    <!-- Footer -->
+    <footer class="bg-white text-gray-600 py-5 border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
             <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs">✂️</span>
-                <p class="text-xs font-black text-slate-700">SalonConnect</p>
+                <div class="sc-logo-mark" style="width:30px;height:30px;border-radius:10px;">
+                    <span class="text-xs font-black">SC</span>
+                </div>
+                <div>
+                    <p class="text-xs font-black text-gray-800">SalonConnect</p>
+                    <p class="text-[9px] text-gray-400">Beauty • Style • Booking</p>
+                </div>
             </div>
-            <p class="text-[11px] text-slate-400">&copy; 2026 SalonConnect. All rights reserved. Secured Session.</p>
+            <p class="text-[10px] text-gray-500">&copy; 2026 SalonConnect. All rights reserved. Secured Session.</p>
         </div>
     </footer>
 
-    <!-- BOOKING MODAL -->
-    <div id="booking-modal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-[60]">
-        <div class="bg-white max-w-xl w-full rounded-[2rem] shadow-2xl relative max-h-[92vh] overflow-y-auto border border-white/70">
-            <div class="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-6 py-5 flex items-center justify-between">
-                <div>
-                    <p class="text-[10px] uppercase section-label font-black text-indigo-600">Appointment</p>
-                    <h3 id="modal-salon-title" class="text-xl font-black text-slate-950 mt-1">Book Appointment</h3>
-                </div>
-                <button type="button" onclick="closeBookingModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 font-black transition">✕</button>
-            </div>
-
-            <form onsubmit="submitBooking(event)" class="p-6 space-y-5">
-                <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-[10px] uppercase tracking-widest text-indigo-500 font-black">Booking as</p>
-                        <p id="modal-client-name-display" class="text-xs text-indigo-950 font-bold mt-1"></p>
-                    </div>
-                    <span class="text-[9px] bg-white text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full uppercase tracking-wider font-black">Account Linked</span>
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[100]">
+        <div class="bg-white max-w-xl w-full p-6 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeBookingModal()" class="absolute right-4 top-4 w-8 h-8 rounded-full bg-gray-100 text-gray-500 font-bold">×</button>
+            <h3 id="modal-salon-title" class="text-xl font-bold text-gray-900 mb-4 pr-8">Book Appointment</h3>
+            <form onsubmit="submitBooking(event)" class="space-y-4">
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-3 text-xs text-purple-900 font-semibold flex items-center justify-between gap-3">
+                    <span>Booking as: <strong id="modal-client-name-display"></strong></span>
+                    <span class="text-[10px] text-purple-500 uppercase tracking-wider">Account Linked</span>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black uppercase tracking-wider text-slate-500">Type of Style</label>
-                    <input type="text" id="style-type" placeholder="e.g. Fade Cut, Box Braids, Silk Press" required
-                           class="mt-2 w-full px-4 py-3 border border-slate-200 rounded-xl outline-none text-sm focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition">
+                    <label class="block text-sm font-medium text-gray-700">Type of Style</label>
+                    <input type="text" id="style-type" placeholder="e.g. Fade Cut, Box Braids, Silk Press" required class="mt-1 w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-purple-500">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black uppercase tracking-wider text-slate-500">Service / Professional Category</label>
-                    <select id="service-type" onchange="onServiceChange()"
-                            class="mt-2 w-full px-4 py-3 border border-slate-200 rounded-xl outline-none text-sm focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition">
+                    <label class="block text-sm font-medium text-gray-700">Select Service / Professional Category</label>
+                    <select id="service-type" onchange="onServiceChange()" class="mt-1 w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-purple-500">
                         <option value="male">Male Barber (Slot Duration: 35 Mins)</option>
                         <option value="female">Female Hair Stylist (Slot Duration: 3 Hours)</option>
                     </select>
                 </div>
 
-                <div class="border-t border-slate-100 pt-5 space-y-4">
+                <div class="border-t pt-4 space-y-3">
                     <div>
-                        <div class="flex justify-between items-center gap-3">
-                            <label class="block text-xs font-black uppercase tracking-wider text-slate-500">Appointment Date</label>
-                            <span id="limit-notice" class="text-[10px] text-slate-400 font-bold"></span>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Select Appointment Date</label>
+                            <span id="limit-notice" class="text-[11px] text-gray-500 font-medium"></span>
                         </div>
-                        <input type="date" id="booking-date" onchange="renderTimeSlots()" required
-                               class="mt-2 w-full px-4 py-3 border border-slate-200 rounded-xl outline-none text-sm focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition">
+                        <input type="date" id="booking-date" onchange="renderTimeSlots()" required class="mt-1 w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none text-sm focus:ring-2 focus:ring-purple-500">
                     </div>
 
                     <div>
-                        <div class="flex justify-between items-center gap-3">
-                            <label class="block text-xs font-black uppercase tracking-wider text-slate-500">Available Time Slots</label>
-                            <span id="capacity-badge" class="text-[10px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full font-black">Parallel capacity: 1</span>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Available Time Slots</label>
+                            <span id="capacity-badge" class="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-semibold">Parallel capacity: 1</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-1">Select an open time slot to secure your spot.</p>
-
-                        <div id="time-slots-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3 max-h-52 overflow-y-auto p-2 border border-slate-200 rounded-2xl bg-slate-50">
-                            <p class="text-xs text-slate-400 col-span-full text-center py-5">Please select a date first.</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Click an open time slot below to secure your spot.</p>
+                        <div id="time-slots-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2 max-h-48 overflow-y-auto p-1 border rounded-lg bg-gray-50">
+                            <p class="text-xs text-gray-400 col-span-full text-center py-4">Please select a date first.</p>
                         </div>
                     </div>
                 </div>
 
                 <input type="hidden" id="selected-time-slot" required>
 
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeBookingModal()"
-                            class="px-5 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-200 transition">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                        Confirm Booking
-                    </button>
+                <div class="flex justify-end gap-2 pt-4 border-t">
+                    <button type="button" onclick="closeBookingModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold hover:bg-purple-700">Confirm Booking</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Frontend Script for Fetching & Interactivity -->
     <script>
-        // ============================================================
-        // BACKEND CONNECTION — PRESERVED
-        // ============================================================
-        const BACKEND_URL = window.location.hostname === 'localhost'
-            ? 'http://localhost:5000/api'
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000/api' 
             : 'https://salonconnect-jbo2.onrender.com/api';
 
         let currentSalonData = {};
         let voterSession = null;
         let globalSalons = [];
 
+        const DEFAULT_SALON_IMAGE = 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800';
+
         document.addEventListener('DOMContentLoaded', () => {
             try {
                 const storedVoter = localStorage.getItem('voterUser');
                 const token = localStorage.getItem('voterToken');
-
                 if (!token || !storedVoter || storedVoter === 'undefined' || storedVoter === 'null') {
                     window.location.replace('voter-login.html');
                     return;
                 }
-
                 voterSession = JSON.parse(storedVoter);
+                if (!voterSession || !voterSession.id) {
+                    throw new Error('Invalid session');
+                }
             } catch (err) {
                 window.location.replace('voter-login.html');
                 return;
             }
 
-            document.getElementById('user-session-info').innerHTML =
-                `<span>👤 ${escapeHtml(voterSession.name)}</span>`;
-
+            document.getElementById('user-session-info').innerHTML = `<span>👤 ${escapeHtml(voterSession.name || 'Client')}</span>`;
             fetchApprovedSalons();
             fetchBottomWinners();
 
             document.body.style.opacity = '1';
         });
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+            }[c]));
+        }
+
+        function safeUrl(value, fallback = DEFAULT_SALON_IMAGE) {
+            if (!value) return fallback;
+            try {
+                const url = new URL(value, window.location.href);
+                if (url.protocol === 'http:' || url.protocol === 'https:') {
+                    return url.href;
+                }
+            } catch (_) {}
+            return fallback;
+        }
 
         function logoutClient() {
             localStorage.removeItem('voterToken');
@@ -468,24 +718,274 @@
             window.location.replace('voter-login.html');
         }
 
-        function escapeHtml(value) {
-            return String(value ?? '').replace(/[&<>"']/g, c => ({
-                '&':'&amp;',
-                '<':'&lt;',
-                '>':'&gt;',
-                '"':'&quot;',
-                "'":'&#039;'
-            }[c]));
-        }
-
         function toggleWinnersSection(event) {
             event.preventDefault();
             const section = document.getElementById('winners-section');
             section.classList.toggle('hidden');
             if (!section.classList.contains('hidden')) {
-                section.scrollIntoView({ behavior: 'smooth' });
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
+
+        async function fetchBottomWinners() {
+            const container = document.getElementById('bottom-winners-container');
+            try {
+                const res = await fetch(`${BACKEND_URL}/admin/announcements`);
+                if (!res.ok) throw new Error('Failed to load winners');
+                const data = await res.json();
+                const items = data.announcements || [];
+
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs bg-white rounded-2xl border border-slate-200 col-span-full">No competition winners published yet. Check back soon!</div>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const dateStr = item.published_at ? new Date(item.published_at).toLocaleDateString() : '';
+                    const locationStr = [item.winner_suburb, item.winner_town, item.winner_province].filter(Boolean).join(', ') || item.location_value || 'South Africa';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'sc-winner-card p-6 space-y-4';
+                    
+                    div.innerHTML = `
+                        <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+                            <span class="floating-balloon balloon-1 text-xl">🎈</span>
+                            <span class="floating-balloon balloon-2 text-2xl">🎈</span>
+                            <span class="floating-balloon balloon-3 text-xl">🎈</span>
+                        </div>
+
+                        <div class="relative z-10 space-y-3">
+                            <div class="flex flex-wrap justify-between items-center gap-2">
+                                <span class="bg-amber-100 text-amber-950 font-black px-3.5 py-1 rounded-full uppercase tracking-wider text-[10px]">
+                                    🏆 ${escapeHtml(item.tier_category || 'Competition')} Champion ${item.location_value ? '— ' + escapeHtml(item.location_value) : ''}
+                                </span>
+                                <span class="text-slate-400 font-semibold text-xs">📅 ${escapeHtml(dateStr)}</span>
+                            </div>
+
+                            <div class="w-full bg-slate-50 rounded-2xl overflow-hidden border border-slate-200">
+                                <div class="relative h-48 bg-slate-200 overflow-hidden">
+                                    <img src="${safeUrl(item.winner_header_image)}" alt="Salon" class="w-full h-full object-cover" onerror="this.src='${DEFAULT_SALON_IMAGE}'">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                                    <div class="absolute bottom-3 left-3 text-white">
+                                        <span class="bg-amber-400 text-amber-950 text-[10px] px-3 py-1 rounded-full font-black uppercase">★ Official Champion</span>
+                                    </div>
+                                </div>
+                                <div class="p-5 space-y-2">
+                                    <h4 class="text-xl font-black text-slate-900">${escapeHtml(item.winner_salon_name || 'Champion Salon')}</h4>
+                                    <p class="text-xs font-medium text-slate-500">📍 ${escapeHtml(locationStr)}</p>
+                                    <div class="text-xs font-bold text-purple-600 bg-purple-50 inline-block px-3 py-1 rounded-lg">
+                                        Male Barbers: ${Number(item.winner_male_barbers || 0)} | Female Stylists: ${Number(item.winner_female_stylists || 0)}
+                                    </div>
+                                    <div class="text-xs font-black text-emerald-600">
+                                        ✨ Total Verified Score: ${Number(item.points || 0)} Points
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-violet-50/60 border border-violet-100 rounded-2xl p-4 space-y-1">
+                                <h5 class="text-xs font-black uppercase tracking-wider text-violet-900">${escapeHtml(item.title || 'Competition Announcement')}</h5>
+                                <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">${escapeHtml(item.details || '')}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="p-8 text-center text-rose-500 text-xs bg-white rounded-2xl border border-slate-200 col-span-full">Error loading winners from server.</div>`;
+            }
+        }
+
+        async function fetchApprovedSalons() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/salons/approved`);
+                if (!response.ok) throw new Error('Failed to fetch salons');
+                const salons = await response.json();
+                globalSalons = Array.isArray(salons) ? salons : [];
+                const gridContainer = document.getElementById('salon-grid');
+                const noResultsDiv = document.getElementById('no-results');
+
+                if (!gridContainer) return;
+
+                if (globalSalons.length === 0) {
+                    gridContainer.innerHTML = `
+                        <div class="col-span-full bg-white rounded-2xl border border-gray-100 p-10 text-center">
+                            <div class="text-4xl mb-3">💇</div>
+                            <p class="text-sm font-bold text-gray-700">No approved salons available yet.</p>
+                            <p class="text-xs text-gray-400 mt-1">Please check back soon.</p>
+                        </div>`;
+                    noResultsDiv.classList.add('hidden');
+                    return;
+                }
+
+                noResultsDiv.classList.add('hidden');
+                gridContainer.innerHTML = '';
+
+                globalSalons.forEach((salon, index) => {
+                    createSalonCard(salon, index, gridContainer);
+                });
+            } catch (error) {
+                console.error('Error loading approved salons:', error);
+                document.getElementById('salon-grid').innerHTML = `
+                    <div class="col-span-full bg-white rounded-2xl border border-rose-100 p-10 text-center">
+                        <div class="text-3xl mb-2">⚠️</div>
+                        <p class="text-sm font-bold text-rose-600">Could not load salons.</p>
+                        <button onclick="fetchApprovedSalons()" class="mt-3 text-xs font-bold text-purple-600">Try again</button>
+                    </div>`;
+            }
+        }
+
+        function createSalonCard(salon, index, gridContainer) {
+            const isPaid = salon.isPaidActive !== false;
+            const headerImg = safeUrl(salon.header_image);
+            const location = [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa';
+            const staffText = `Male ${salon.male_barbers || 1} • Female ${salon.female_stylists || 1}`;
+            const giveaway = salon.free_hair_giveaway && isPaid;
+            const betaway = salon.betaway_challenge && isPaid;
+
+            const card = document.createElement('div');
+            card.className = `salon-card sc-salon-card flex flex-col justify-between ${!isPaid ? 'opacity-60' : 'cursor-pointer'}`;
+            card.setAttribute('data-name', String(salon.name || '').toLowerCase());
+            card.setAttribute('data-services', `${salon.name || ''} ${salon.service_type || ''} ${salon.category || ''}`.toLowerCase());
+
+            card.onclick = (e) => {
+                if (e.target.closest('button')) return;
+                if (!isPaid) {
+                    alert("This salon's monthly subscription is unpaid. Gallery and details are locked.");
+                    return;
+                }
+                showSalonDetailView(salon.id);
+            };
+
+            card.innerHTML = `
+                <div>
+                    <div class="sc-salon-image-wrap ${!isPaid ? 'sc-locked' : ''}">
+                        <img src="${headerImg}" alt="Salon" class="sc-salon-image" onerror="this.src='${DEFAULT_SALON_IMAGE}'">
+                        ${index < 2 && isPaid ? `<span class="sc-featured-label">Featured</span>` : ''}
+                        <div class="sc-salon-heart">♡</div>
+                    </div>
+                    <div class="sc-salon-content">
+                        <div class="flex items-start justify-between gap-2">
+                            <h3 class="sc-salon-name salon-name"></h3>
+                            ${betaway ? `<span class="sc-betaway">🏆</span>` : ''}
+                        </div>
+                        <p class="sc-salon-location">📍 ${escapeHtml(location)}</p>
+                        <div class="sc-salon-rating">
+                            <span class="star">★</span>
+                            <span>Trusted salon</span>
+                        </div>
+                        <p class="text-[8px] text-purple-500 font-bold mt-1">${escapeHtml(staffText)}</p>
+                        ${giveaway ? `<span class="sc-giveaway">🎁 Giveaway Active</span>` : ''}
+                        ${!isPaid ? `<span class="inline-block mt-2 text-[8px] font-black text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-2 py-1">🔒 Subscription Unpaid</span>` : ''}
+                        <div class="sc-salon-actions">
+                            <button class="sc-book-button book-now-btn">${isPaid ? 'Book Now' : 'Locked'}</button>
+                            <button class="sc-vote-button vote-btn" title="Vote for this salon">★</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.salon-name').innerText = salon.name || 'Salon';
+            card.querySelector('.vote-btn').addEventListener('click', e => {
+                e.stopPropagation();
+                if (!isPaid) {
+                    alert('Voting is locked for salons with unpaid subscriptions.');
+                    return;
+                }
+                voteForSalon(salon.id, salon.name);
+            });
+
+            card.querySelector('.book-now-btn').addEventListener('click', e => {
+                e.stopPropagation();
+                if (!isPaid) {
+                    alert("Bookings are disabled because this salon's monthly platform subscription is unpaid.");
+                    return;
+                }
+                openBookingModal(salon.id);
+            });
+
+            gridContainer.appendChild(card);
+        }
+
+        function filterSalons() {
+            const input = document.getElementById('salon-search-input');
+            const query = input.value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.salon-card');
+            const suggestionsBox = document.getElementById('search-suggestions');
+            let visibleCount = 0;
+
+            suggestionsBox.innerHTML = '';
+
+            if (query.length > 0) {
+                const matches = globalSalons.filter(salon => String(salon.name || '').toLowerCase().includes(query));
+                if (matches.length > 0) {
+                    suggestionsBox.classList.remove('hidden');
+                    matches.slice(0, 6).forEach(salon => {
+                        const item = document.createElement('div');
+                        item.className = 'px-4 py-3 text-xs font-semibold hover:bg-purple-50 hover:text-purple-600 cursor-pointer border-b border-gray-100 last:border-none';
+                        item.innerText = salon.name || 'Salon';
+                        item.onclick = () => {
+                            input.value = salon.name || '';
+                            suggestionsBox.classList.add('hidden');
+                            filterSalons();
+                        };
+                        suggestionsBox.appendChild(item);
+                    });
+                } else {
+                    suggestionsBox.classList.add('hidden');
+                }
+            } else {
+                suggestionsBox.classList.add('hidden');
+            }
+
+            cards.forEach(card => {
+                const name = (card.getAttribute('data-name') || '').toLowerCase();
+                const services = (card.getAttribute('data-services') || '').toLowerCase();
+                if (name.includes(query) || services.includes(query)) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('no-results').classList.toggle('hidden', visibleCount > 0);
+        }
+
+        function filterCategory(category) {
+            const search = document.getElementById('salon-search-input');
+            search.value = category;
+            const cards = document.querySelectorAll('.salon-card');
+            const query = category.toLowerCase();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const searchable = `${card.getAttribute('data-name') || ''} ${card.getAttribute('data-services') || ''}`.toLowerCase();
+                if (searchable.includes(query)) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('no-results').classList.toggle('hidden', visibleCount > 0);
+            document.getElementById('salon-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function clearSalonFilter() {
+            document.getElementById('salon-search-input').value = '';
+            document.querySelectorAll('.salon-card').forEach(card => { card.style.display = 'flex'; });
+            document.getElementById('no-results').classList.add('hidden');
+            document.getElementById('search-suggestions').classList.add('hidden');
+        }
+
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#salon-search-input') && !e.target.closest('#search-suggestions')) {
+                document.getElementById('search-suggestions').classList.add('hidden');
+            }
+        });
 
         function showDashboardView() {
             document.getElementById('salon-detail-view').classList.add('hidden');
@@ -498,226 +998,69 @@
             document.getElementById('salon-detail-view').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            document.getElementById('detail-salon-name').innerText = "Loading salon...";
-            document.getElementById('detail-gallery-grid').innerHTML =
-                `<p class="text-xs text-gray-400 col-span-full py-6 text-center">Loading gallery pictures...</p>`;
+            document.getElementById('detail-salon-name').innerText = 'Loading salon...';
+            document.getElementById('detail-gallery-grid').innerHTML = `<p class="text-xs text-gray-400 col-span-full py-6 text-center">Loading gallery pictures...</p>`;
 
             try {
                 const res = await fetch(`${BACKEND_URL}/salons/${salonId}`);
-                if (!res.ok) throw new Error("Failed to load salon details");
-
+                if (!res.ok) throw new Error('Failed to load salon details');
                 const salon = await res.json();
                 currentSalonData = salon;
 
-                document.getElementById('detail-header-img').src =
-                    salon.header_image ||
-                    "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800";
-
-                document.getElementById('detail-salon-name').innerText = salon.name;
-
-                document.getElementById('detail-salon-location').innerText =
-                    `📍 ${[salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa'}`;
-
-                document.getElementById('detail-staff-info').innerText =
-                    `Male Barbers: ${salon.male_barbers || 1} | Female Stylists: ${salon.female_stylists || 1}`;
-
-                document.getElementById('detail-hours').innerText =
-                    `${salon.open_time || '08:00'} - ${salon.close_time || '18:00'}`;
-
-                document.getElementById('detail-booking-window').innerText =
-                    `Advance Booking Window: ${salon.advance_booking_days ?? 3} day(s)`;
+                document.getElementById('detail-header-img').src = safeUrl(salon.header_image);
+                document.getElementById('detail-salon-name').innerText = salon.name || 'Salon';
+                document.getElementById('detail-salon-location').innerText = `📍 ${[salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa'}`;
+                document.getElementById('detail-staff-info').innerText = `Male Barbers: ${salon.male_barbers || 1} | Female Stylists: ${salon.female_stylists || 1}`;
+                document.getElementById('detail-hours').innerText = `${salon.open_time || '08:00'} - ${salon.close_time || '18:00'}`;
+                document.getElementById('detail-booking-window').innerText = `Advance Booking Window: ${salon.advance_booking_days ?? 3} day(s)`;
 
                 const giveawayBadge = document.getElementById('detail-giveaway-badge');
-
                 if (salon.free_hair_giveaway) {
-                    giveawayBadge.innerHTML =
-                        `<span class="text-xs text-green-700 font-bold bg-green-50 px-3 py-2 rounded-xl border border-green-100 inline-block">🎁 Free Hair Giveaway Active!</span>`;
+                    giveawayBadge.innerHTML = `<span class="text-xs text-green-600 font-bold bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 inline-block">🎁 Free Hair Giveaway Active!</span>`;
                 } else {
                     giveawayBadge.innerHTML = '';
                 }
 
-                document.getElementById('detail-vote-btn').onclick =
-                    () => voteForSalon(salon.id, salon.name);
-
-                document.getElementById('detail-book-btn').onclick =
-                    () => openBookingModal(salon.id);
+                document.getElementById('detail-vote-btn').onclick = () => voteForSalon(salon.id, salon.name);
+                document.getElementById('detail-book-btn').onclick = () => openBookingModal(salon.id);
 
                 fetchSalonGallery(salonId);
             } catch (err) {
-                console.error("Error loading salon detail:", err);
-                alert("Could not load salon details.");
+                console.error('Error loading salon detail:', err);
+                alert('Could not load salon details.');
                 showDashboardView();
             }
         }
 
         async function fetchSalonGallery(salonId) {
             const galleryGrid = document.getElementById('detail-gallery-grid');
-
             try {
                 const res = await fetch(`${BACKEND_URL}/salon-gallery/${salonId}`);
+                if (!res.ok) throw new Error('Gallery request failed');
                 const images = await res.json();
 
                 if (!images || images.length === 0) {
-                    galleryGrid.innerHTML =
-                        `<p class="text-xs text-gray-400 col-span-full py-6 text-center">No portfolio images uploaded for this salon yet.</p>`;
+                    galleryGrid.innerHTML = `<p class="text-xs text-gray-400 col-span-full py-6 text-center">No portfolio images uploaded for this salon yet.</p>`;
                     return;
                 }
 
                 galleryGrid.innerHTML = '';
-
                 images.forEach(img => {
                     const imgEl = document.createElement('div');
-                    imgEl.className =
-                        "h-44 sm:h-52 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100";
-
-                    imgEl.innerHTML =
-                        `<img src="${img.image_url}" alt="Gallery work" class="w-full h-full object-cover hover:scale-105 transition duration-300">`;
-
+                    imgEl.className = 'h-40 rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gray-100';
+                    imgEl.innerHTML = `
+                        <img src="${safeUrl(img.image_url, DEFAULT_SALON_IMAGE)}" alt="Gallery work" class="w-full h-full object-cover hover:scale-105 transition duration-300" onerror="this.src='${DEFAULT_SALON_IMAGE}'">
+                    `;
                     galleryGrid.appendChild(imgEl);
                 });
             } catch (err) {
-                console.error("Gallery fetch error:", err);
-                galleryGrid.innerHTML =
-                    `<p class="text-xs text-red-400 col-span-full py-6 text-center">Failed to load gallery.</p>`;
-            }
-        }
-
-        async function fetchApprovedSalons() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/salons/approved`);
-                const salons = await response.json();
-
-                globalSalons = salons || [];
-
-                const gridContainer = document.getElementById('salon-grid');
-                const noResultsDiv = document.getElementById('no-results');
-
-                if (!gridContainer) return;
-
-                if (!globalSalons || globalSalons.length === 0) {
-                    gridContainer.innerHTML = '';
-                    noResultsDiv.classList.remove('hidden');
-                    return;
-                }
-
-                noResultsDiv.classList.add('hidden');
-                gridContainer.innerHTML = '';
-
-                globalSalons.forEach(salon => {
-                    const card = document.createElement('div');
-                    const isPaid = salon.isPaidActive;
-
-                    card.className =
-                        `salon-card bg-white rounded-3xl shadow-card overflow-hidden border border-slate-200 flex flex-col justify-between ${isPaid ? 'cursor-pointer' : 'opacity-65 bg-slate-50'}`;
-
-                    card.setAttribute('data-name', salon.name.toLowerCase());
-
-                    card.onclick = (e) => {
-                        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-
-                        if (!isPaid) {
-                            alert("This salon's monthly subscription is unpaid. Gallery and details are locked.");
-                            return;
-                        }
-
-                        showSalonDetailView(salon.id);
-                    };
-
-                    const headerImg =
-                        salon.header_image ||
-                        "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600";
-
-                    const location =
-                        [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') ||
-                        'South Africa';
-
-                    const staffText =
-                        `Male Staff: ${salon.male_barbers || 1} | Female Staff: ${salon.female_stylists || 1}`;
-
-                    const statusBadge = isPaid
-                        ? (salon.free_hair_giveaway
-                            ? `<span class="text-[11px] text-emerald-700 font-black bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100 inline-block">🎁 Free Hair Giveaway Active</span>`
-                            : `<span class="text-[11px] text-emerald-700 font-bold">● Available on SalonConnect</span>`)
-                        : `<span class="text-[11px] text-rose-600 font-black bg-rose-50 px-2.5 py-1.5 rounded-lg border border-rose-100 inline-block">🔒 Subscription Unpaid / Locked</span>`;
-
-                    const betawayBadge =
-                        salon.betaway_challenge && isPaid
-                            ? `<span class="bg-amber-50 text-amber-700 border border-amber-100 text-[10px] px-2.5 py-1 rounded-full font-black">🏆 Betaway Contender</span>`
-                            : `<span></span>`;
-
-                    card.innerHTML = `
-                        <div>
-                            <div class="relative h-52 overflow-hidden bg-slate-200">
-                                <img src="${headerImg}" alt="Salon" class="salon-image w-full h-full object-cover ${!isPaid ? 'grayscale' : ''}">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent"></div>
-
-                                <div class="absolute top-3 left-3">
-                                    <span class="bg-white/90 backdrop-blur text-slate-700 text-[9px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider">
-                                        ${isPaid ? 'Approved Salon' : 'Locked'}
-                                    </span>
-                                </div>
-
-                                <div class="absolute bottom-3 left-3 right-3 flex justify-between items-end gap-2">
-                                    <span class="text-white text-[10px] font-bold drop-shadow-md">📍 ${escapeHtml(location)}</span>
-                                    ${betawayBadge}
-                                </div>
-                            </div>
-
-                            <div class="p-5">
-                                <div class="flex flex-col gap-2">
-                                    <h3 class="text-xl font-black text-slate-950 salon-name"></h3>
-                                    <p class="text-xs text-slate-500">${escapeHtml(location)}</p>
-                                    <p class="text-[11px] text-indigo-600 mt-1 font-bold">${escapeHtml(staffText)}</p>
-                                    <div class="mt-2">${statusBadge}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-5 pt-0 flex items-center justify-between gap-2">
-                            <button class="vote-btn bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2.5 rounded-xl text-xs font-black transition shadow-sm flex items-center gap-1 ${!isPaid ? 'opacity-50 cursor-not-allowed' : ''}">
-                                ★ Vote & Support
-                            </button>
-
-                            <button class="book-now-btn ${isPaid ? 'bg-slate-950 hover:bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'} px-4 py-2.5 rounded-xl text-xs font-black transition">
-                                ${isPaid ? 'Book Now' : 'Locked'}
-                            </button>
-                        </div>
-                    `;
-
-                    card.querySelector('.salon-name').innerText = salon.name;
-
-                    card.querySelector('.vote-btn').addEventListener('click', (e) => {
-                        e.stopPropagation();
-
-                        if (!isPaid) {
-                            alert("Voting is locked for salons with unpaid subscriptions.");
-                            return;
-                        }
-
-                        voteForSalon(salon.id, salon.name);
-                    });
-
-                    card.querySelector('.book-now-btn').addEventListener('click', (e) => {
-                        e.stopPropagation();
-
-                        if (!isPaid) {
-                            alert("Bookings are disabled because this salon's monthly platform subscription is unpaid.");
-                            return;
-                        }
-
-                        openBookingModal(salon.id);
-                    });
-
-                    gridContainer.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error loading approved salons:", error);
+                console.error('Gallery fetch error:', err);
+                galleryGrid.innerHTML = `<p class="text-xs text-red-400 col-span-full py-6 text-center">Failed to load gallery.</p>`;
             }
         }
 
         async function voteForSalon(salonId, salonName) {
             const token = localStorage.getItem('voterToken');
-
             if (!token) {
                 window.location.replace('voter-login.html');
                 return;
@@ -731,105 +1074,16 @@
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
                 const data = await res.json();
 
                 if (res.ok) {
                     alert(`⭐ Thank you ${voterSession.name}! Your vote for ${salonName} has been successfully recorded.`);
                 } else {
-                    alert(data.error || "You have already voted for this salon.");
+                    alert(data.error || 'You have already voted for this salon.');
                 }
             } catch (err) {
-                console.error("Voting error:", err);
-                alert("Server connection error while voting.");
-            }
-        }
-
-        async function fetchBottomWinners() {
-            const container = document.getElementById('bottom-winners-container');
-
-            try {
-                const res = await fetch(`${BACKEND_URL}/admin/announcements`);
-
-                if (!res.ok) throw new Error('Failed to load winners');
-
-                const data = await res.json();
-                const items = data.announcements || [];
-
-                if (items.length === 0) {
-                    container.innerHTML =
-                        `<div class="p-8 text-center text-slate-400 text-xs bg-white rounded-2xl border border-slate-200 col-span-full">No competition winners published yet. Check back soon!</div>`;
-                    return;
-                }
-
-                container.innerHTML = '';
-
-                items.forEach(item => {
-                    const dateStr = new Date(item.published_at).toLocaleDateString();
-
-                    const locationStr =
-                        [item.winner_suburb, item.winner_town, item.winner_province].filter(Boolean).join(', ') ||
-                        item.location_value ||
-                        'South Africa';
-
-                    const div = document.createElement('div');
-                    div.className =
-                        "relative bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden p-6 space-y-4";
-
-                    div.innerHTML = `
-                        <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
-                            <span class="floating-balloon balloon-1 text-xl">🎈</span>
-                            <span class="floating-balloon balloon-2 text-2xl">🎈</span>
-                            <span class="floating-balloon balloon-3 text-xl">🎈</span>
-                        </div>
-
-                        <div class="relative z-10 space-y-3">
-                            <div class="flex flex-wrap justify-between items-center gap-2">
-                                <span class="bg-amber-100 text-amber-950 font-black px-3.5 py-1 rounded-full uppercase tracking-wider text-[11px]">
-                                    🏆 ${escapeHtml(item.tier_category || 'Competition')} Champion — ${escapeHtml(item.location_value || '')}
-                                </span>
-                                <span class="text-slate-400 font-semibold text-xs">📅 ${dateStr}</span>
-                            </div>
-
-                            <div class="w-full bg-slate-50 rounded-2xl overflow-hidden border border-slate-200">
-                                <div class="relative h-48 bg-slate-200 overflow-hidden">
-                                    <img src="${item.winner_header_image || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600'}"
-                                         alt="Storefront" class="w-full h-full object-cover">
-
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-
-                                    <div class="absolute bottom-3 left-3 text-white">
-                                        <span class="bg-amber-400 text-amber-950 text-[10px] px-3 py-1 rounded-full font-black uppercase">★ Official Champion</span>
-                                    </div>
-                                </div>
-
-                                <div class="p-5 space-y-2">
-                                    <h4 class="text-xl font-black text-slate-900 capitalize">${escapeHtml(item.winner_salon_name || 'Champion Salon')}</h4>
-                                    <p class="text-xs font-medium text-slate-500">📍 ${escapeHtml(locationStr)}</p>
-
-                                    <div class="text-xs font-bold text-indigo-600 bg-indigo-50 inline-block px-3 py-1 rounded-lg">
-                                        Male Barbers: ${item.winner_male_barbers || 0} | Female Stylists: ${item.winner_female_stylists || 0}
-                                    </div>
-
-                                    <div class="text-xs font-black text-emerald-600">
-                                        ✨ Total Verified Score: ${item.points || 0} Points
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-violet-50/60 border border-violet-100 rounded-2xl p-4 space-y-1">
-                                <h5 class="text-xs font-black uppercase tracking-wider text-violet-900">${escapeHtml(item.title)}</h5>
-                                <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line">${escapeHtml(item.details)}</p>
-                            </div>
-                        </div>
-                    `;
-
-                    container.appendChild(div);
-                });
-            } catch (err) {
-                console.error(err);
-                container.innerHTML =
-                    `<div class="p-8 text-center text-rose-500 text-xs bg-white rounded-2xl border border-slate-200 col-span-full">Error loading winners from server.</div>`;
+                console.error('Voting error:', err);
+                alert('Server connection error while voting.');
             }
         }
 
@@ -841,50 +1095,34 @@
                 }
 
                 const res = await fetch(`${BACKEND_URL}/salons/${salonId}`);
-
-                if (!res.ok) throw new Error("Failed to fetch salon details");
+                if (!res.ok) throw new Error('Failed to fetch salon details');
 
                 currentSalonData = await res.json();
 
-                document.getElementById('modal-salon-title').innerText =
-                    `Book Appointment at ${currentSalonData.name}`;
-
+                document.getElementById('modal-salon-title').innerText = `Book Appointment at ${currentSalonData.name}`;
                 document.getElementById('selected-time-slot').value = '';
-
-                document.getElementById('modal-client-name-display').innerText =
-                    `${voterSession.name} (${voterSession.email})`;
+                document.getElementById('modal-client-name-display').innerText = `${voterSession.name} (${voterSession.email})`;
 
                 const todayObj = new Date();
                 todayObj.setHours(0, 0, 0, 0);
-
                 const todayStr = todayObj.toISOString().split('T')[0];
 
-                const maxDays =
-                    currentSalonData.advance_booking_days !== undefined &&
-                    currentSalonData.advance_booking_days !== null
-                        ? parseInt(currentSalonData.advance_booking_days)
-                        : 3;
-
+                const maxDays = currentSalonData.advance_booking_days !== undefined && currentSalonData.advance_booking_days !== null ? parseInt(currentSalonData.advance_booking_days) : 3;
                 const maxDateObj = new Date();
                 maxDateObj.setDate(todayObj.getDate() + maxDays);
-
                 const maxDateStr = maxDateObj.toISOString().split('T')[0];
 
                 const dateInput = document.getElementById('booking-date');
-
                 dateInput.min = todayStr;
                 dateInput.max = maxDateStr;
                 dateInput.value = todayStr;
 
-                document.getElementById('limit-notice').innerText =
-                    `Max booking window: ${maxDays} day(s)`;
-
+                document.getElementById('limit-notice').innerText = `Max booking window: ${maxDays} day(s)`;
                 document.getElementById('booking-modal').classList.remove('hidden');
-
                 renderTimeSlots();
             } catch (err) {
-                console.error("Error opening booking modal:", err);
-                alert("Could not load latest salon scheduling rules.");
+                console.error('Error opening booking modal:', err);
+                alert('Could not load latest salon scheduling rules.');
             }
         }
 
@@ -905,54 +1143,38 @@
             document.getElementById('selected-time-slot').value = '';
 
             if (!selectedDate) {
-                container.innerHTML =
-                    `<p class="text-xs text-gray-400 col-span-full text-center py-4">Please select a valid date.</p>`;
+                container.innerHTML = `<p class="text-xs text-gray-400 col-span-full text-center py-4">Please select a valid date.</p>`;
                 return;
             }
 
-            const capacity =
-                serviceType === 'male'
-                    ? (currentSalonData.male_barbers || 1)
-                    : (currentSalonData.female_stylists || 1);
-
-            capacityBadge.innerText =
-                `Parallel capacity: ${capacity} staff member(s)`;
+            const capacity = serviceType === 'male' ? (currentSalonData.male_barbers || 1) : (currentSalonData.female_stylists || 1);
+            capacityBadge.innerText = `Parallel capacity: ${capacity} staff member(s)`;
 
             const intervalMins = serviceType === 'male' ? 35 : 180;
-
-            const openTimeStr = currentSalonData.open_time || "08:00";
-            const closeTimeStr = currentSalonData.close_time || "18:00";
+            const openTimeStr = currentSalonData.open_time || '08:00';
+            const closeTimeStr = currentSalonData.close_time || '18:00';
 
             const slots = generateSlotsList(openTimeStr, closeTimeStr, intervalMins);
 
             if (slots.length === 0) {
-                container.innerHTML =
-                    `<p class="text-xs text-gray-400 col-span-full text-center py-4">No slots available for operating hours.</p>`;
+                container.innerHTML = `<p class="text-xs text-gray-400 col-span-full text-center py-4">No slots available for operating hours.</p>`;
                 return;
             }
 
             container.innerHTML = '';
-
             slots.forEach(slot => {
                 const btn = document.createElement('button');
-
                 btn.type = 'button';
-                btn.className =
-                    "time-slot-btn text-xs font-bold py-2.5 px-1 border border-slate-200 rounded-xl bg-white text-slate-700 hover:border-indigo-600 hover:text-indigo-600 transition text-center shadow-sm";
-
-                btn.innerHTML =
-                    `${slot} <br/><span class="text-[10px] text-emerald-600 font-normal">Available</span>`;
+                btn.className = 'time-slot-btn text-xs font-medium py-2 px-1 border rounded-lg bg-white text-gray-700 hover:border-purple-600 hover:text-purple-600 transition text-center shadow-sm';
+                btn.innerHTML = `${slot}<br><span class="text-[10px] text-emerald-600 font-normal">Available</span>`;
 
                 btn.onclick = () => {
                     document.querySelectorAll('.time-slot-btn').forEach(b => {
-                        b.classList.remove('slot-selected');
-                        b.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
-                        b.classList.add('bg-white', 'text-slate-700');
+                        b.classList.remove('bg-purple-600', 'text-white', 'border-purple-600');
+                        b.classList.add('bg-white', 'text-gray-700');
                     });
-
-                    btn.classList.remove('bg-white', 'text-slate-700');
-                    btn.classList.add('slot-selected');
-
+                    btn.classList.remove('bg-white', 'text-gray-700');
+                    btn.classList.add('bg-purple-600', 'text-white', 'border-purple-600');
                     document.getElementById('selected-time-slot').value = slot;
                 };
 
@@ -962,7 +1184,6 @@
 
         function generateSlotsList(startStr, endStr, intervalMins) {
             const slots = [];
-
             let [startH, startM] = startStr.split(':').map(Number);
             let [endH, endM] = endStr.split(':').map(Number);
 
@@ -970,18 +1191,15 @@
             const endMinutes = endH * 60 + endM;
 
             while (currentMinutes + intervalMins <= endMinutes) {
-                let h1 = Math.floor(currentMinutes / 60).toString().padStart(2, '0');
-                let m1 = (currentMinutes % 60).toString().padStart(2, '0');
-
-                let nextMinutes = currentMinutes + intervalMins;
-
-                let h2 = Math.floor(nextMinutes / 60).toString().padStart(2, '0');
-                let m2 = (nextMinutes % 60).toString().padStart(2, '0');
+                const h1 = Math.floor(currentMinutes / 60).toString().padStart(2, '0');
+                const m1 = (currentMinutes % 60).toString().padStart(2, '0');
+                const nextMinutes = currentMinutes + intervalMins;
+                const h2 = Math.floor(nextMinutes / 60).toString().padStart(2, '0');
+                const m2 = (nextMinutes % 60).toString().padStart(2, '0');
 
                 slots.push(`${h1}:${m1} - ${h2}:${m2}`);
                 currentMinutes = nextMinutes;
             }
-
             return slots;
         }
 
@@ -989,9 +1207,8 @@
             event.preventDefault();
 
             const selectedSlot = document.getElementById('selected-time-slot').value;
-
             if (!selectedSlot) {
-                alert("Please select an available time slot from the schedule before confirming.");
+                alert('Please select an available time slot from the schedule before confirming.');
                 return;
             }
 
@@ -1000,15 +1217,15 @@
                 return;
             }
 
-            const nameParts = voterSession.name.split(' ');
+            const nameParts = String(voterSession.name || 'Client User').trim().split(/\s+/);
             const firstName = nameParts[0] || 'Client';
             const surname = nameParts.slice(1).join(' ') || 'User';
 
             const bookingData = {
                 salonId: currentSalonData.id,
                 salonName: currentSalonData.name,
-                firstName: firstName,
-                surname: surname,
+                firstName,
+                surname,
                 phone: voterSession.phone || 'N/A',
                 email: voterSession.email,
                 styleType: document.getElementById('style-type').value,
@@ -1030,78 +1247,16 @@
                 if (res.ok) {
                     alert(`Appointment successfully confirmed for ${bookingData.bookingDate} at ${bookingData.timeSlot}!`);
                     closeBookingModal();
+                    document.getElementById('style-type').value = '';
+                    document.getElementById('selected-time-slot').value = '';
                 } else {
-                    alert(data.error || "Failed to submit booking.");
+                    alert(data.error || 'Failed to submit booking.');
                 }
             } catch (err) {
-                console.error("Booking error:", err);
-                alert("Server connection error during booking.");
+                console.error('Booking error:', err);
+                alert('Server connection error during booking.');
             }
         }
-
-        function filterSalons() {
-            const query = document.getElementById('salon-search-input').value.toLowerCase().trim();
-            const cards = document.querySelectorAll('.salon-card');
-            const suggestionsBox = document.getElementById('search-suggestions');
-
-            let visibleCount = 0;
-
-            suggestionsBox.innerHTML = '';
-
-            if (query.length > 0) {
-                const matches = globalSalons.filter(s =>
-                    s.name.toLowerCase().includes(query)
-                );
-
-                if (matches.length > 0) {
-                    suggestionsBox.classList.remove('hidden');
-
-                    matches.forEach(salon => {
-                        const item = document.createElement('div');
-
-                        item.className =
-                            "px-4 py-3 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer border-b border-slate-100 last:border-none transition";
-
-                        item.innerText = salon.name;
-
-                        item.onclick = () => {
-                            document.getElementById('salon-search-input').value = salon.name;
-                            suggestionsBox.classList.add('hidden');
-                            filterSalons();
-                        };
-
-                        suggestionsBox.appendChild(item);
-                    });
-                } else {
-                    suggestionsBox.classList.add('hidden');
-                }
-            } else {
-                suggestionsBox.classList.add('hidden');
-            }
-
-            cards.forEach(card => {
-                const name = card.querySelector('.salon-name').innerText.toLowerCase();
-
-                if (name.includes(query)) {
-                    card.style.display = "flex";
-                    visibleCount++;
-                } else {
-                    card.style.display = "none";
-                }
-            });
-
-            document.getElementById('no-results').classList.toggle(
-                'hidden',
-                visibleCount > 0
-            );
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#salon-search-input') &&
-                !e.target.closest('#search-suggestions')) {
-                document.getElementById('search-suggestions').classList.add('hidden');
-            }
-        });
 
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
