@@ -999,10 +999,21 @@
             }[c]));
         }
 
+        // FIX: previously this only accepted http/https URLs, which silently
+        // rejected any header_image stored as a base64 data URI (data:image/...),
+        // causing every card to fall back to the generic stock photo instead of
+        // the salon's own uploaded picture. Now data: image URIs are allowed too.
         function safeUrl(value, fallback = DEFAULT_SALON_IMAGE) {
             if (!value) return fallback;
             const trimmed = String(value).trim();
             if (trimmed === '') return fallback;
+
+            // Allow base64-encoded image data URIs (common when a photo is
+            // uploaded and stored directly in the database rather than hosted
+            // externally).
+            if (/^data:image\/(png|jpe?g|gif|webp|svg\+xml|bmp|avif);base64,/i.test(trimmed)) {
+                return trimmed;
+            }
 
             try {
                 const url = new URL(trimmed, window.location.href);
