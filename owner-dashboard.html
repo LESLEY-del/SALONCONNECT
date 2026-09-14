@@ -102,25 +102,23 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
         </div>
     </nav>
 
-    <!-- Full-Screen Unpaid Subscription Blockout Modal -->
-    <div id="subscription-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[100] p-4">
-        <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden p-8 text-center space-y-6 border border-slate-100">
+    <!-- Full-Screen Unpaid Subscription Blockout Modal: Plan Picker -->
+    <div id="subscription-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[100] p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-3xl rounded-[2rem] shadow-2xl overflow-hidden p-8 text-center space-y-6 border border-slate-100 my-8">
             <div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-inner">
                 🔒
             </div>
             <div class="space-y-2">
                 <span class="bg-rose-100 text-rose-900 text-[10px] font-black px-3.5 py-1 rounded-full uppercase tracking-wider">Subscription Required</span>
-                <h3 class="text-2xl font-black text-slate-900">Pay SalonConnect Platform Fee</h3>
-                <p class="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">Your 30-day rolling monthly platform subscription is unpaid or expired. Complete payment to instantly unlock your dashboard and resume client bookings.</p>
+                <h3 class="text-2xl font-black text-slate-900">Choose Your SalonConnect Plan</h3>
+                <p class="text-xs text-slate-500 leading-relaxed max-w-lg mx-auto">Your 30-day subscription is unpaid or expired. Pick a plan to unlock your dashboard. Competitions are free on every plan — the fee covers your profile, bookings, reviews, and gallery.</p>
             </div>
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center text-xs font-bold">
-                <span class="text-slate-600">30-Day Platform Access:</span>
-                <span class="text-emerald-600 font-black text-sm">R200.00</span>
+
+            <div id="plan-picker-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                <div class="p-6 text-center text-slate-400 text-xs col-span-full">Loading plans...</div>
             </div>
+
             <div class="space-y-3 pt-2">
-                <button onclick="payMonthlySubscription()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl text-xs font-black transition shadow-lg shadow-indigo-100">
-                    💳 Pay R200 via PayFast
-                </button>
                 <button onclick="manualRefreshPaymentStatus()" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 py-3 rounded-xl text-xs font-bold transition border border-emerald-200">
                     🔄 I've Already Paid — Refresh Status
                 </button>
@@ -141,7 +139,10 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
                 <div class="flex items-center gap-2">
                     <span class="text-[11px] uppercase tracking-wider text-indigo-600 font-extrabold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Management Suite</span>
                 </div>
-                <h2 id="owner-salon-title" class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight capitalize">My Salon Dashboard</h2>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h2 id="owner-salon-title" class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight capitalize">My Salon Dashboard</h2>
+                    <span id="current-plan-badge" class="hidden text-[11px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1 rounded-full"></span>
+                </div>
                 <p class="text-xs sm:text-sm text-slate-500 font-medium">Manage your storefront, scheduling hours, calendar availability, and live client logs.</p>
             </div>
             
@@ -256,10 +257,11 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
                 <div>
                     <h3 class="text-xl font-bold text-slate-900 tracking-tight">Portfolio Gallery Management</h3>
                     <p class="text-xs text-slate-500">Upload high-resolution photos or media clips showcasing your hair design work.</p>
+                    <p id="gallery-limit-counter" class="text-[11px] font-bold text-indigo-600 mt-1">Loading your plan limits...</p>
                 </div>
-                <label class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition shadow-sm shadow-indigo-100 flex items-center gap-2">
+                <label id="gallery-upload-label" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition shadow-sm shadow-indigo-100 flex items-center gap-2">
                     <span>+ Add Picture(s) / Video(s)</span>
-                    <input type="file" id="media-files" accept="image/*,video/*" multiple class="hidden" onchange="handleBatchMediaUpload(event)">
+                    <input type="file" id="media-files" accept="image/*" multiple class="hidden" onchange="handleBatchMediaUpload(event)">
                 </label>
             </div>
 
@@ -827,9 +829,22 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
                     if (!isPaidActive) {
                         subModal.classList.remove('hidden');
                         subModal.classList.add('flex');
+                        fetchAndRenderPlans();
                     } else {
                         subModal.classList.add('hidden');
                         subModal.classList.remove('flex');
+                    }
+
+                    // Show the active plan badge once subscribed.
+                    const planBadge = document.getElementById('current-plan-badge');
+                    if (planBadge) {
+                        if (isPaidActive && salon.plan) {
+                            const planLabels = { basic: 'Basic', premium: 'Premium', pro: 'Pro' };
+                            planBadge.innerText = `${planLabels[salon.plan] || salon.plan} Plan`;
+                            planBadge.classList.remove('hidden');
+                        } else {
+                            planBadge.classList.add('hidden');
+                        }
                     }
 
                     if (salon.header_image) {
@@ -1047,12 +1062,37 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
                     event.target.value = '';
                     fetchGalleryMedia();
                 } else {
-                    alert("Batch upload failed.");
+                    const errData = await res.json().catch(() => ({}));
+                    alert(errData.error || "Batch upload failed — you may have hit your plan's photo/video limit.");
                 }
             } catch (err) {
                 console.error("Batch upload error:", err);
                 alert("Error processing files.");
             }
+        }
+
+        // Shows "X / Y used" against the salon's current plan, and disables
+        // the uploader once the limit is hit so people don't waste a big
+        // base64 upload just to get rejected by the server.
+        function updateGalleryLimitUI() {
+            const planKey = window.currentSalonData ? window.currentSalonData.plan : null;
+            const plan = availablePlans.find(p => p.key === planKey) || (availablePlans.find(p => p.key === 'basic'));
+            const counterEl = document.getElementById('gallery-limit-counter');
+            const uploadLabel = document.getElementById('gallery-upload-label');
+            const fileInput = document.getElementById('media-files');
+            if (!plan || !counterEl) return;
+
+            const used = currentGalleryItems.length;
+            counterEl.innerText = `${used} / ${plan.maxPhotos} used — ${plan.allowVideo ? 'photos & video' : 'photos only'} on your ${plan.label} plan`;
+
+            if (fileInput) fileInput.accept = plan.allowVideo ? 'image/*,video/*' : 'image/*';
+
+            const atLimit = used >= plan.maxPhotos;
+            if (uploadLabel) {
+                uploadLabel.classList.toggle('opacity-50', atLimit);
+                uploadLabel.classList.toggle('pointer-events-none', atLimit);
+            }
+            if (fileInput) fileInput.disabled = atLimit;
         }
 
         async function fetchGalleryMedia() {
@@ -1062,6 +1102,15 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
                 currentGalleryItems = await res.json();
                 const grid = document.getElementById('salon-gallery-grid');
                 if (!grid) return;
+
+                if (availablePlans.length === 0) {
+                    try {
+                        const plansRes = await fetch(`${BACKEND_URL}/plans`);
+                        const plansData = await plansRes.json();
+                        availablePlans = plansData.plans || [];
+                    } catch (e) { /* limit UI just won't show counts this once */ }
+                }
+                updateGalleryLimitUI();
 
                 if (!currentGalleryItems || currentGalleryItems.length === 0) return;
 
@@ -1229,7 +1278,10 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
         }
 
         // --- SECURE PAYFAST CHECKOUT INTEGRATION ---
-        async function triggerPayFastCheckout(paymentType, tierKey = null, amount = 200.00, itemName = "Salon Monthly Subscription") {
+        // NOTE: the amount is no longer sent from here for subscription
+        // payments — the server looks up the price for `tierKey` (the plan)
+        // itself from PLAN_CONFIG, so it can't be tampered with in devtools.
+        async function triggerPayFastCheckout(paymentType, tierKey = null, itemName = null) {
             try {
                 const res = await fetch(`${BACKEND_URL}/payments/payfast-init`, {
                     method: 'POST',
@@ -1238,7 +1290,6 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
                         salonId: salonId, 
                         paymentType, 
                         tierKey, 
-                        amount, 
                         itemName 
                     })
                 });
@@ -1260,7 +1311,7 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
                     document.body.appendChild(form);
                     form.submit();
                 } else {
-                    alert("Failed to initialize PayFast checkout session.");
+                    alert(data.error || "Failed to initialize PayFast checkout session.");
                 }
             } catch (err) {
                 console.error("Checkout error:", err);
@@ -1268,12 +1319,56 @@ button:disabled{opacity: 0.6; cursor: not-allowed; transform: none !important;}
             }
         }
 
-        function payMonthlySubscription() {
-            triggerPayFastCheckout('monthly', null, 200.00, 'SalonConnect 30-Day Platform Subscription');
+        function payMonthlySubscription(planKey) {
+            triggerPayFastCheckout('monthly', planKey);
         }
 
+        // Competition entry is free on every plan (Phase 2 wires up the
+        // actual free-join call) — this stub just avoids a broken button
+        // in the meantime instead of trying to charge for it.
         function payCompetitionEntry(tierKey, amount, itemName) {
-            triggerPayFastCheckout('competition', tierKey, amount, itemName);
+            alert("🎉 Competition entry is free for all subscribed salons. Free entry is rolling out in the next update — check back soon!");
+        }
+
+        // --- PLAN PICKER (renders inside the subscription-modal paywall) ---
+        let availablePlans = [];
+
+        async function fetchAndRenderPlans() {
+            const grid = document.getElementById('plan-picker-grid');
+            try {
+                const res = await fetch(`${BACKEND_URL}/plans`);
+                const data = await res.json();
+                availablePlans = data.plans || [];
+
+                const currentPlan = window.currentSalonData ? window.currentSalonData.plan : null;
+
+                grid.innerHTML = availablePlans.map(plan => {
+                    const isCurrent = plan.key === currentPlan;
+                    return `
+                        <div class="rounded-2xl border ${isCurrent ? 'border-indigo-400 ring-2 ring-indigo-100' : 'border-slate-200'} p-5 flex flex-col justify-between bg-slate-50/60">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-black text-slate-900">${escapeHtml(plan.label)}</span>
+                                    ${isCurrent ? '<span class="text-[9px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-bold">Renew</span>' : ''}
+                                </div>
+                                <p class="text-2xl font-black text-indigo-600">R${plan.price}<span class="text-xs text-slate-400 font-semibold">/mo</span></p>
+                                <p class="text-[11px] text-slate-500 leading-relaxed">${escapeHtml(plan.description)}</p>
+                                <ul class="text-[11px] text-slate-600 space-y-1 pt-1">
+                                    <li>📸 Up to ${plan.maxPhotos} photos</li>
+                                    <li>${plan.allowVideo ? '🎥 Video uploads' : '🚫 Photos only'}</li>
+                                    <li>🏆 Free competition entry</li>
+                                </ul>
+                            </div>
+                            <button onclick="payMonthlySubscription('${plan.key}')" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-black transition">
+                                💳 Choose ${escapeHtml(plan.label)}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error loading plans:', err);
+                grid.innerHTML = `<div class="p-6 text-center text-rose-500 text-xs col-span-full">Could not load plans. Please refresh.</div>`;
+            }
         }
 
         async function viewCompetitionLeaderboard(competitionKey) {
