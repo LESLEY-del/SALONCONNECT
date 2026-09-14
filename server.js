@@ -37,15 +37,57 @@ const crypto = require('crypto');
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lesley-del.github.io/SALONCONNECT';
 const BACKEND_URL = process.env.BACKEND_URL || 'https://salonconnect-jbo2.onrender.com';
 
+// ------------------------------------------------------------------
+// SUBSCRIPTION PLANS (SalonConnect business model)
+// Three tiers. Competitions are free on every plan — the monthly fee
+// pays for the platform itself (profile, bookings, reviews, gallery,
+// promotion), not for competition placement.
+// This is the single source of truth for pricing and limits — never
+// trust a price sent from the browser, always look it up here.
+// ------------------------------------------------------------------
+const PLAN_CONFIG = {
+    basic:   { key: 'basic',   label: 'Basic',   price: 70,  maxPhotos: 7,  allowVideo: false, description: 'Salon profile, bookings, reviews, posts, up to 7 photos.' },
+    premium: { key: 'premium', label: 'Premium', price: 100, maxPhotos: 20, allowVideo: true,  description: 'Everything in Basic, plus up to 20 photos, video uploads, and extra promotion.' },
+    pro:     { key: 'pro',     label: 'Pro',     price: 130, maxPhotos: 50, allowVideo: true,  description: 'Everything in Premium, plus up to 50 photos and advanced/promotional features as they roll out.' }
+};
+
+// Public: lets the frontend render the pricing/plan picker from one place.
+app.get('/api/plans', (req, res) => {
+    res.json({ plans: Object.values(PLAN_CONFIG) });
+});
+
 // Generate PayFast Sandbox or Live Payment Parameters securely
 app.post('/api/payments/payfast-init', async (req, res) => {
     try {
-        const { salonId, paymentType, tierKey, amount, itemName } = req.body;
+        const { salonId, paymentType, tierKey, itemName } = req.body;
 
         const isSandbox = process.env.PAYFAST_MODE !== 'live';
         const merchantId = process.env.PAYFAST_MERCHANT_ID;
         const merchantKey = process.env.PAYFAST_MERCHANT_KEY;
         const passphrase = process.env.PAYFAST_PASSPHRASE || '';
+
+        if (!salonId) {
+            return res.status(400).json({ error: 'salonId is required.' });
+        }
+
+        // SECURITY FIX: amount used to come straight from the browser
+        // (`req.body.amount`), which means anyone could open devtools and
+        // change it before the form posted to PayFast. For subscription
+        // payments the price is now always looked up server-side from
+        // PLAN_CONFIG — the client can only pick which plan, never the price.
+        let amount;
+        let resolvedItemName;
+
+        if (paymentType === 'monthly') {
+            const plan = PLAN_CONFIG[tierKey];
+            if (!plan) {
+                return res.status(400).json({ error: 'Invalid or missing plan. Choose basic, premium, or pro.' });
+            }
+            amount = plan.price;
+            resolvedItemName = `SalonConnect ${plan.label} Plan — 30 Days`;
+        } else {
+            return res.status(400).json({ error: 'Unknown payment type.' });
+        }
 
         // FIXED: was pointing at a dead LocalTunnel URL (sweet-carrots-invite.loca.lt).
         // Now points at your real GitHub Pages frontend and Render backend.
@@ -63,8 +105,8 @@ app.post('/api/payments/payfast-init', async (req, res) => {
             name_last: 'Owner',
             email_address: 'owner@salonconnect.co.za',
             m_payment_id: `${salonId}_${Date.now()}`,
-            amount: parseFloat(amount).toFixed(2),
-            item_name: itemName,
+            amount: amount.toFixed(2),
+            item_name: resolvedItemName || itemName || 'SalonConnect Subscription',
             custom_str1: salonId,
             custom_str2: paymentType,
             custom_str3: tierKey || ''
@@ -108,14 +150,19 @@ app.post('/api/payments/payfast-webhook', express.urlencoded({ extended: true })
             const tierKey = pfData.custom_str3;
 
             if (paymentType === 'monthly') {
+                const updateData = {
+                    monthly_paid: true,
+                    monthly_paid_at: new Date().toISOString()
+                };
+                // tierKey carries the plan (basic/premium/pro) for monthly payments.
+                if (PLAN_CONFIG[tierKey]) {
+                    updateData.plan = tierKey;
+                }
                 await supabase
                     .from('salons')
-                    .update({ 
-                        monthly_paid: true, 
-                        monthly_paid_at: new Date().toISOString() 
-                    })
+                    .update(updateData)
                     .eq('id', salonId);
-                console.log(`Salon ${salonId} monthly subscription marked as paid via webhook.`);
+                console.log(`Salon ${salonId} subscribed to the ${tierKey || 'unknown'} plan via webhook.`);
             } else if (paymentType === 'competition') {
                 // FIXED: the dashboard's "Join Competition" buttons go straight to PayFast
                 // and never call /api/salons/:id/competitions/join first, so no row existed
@@ -1318,9 +1365,66 @@ app.get('/api/salon-gallery/:salonId', async (req, res) => {
     }
 });
 
+// Checks a salon's current gallery count and plan (defaulting to the most
+// restrictive plan — Basic — if the salon hasn't picked one yet) before an
+// upload is allowed to go through. Server-side, because the frontend limit
+// is just for UX and can't be trusted on its own.
+async function enforceGalleryLimits(salonId, incomingCount, incomingHasVideo) {
+    const { data: salon, error: salonErr } = await supabase
+        .from('salons')
+        .select('plan')
+        .eq('id', salonId)
+        .maybeSingle();
+
+    if (salonErr || !salon) {
+        return { ok: false, status: 404, error: 'Salon not found.' };
+    }
+
+    const planConfig = PLAN_CONFIG[salon.plan] || PLAN_CONFIG.basic;
+
+    if (incomingHasVideo && !planConfig.allowVideo) {
+        return {
+            ok: false,
+            status: 403,
+            error: `Video uploads require the Premium or Pro plan. Your salon is currently on the ${planConfig.label} plan.`
+        };
+    }
+
+    const { count, error: countErr } = await supabase
+        .from('salon_gallery')
+        .select('id', { count: 'exact', head: true })
+        .eq('salon_id', salonId);
+
+    if (countErr) {
+        return { ok: false, status: 500, error: 'Could not verify current gallery usage.' };
+    }
+
+    const currentCount = count || 0;
+    if (currentCount + incomingCount > planConfig.maxPhotos) {
+        const remaining = Math.max(0, planConfig.maxPhotos - currentCount);
+        return {
+            ok: false,
+            status: 403,
+            error: `Your ${planConfig.label} plan allows up to ${planConfig.maxPhotos} gallery items. You currently have ${currentCount} and only ${remaining} slot(s) left. Upgrade your plan for more room.`
+        };
+    }
+
+    return { ok: true, planConfig };
+}
+
 app.post('/api/salon-gallery', async (req, res) => {
     try {
         const { salonId, imageUrl } = req.body;
+        if (!salonId || !imageUrl) {
+            return res.status(400).json({ error: 'salonId and imageUrl are required.' });
+        }
+
+        const isVideo = typeof imageUrl === 'string' && imageUrl.startsWith('data:video');
+        const limitCheck = await enforceGalleryLimits(salonId, 1, isVideo);
+        if (!limitCheck.ok) {
+            return res.status(limitCheck.status).json({ error: limitCheck.error });
+        }
+
         const { data, error } = await supabase
             .from('salon_gallery')
             .insert([{ salon_id: salonId, image_url: imageUrl }])
@@ -1339,6 +1443,12 @@ app.post('/api/salon-gallery/batch', async (req, res) => {
 
         if (!images || !Array.isArray(images) || images.length === 0) {
             return res.status(400).json({ error: "No images provided for batch upload." });
+        }
+
+        const hasVideo = images.some(img => typeof img === 'string' && img.startsWith('data:video'));
+        const limitCheck = await enforceGalleryLimits(salonId, images.length, hasVideo);
+        if (!limitCheck.ok) {
+            return res.status(limitCheck.status).json({ error: limitCheck.error });
         }
 
         const insertRows = images.map(imageUrl => ({
