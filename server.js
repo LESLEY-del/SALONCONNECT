@@ -38,6 +38,35 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lesley-del.github.io/S
 const BACKEND_URL = process.env.BACKEND_URL || 'https://salonconnect-jbo2.onrender.com';
 
 // ------------------------------------------------------------------
+// SERVICE CATEGORIES (salon offerings)
+// Canonical list of service categories a salon can offer, matching the
+// category filter buttons on the customer-facing dashboard. Kept
+// server-side as the single source of truth so we never trust arbitrary
+// category strings sent from the browser — anything not in this list is
+// silently dropped rather than stored.
+// ------------------------------------------------------------------
+const ALLOWED_SERVICES = ['hair', 'nails', 'beauty', 'makeup', 'massage', 'facials', 'barber'];
+
+// Accepts either an array of category strings (e.g. ["hair", "barber"]) or
+// a single comma-separated string (e.g. "hair,barber"), trims/lowercases
+// each entry, drops anything not in ALLOWED_SERVICES, removes duplicates,
+// and returns a clean comma-separated string ready to store in the
+// `services` column. Always returns a string (possibly empty), never throws.
+function sanitizeServices(input) {
+    if (!input) return '';
+
+    const rawList = Array.isArray(input)
+        ? input
+        : String(input).split(',');
+
+    const cleaned = rawList
+        .map(s => String(s).trim().toLowerCase())
+        .filter(s => ALLOWED_SERVICES.includes(s));
+
+    return [...new Set(cleaned)].join(',');
+}
+
+// ------------------------------------------------------------------
 // SUBSCRIPTION PLANS (SalonConnect business model)
 // Three tiers. Competitions are free on every plan — the monthly fee
 // pays for the platform itself (profile, bookings, reviews, gallery,
@@ -586,6 +615,7 @@ app.post('/api/register-salon', async (req, res) => {
             password,
             salonName,
             headerImage,
+            services,
             suburb,
             town,
             province,
@@ -598,6 +628,11 @@ app.post('/api/register-salon', async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+        // Sanitized down to only recognised categories (hair, nails, beauty,
+        // makeup, massage, facials, barber) and stored as a comma-separated
+        // string, e.g. "hair,barber".
+        const sanitizedServices = sanitizeServices(services);
+
         const { data, error } = await supabase
             .from('salons')
             .insert([
@@ -607,6 +642,7 @@ app.post('/api/register-salon', async (req, res) => {
                     password: hashedPassword,
                     name: salonName,
                     header_image: headerImage,
+                    services: sanitizedServices,
                     suburb,
                     town,
                     province,
@@ -895,11 +931,14 @@ app.post('/api/admin/send-email', async (req, res) => {
 app.patch('/api/salons/:id/settings', async (req, res) => {
     try {
         const { id } = req.params;
-        const { isAcceptingBookings, advanceBookingDays } = req.body;
+        const { isAcceptingBookings, advanceBookingDays, services } = req.body;
 
         const updateData = {};
         if (isAcceptingBookings !== undefined) updateData.is_accepting_bookings = isAcceptingBookings;
         if (advanceBookingDays !== undefined) updateData.advance_booking_days = advanceBookingDays;
+        // Same sanitize step as registration: only recognised categories
+        // are ever written, so a profile edit can't sneak in arbitrary text.
+        if (services !== undefined) updateData.services = sanitizeServices(services);
 
         const { data, error } = await supabase
             .from('salons')
@@ -920,7 +959,7 @@ app.get('/api/salons/:id/settings', async (req, res) => {
         const salonId = req.params.id;
         const { data, error } = await supabase
             .from('salons')
-            .select('id, name, male_barbers, female_stylists, open_time, close_time, advance_booking_days')
+            .select('id, name, male_barbers, female_stylists, open_time, close_time, advance_booking_days, services')
             .eq('id', salonId)
             .maybeSingle();
 
@@ -1292,7 +1331,7 @@ app.get('/api/salons/approved', async (req, res) => {
     try {
         const { data: salons, error } = await supabase
             .from('salons')
-            .select('id, name, suburb, town, province, male_barbers, female_stylists, header_image, free_hair_giveaway, betaway_challenge, monthly_paid, monthly_paid_at, status')
+            .select('id, name, suburb, town, province, male_barbers, female_stylists, header_image, services, free_hair_giveaway, betaway_challenge, monthly_paid, monthly_paid_at, status')
             .eq('status', 'approved');
 
         if (error) throw error;
