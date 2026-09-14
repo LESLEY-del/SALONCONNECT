@@ -243,11 +243,14 @@
     <!-- Frontend Script for Fetching & Interactivity -->
     <script>
         const BACKEND_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000/api' 
-    : 'https://salonconnect-jbo2.onrender.com/api';
+            ? 'http://localhost:5000/api' 
+            : 'https://salonconnect-jbo2.onrender.com/api';
+
         let currentSalonData = {};
         let voterSession = null;
         let globalSalons = [];
+
+        const DEFAULT_SALON_IMAGE = "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800";
 
         document.addEventListener('DOMContentLoaded', () => {
             try {
@@ -312,8 +315,8 @@
                 const salon = await res.json();
                 currentSalonData = salon;
 
-                // Fixed header image assignment for detail view
-                document.getElementById('detail-header-img').src = (salon.header_image && salon.header_image.trim() !== '') ? salon.header_image : "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800";
+                // Fixed: Pull database header image correctly or fallback if missing
+                document.getElementById('detail-header-img').src = (salon.header_image && salon.header_image.trim() !== '') ? salon.header_image : DEFAULT_SALON_IMAGE;
                 document.getElementById('detail-salon-name').innerText = salon.name;
                 document.getElementById('detail-salon-location').innerText = `📍 ${[salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa'}`;
                 document.getElementById('detail-staff-info').innerText = `Male Barbers: ${salon.male_barbers || 1} | Female Stylists: ${salon.female_stylists || 1}`;
@@ -397,8 +400,8 @@
                         showSalonDetailView(salon.id);
                     };
                     
-                    // Fixed header image assignment: checks database value first, falls back only if empty
-                    const headerImg = (salon.header_image && salon.header_image.trim() !== '') ? salon.header_image : "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600";
+                    // Fixed: Pull actual database header image or fallback if blank
+                    const headerImg = (salon.header_image && salon.header_image.trim() !== '') ? salon.header_image : DEFAULT_SALON_IMAGE;
                     const location = [salon.suburb, salon.town, salon.province].filter(Boolean).join(', ') || 'South Africa';
                     const staffText = `Male Staff: ${salon.male_barbers || 1} | Female Staff: ${salon.female_stylists || 1}`;
                     
@@ -410,7 +413,7 @@
 
                     card.innerHTML = `
                         <div>
-                            <img src="${headerImg}" alt="Salon" class="w-full h-48 object-cover ${!isPaid ? 'grayscale' : ''}">
+                            <img src="${headerImg}" alt="Salon" class="w-full h-48 object-cover ${!isPaid ? 'grayscale' : ''}" onerror="this.src='${DEFAULT_SALON_IMAGE}'">
                             <div class="p-5">
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                     <h3 class="text-xl font-bold text-gray-900 salon-name"></h3>
@@ -525,8 +528,8 @@
 
                             <div class="w-full bg-slate-50 rounded-2xl overflow-hidden border border-slate-200">
                                 <div class="relative h-48 bg-slate-200 overflow-hidden">
-                                    <img src="${(item.winner_header_image && item.winner_header_image.trim() !== '') ? item.winner_header_image : 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600'}" 
-                                         alt="Storefront" class="w-full h-full object-cover">
+                                    <img src="${(item.winner_header_image && item.winner_header_image.trim() !== '') ? item.winner_header_image : DEFAULT_SALON_IMAGE}" 
+                                         alt="Storefront" class="w-full h-full object-cover" onerror="this.src='${DEFAULT_SALON_IMAGE}'">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                                     <div class="absolute bottom-3 left-3 text-white">
                                         <span class="bg-amber-400 text-amber-950 text-[10px] px-3 py-1 rounded-full font-black uppercase">★ Official Champion</span>
