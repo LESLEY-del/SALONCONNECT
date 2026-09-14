@@ -58,6 +58,43 @@
                     <p class="text-xs text-gray-400 mt-1">Upload a clear photo of your salon storefront from your device.</p>
                 </div>
 
+                <!-- Services Offered -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Services Offered</label>
+                    <p class="text-xs text-gray-400 mb-2">Select every category your salon offers. This is what customers search and filter by.</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <label class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition">
+                            <input type="checkbox" name="services" value="hair" class="service-checkbox w-4 h-4 text-indigo-600 rounded">
+                            <span>💇 Hair</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition">
+                            <input type="checkbox" name="services" value="nails" class="service-checkbox w-4 h-4 text-indigo-600 rounded">
+                            <span>💅 Nails</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition">
+                            <input type="checkbox" name="services" value="beauty" class="service-checkbox w-4 h-4 text-indigo-600 rounded">
+                            <span>✨ Beauty</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition">
+                            <input type="checkbox" name="services" value="makeup" class="service-checkbox w-4 h-4 text-indigo-600 rounded">
+                            <span>💄 Makeup</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition">
+                            <input type="checkbox" name="services" value="massage" class="service-checkbox w-4 h-4 text-indigo-600 rounded">
+                            <span>💆 Massage</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition">
+                            <input type="checkbox" name="services" value="facials" class="service-checkbox w-4 h-4 text-indigo-600 rounded">
+                            <span>🧖 Facials</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition">
+                            <input type="checkbox" name="services" value="barber" class="service-checkbox w-4 h-4 text-indigo-600 rounded">
+                            <span>✂️ Barber</span>
+                        </label>
+                    </div>
+                    <p id="services-feedback" class="hidden text-xs mt-1 text-red-600 font-semibold">⚠️ Please select at least one service category.</p>
+                </div>
+
                 <!-- Location -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
@@ -203,6 +240,22 @@
         async function handleRegister(event) {
             event.preventDefault();
 
+            // Services Offered: require at least one selected category before
+            // letting the form submit, so a salon never ends up with an
+            // empty services list by accident.
+            const selectedServices = Array.from(
+                document.querySelectorAll('.service-checkbox:checked')
+            ).map(cb => cb.value);
+
+            const servicesFeedback = document.getElementById('services-feedback');
+
+            if (selectedServices.length === 0) {
+                servicesFeedback.classList.remove('hidden');
+                servicesFeedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            servicesFeedback.classList.add('hidden');
+
             const fileInput = document.getElementById('header-image-file');
             let headerImageBase64 = "";
 
@@ -223,6 +276,7 @@
                 password: document.getElementById('password').value,
                 salonName: document.getElementById('salon-name').value,
                 headerImage: headerImageBase64, // Sending base64 data string instead of a URL
+                services: selectedServices, // Array of category keys, e.g. ["hair", "barber"]
                 suburb: document.getElementById('suburb').value,
                 town: document.getElementById('town').value,
                 province: document.getElementById('province').value,
