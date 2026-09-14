@@ -69,6 +69,22 @@
         }
 
         /* =====================================================
+           iOS ZOOM-ON-FOCUS FIX
+           Safari (and iOS Chrome, which uses the same WebKit engine)
+           auto-zooms the page when a focused text input has a font
+           size under 16px, then the user has to manually zoom back
+           out. None of our inputs are meant to trigger that, so on
+           mobile widths we force every form control to at least 16px
+           regardless of the Tailwind text-size utility classes used
+           on it.
+           ===================================================== */
+        @media (max-width: 767px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* =====================================================
            SALONCONNECT APP-STYLE DESIGN
            ===================================================== */
 
@@ -136,7 +152,7 @@
             border-radius: 18px;
             background: white;
             padding: 0 57px 0 48px;
-            font-size: 14px;
+            font-size: 16px;
             color: #252133;
             outline: none;
             box-shadow: 0 10px 30px rgba(47,31,91,.08);
@@ -207,12 +223,22 @@
             background: #e7ddff;
         }
 
+        .sc-category.sc-category-active .sc-category-icon {
+            background: #6d3df5;
+            color: white;
+            box-shadow: 0 8px 18px rgba(109,61,245,.35);
+        }
+
         .sc-category span {
             display: block;
             margin-top: 7px;
             color: #706b7e;
             font-size: 10px;
             font-weight: 800;
+        }
+
+        .sc-category.sc-category-active span {
+            color: #6d3df5;
         }
 
         .sc-section-title {
@@ -235,6 +261,42 @@
             border: 0;
             background: transparent;
             cursor: pointer;
+        }
+
+        /* Active category / filter chip */
+        .sc-filter-chip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: #f1ecff;
+            border: 1px solid #e0d4ff;
+            border-radius: 16px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+        }
+
+        .sc-filter-chip-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #4c2fa8;
+        }
+
+        .sc-filter-chip-clear {
+            font-size: 11px;
+            font-weight: 900;
+            color: #6d3df5;
+            background: white;
+            border: 1px solid #ddd0ff;
+            border-radius: 999px;
+            padding: 6px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .sc-filter-chip-clear:hover {
+            background: #6d3df5;
+            color: white;
         }
 
         /* Salon cards - two columns like the reference design */
@@ -570,7 +632,7 @@
                     type="text"
                     id="salon-search-input"
                     onkeyup="filterSalons()"
-                    placeholder="Search for a salon..."
+                    placeholder="Search by salon, suburb, town or province..."
                     class="sc-search"
                     autocomplete="off"
                 >
@@ -595,39 +657,39 @@
             </div>
 
             <!-- Categories -->
-            <div class="sc-categories">
+            <div class="sc-categories" id="category-buttons">
 
-                <button class="sc-category" onclick="filterCategory('hair')">
+                <button class="sc-category" data-category="hair" onclick="filterCategory('hair')">
                     <div class="sc-category-icon">💇</div>
                     <span>Hair</span>
                 </button>
 
-                <button class="sc-category" onclick="filterCategory('nails')">
+                <button class="sc-category" data-category="nails" onclick="filterCategory('nails')">
                     <div class="sc-category-icon">💅</div>
                     <span>Nails</span>
                 </button>
 
-                <button class="sc-category" onclick="filterCategory('beauty')">
+                <button class="sc-category" data-category="beauty" onclick="filterCategory('beauty')">
                     <div class="sc-category-icon">✨</div>
                     <span>Beauty</span>
                 </button>
 
-                <button class="sc-category" onclick="filterCategory('makeup')">
+                <button class="sc-category" data-category="makeup" onclick="filterCategory('makeup')">
                     <div class="sc-category-icon">💄</div>
                     <span>Makeup</span>
                 </button>
 
-                <button class="sc-category" onclick="filterCategory('massage')">
+                <button class="sc-category" data-category="massage" onclick="filterCategory('massage')">
                     <div class="sc-category-icon">💆</div>
                     <span>Massage</span>
                 </button>
 
-                <button class="sc-category" onclick="filterCategory('facials')">
+                <button class="sc-category" data-category="facials" onclick="filterCategory('facials')">
                     <div class="sc-category-icon">🧖</div>
                     <span>Facials</span>
                 </button>
 
-                <button class="sc-category" onclick="filterCategory('barber')">
+                <button class="sc-category" data-category="barber" onclick="filterCategory('barber')">
                     <div class="sc-category-icon">✂️</div>
                     <span>Barber</span>
                 </button>
@@ -648,6 +710,14 @@
             </button>
         </div>
 
+        <!-- Active category / filter chip -->
+        <div id="active-filter-chip" class="sc-filter-chip hidden">
+            <span class="sc-filter-chip-label" id="active-filter-label"></span>
+            <button type="button" class="sc-filter-chip-clear" onclick="clearSalonFilter()">
+                Show all salons ✕
+            </button>
+        </div>
+
         <!-- Dynamic Salon Grid -->
         <div id="salon-grid">
             <p class="text-sm text-gray-400 col-span-full text-center py-10">
@@ -658,7 +728,7 @@
         <!-- No results -->
         <div id="no-results" class="hidden text-center py-10 text-gray-500">
             <div class="text-3xl mb-2">🔍</div>
-            <p class="text-sm">No salons found matching your search.</p>
+            <p class="text-sm" id="no-results-text">No salons found matching your search.</p>
             <button onclick="clearSalonFilter()"
                     class="mt-3 text-xs font-bold text-purple-600">
                 Show all salons
@@ -752,6 +822,8 @@
 
                     <p id="detail-staff-info"
                        class="text-sm text-gray-600 font-medium"></p>
+
+                    <div id="detail-services-badges" class="flex flex-wrap gap-1.5"></div>
 
                     <div id="detail-giveaway-badge"></div>
                 </div>
@@ -949,8 +1021,27 @@
         let voterSession = null;
         let globalSalons = [];
 
+        // Tracks whichever single category filter (if any) is currently
+        // active, e.g. 'hair'. null means "showing everything" / free-text
+        // search mode. Kept as module-level state so filterCategory,
+        // filterSalons and clearSalonFilter can all agree on what's active.
+        let activeCategory = null;
+
         const DEFAULT_SALON_IMAGE =
             'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=800';
+
+        // Canonical service categories, matched exactly against a salon's
+        // real `services` column (set at registration / in salon settings)
+        // — this must match the ALLOWED_SERVICES list on the backend.
+        const CATEGORY_LABELS = {
+            hair: '💇 Hair',
+            nails: '💅 Nails',
+            beauty: '✨ Beauty',
+            makeup: '💄 Makeup',
+            massage: '💆 Massage',
+            facials: '🧖 Facials',
+            barber: '✂️ Barber'
+        };
 
         /* =====================================================
            INITIALISE
@@ -999,10 +1090,6 @@
             }[c]));
         }
 
-        // FIX: previously this only accepted http/https URLs, which silently
-        // rejected any header_image stored as a base64 data URI (data:image/...),
-        // causing every card to fall back to the generic stock photo instead of
-        // the salon's own uploaded picture. Now data: image URIs are allowed too.
         function safeUrl(value, fallback = DEFAULT_SALON_IMAGE) {
             if (!value) return fallback;
             const trimmed = String(value).trim();
@@ -1023,6 +1110,17 @@
             } catch (_) {}
 
             return fallback;
+        }
+
+        // Parses the comma-separated `services` string from the backend
+        // (e.g. "hair,barber") into a clean lowercase array. Tolerant of
+        // missing/empty values so older salons without services set yet
+        // just show as offering nothing rather than breaking the filter.
+        function parseServices(servicesValue) {
+            return String(servicesValue || '')
+                .split(',')
+                .map(s => s.trim().toLowerCase())
+                .filter(Boolean);
         }
 
         function logoutClient() {
@@ -1269,6 +1367,12 @@
             const betaway =
                 salon.betaway_challenge && isPaid;
 
+            // Real service categories this salon actually offers (from the
+            // `services` column), used by the category filter buttons —
+            // NOT the salon's name, which is what caused clicking "Hair" to
+            // wrongly match on any salon whose *name* contained "hair".
+            const servicesList = parseServices(salon.services);
+
             const card = document.createElement('div');
 
             card.className =
@@ -1280,9 +1384,20 @@
                 String(salon.name || '').toLowerCase()
             );
 
+            // Comma-separated list of this salon's real service categories,
+            // e.g. "hair,barber" — matched with an exact-membership check
+            // by filterCategory(), not substring matching.
+            card.setAttribute('data-services', servicesList.join(','));
+
+            // Separate location string (suburb/town/province) so the free
+            // text search box can match on where a salon is, not just its
+            // name or services.
             card.setAttribute(
-                'data-services',
-                `${salon.name || ''} ${salon.service_type || ''} ${salon.category || ''}`.toLowerCase()
+                'data-location',
+                [salon.suburb, salon.town, salon.province]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase()
             );
 
             card.onclick = (e) => {
@@ -1404,7 +1519,7 @@
         }
 
         /* =====================================================
-           SEARCH
+           SEARCH (free text — matches name, suburb/town/province)
            ===================================================== */
         function filterSalons() {
             const input =
@@ -1412,6 +1527,12 @@
 
             const query =
                 input.value.toLowerCase().trim();
+
+            // Typing in the search box always leaves category-filter mode,
+            // so the two filtering modes never fight each other.
+            activeCategory = null;
+            setActiveCategoryButton(null);
+            hideActiveFilterChip();
 
             const cards =
                 document.querySelectorAll('.salon-card');
@@ -1425,11 +1546,14 @@
 
             if (query.length > 0) {
                 const matches =
-                    globalSalons.filter(salon =>
-                        String(salon.name || '')
-                            .toLowerCase()
-                            .includes(query)
-                    );
+                    globalSalons.filter(salon => {
+                        const name = String(salon.name || '').toLowerCase();
+                        const location = [salon.suburb, salon.town, salon.province]
+                            .filter(Boolean)
+                            .join(' ')
+                            .toLowerCase();
+                        return name.includes(query) || location.includes(query);
+                    });
 
                 if (matches.length > 0) {
                     suggestionsBox.classList.remove('hidden');
@@ -1441,8 +1565,14 @@
                         item.className =
                             'px-4 py-3 text-xs font-semibold hover:bg-purple-50 hover:text-purple-600 cursor-pointer border-b border-gray-100 last:border-none';
 
-                        item.innerText =
-                            salon.name || 'Salon';
+                        const salonLocation = [salon.suburb, salon.town, salon.province]
+                            .filter(Boolean)
+                            .join(', ');
+
+                        item.innerHTML = `
+                            <span>${escapeHtml(salon.name || 'Salon')}</span>
+                            ${salonLocation ? `<span class="block text-[10px] text-gray-400 font-normal mt-0.5">📍 ${escapeHtml(salonLocation)}</span>` : ''}
+                        `;
 
                         item.onclick = () => {
                             input.value =
@@ -1466,17 +1596,20 @@
                     (card.getAttribute('data-name') || '')
                         .toLowerCase();
 
-                const services =
-                    (card.getAttribute('data-services') || '')
+                const location =
+                    (card.getAttribute('data-location') || '')
                         .toLowerCase();
 
-                if (name.includes(query) || services.includes(query)) {
+                if (name.includes(query) || location.includes(query)) {
                     card.style.display = 'flex';
                     visibleCount++;
                 } else {
                     card.style.display = 'none';
                 }
             });
+
+            document.getElementById('no-results-text').innerText =
+                'No salons found matching your search.';
 
             document
                 .getElementById('no-results')
@@ -1486,32 +1619,44 @@
                 );
         }
 
+        /* =====================================================
+           CATEGORY FILTER (exact match against a salon's real
+           `services` list — never the salon's name)
+           ===================================================== */
         function filterCategory(category) {
-            const search =
-                document.getElementById('salon-search-input');
-
-            search.value = category;
-
             const cards =
                 document.querySelectorAll('.salon-card');
 
-            const query = category.toLowerCase();
-
             let visibleCount = 0;
 
-            cards.forEach(card => {
-                const searchable =
-                    `${card.getAttribute('data-name') || ''}
-                     ${card.getAttribute('data-services') || ''}`
-                        .toLowerCase();
+            // Clear any free-text search so the two modes don't conflict,
+            // and so it's clear to the user they're now in category mode.
+            document.getElementById('salon-search-input').value = '';
+            document.getElementById('search-suggestions').classList.add('hidden');
+            document.getElementById('search-suggestions').innerHTML = '';
 
-                if (searchable.includes(query)) {
+            activeCategory = category;
+            setActiveCategoryButton(category);
+
+            cards.forEach(card => {
+                const services =
+                    (card.getAttribute('data-services') || '')
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(Boolean);
+
+                if (services.includes(category)) {
                     card.style.display = 'flex';
                     visibleCount++;
                 } else {
                     card.style.display = 'none';
                 }
             });
+
+            const label = CATEGORY_LABELS[category] || category;
+
+            document.getElementById('no-results-text').innerText =
+                `No salons currently offer ${label.replace(/^\S+\s/, '')} services.`;
 
             document
                 .getElementById('no-results')
@@ -1520,6 +1665,11 @@
                     visibleCount > 0
                 );
 
+            showActiveFilterChip(category, visibleCount);
+
+            // This scroll only happens because the user deliberately tapped
+            // a category button — it is not tied to typing/focusing the
+            // search input, so it does not cause the zoom-on-focus issue.
             document
                 .getElementById('salon-grid')
                 .scrollIntoView({
@@ -1528,7 +1678,34 @@
                 });
         }
 
+        // Visually highlights whichever category button is active (or
+        // clears the highlight when category is null), so it's obvious at
+        // a glance which filter — if any — is currently applied.
+        function setActiveCategoryButton(category) {
+            document.querySelectorAll('#category-buttons .sc-category').forEach(btn => {
+                const isActive = category && btn.getAttribute('data-category') === category;
+                btn.classList.toggle('sc-category-active', Boolean(isActive));
+            });
+        }
+
+        function showActiveFilterChip(category, count) {
+            const chip = document.getElementById('active-filter-chip');
+            const label = document.getElementById('active-filter-label');
+            const name = CATEGORY_LABELS[category] || category;
+
+            label.innerText = `Showing salons for: ${name} (${count} found)`;
+            chip.classList.remove('hidden');
+        }
+
+        function hideActiveFilterChip() {
+            document.getElementById('active-filter-chip').classList.add('hidden');
+        }
+
         function clearSalonFilter() {
+            activeCategory = null;
+            setActiveCategoryButton(null);
+            hideActiveFilterChip();
+
             document.getElementById('salon-search-input').value = '';
 
             document.querySelectorAll('.salon-card')
@@ -1628,6 +1805,19 @@
                     .innerText =
                     `Male Barbers: ${salon.male_barbers || 1}
                      | Female Stylists: ${salon.female_stylists || 1}`;
+
+                const servicesBadgesContainer =
+                    document.getElementById('detail-services-badges');
+
+                const servicesList = parseServices(salon.services);
+
+                servicesBadgesContainer.innerHTML = servicesList.length
+                    ? servicesList.map(s => `
+                        <span class="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-100 rounded-full px-2.5 py-1">
+                            ${escapeHtml(CATEGORY_LABELS[s] || s)}
+                        </span>
+                    `).join('')
+                    : '';
 
                 document.getElementById('detail-hours')
                     .innerText =
