@@ -450,6 +450,74 @@
             margin-top: 6px;
         }
 
+        /* Hiring + discount indicators (mirrors the owner dashboard) */
+        @keyframes hiringPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,.45); }
+            50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+        }
+
+        .sc-hiring {
+            color: #065f46;
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 4px 7px;
+            font-size: 8px;
+            font-weight: 900;
+            display: inline-block;
+            margin-top: 6px;
+        }
+
+        .sc-discount-tag {
+            position: absolute;
+            left: 9px;
+            bottom: 9px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: linear-gradient(135deg,#f43f5e,#fb7185);
+            color: white;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            box-shadow: 0 6px 14px rgba(244,63,94,.35);
+            animation: hiringPulse 2s ease-in-out infinite;
+        }
+
+        .sc-offer-card {
+            background: linear-gradient(135deg,#fff1f2,#fff);
+            border: 1px solid #fecdd3;
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .sc-job-card {
+            background: linear-gradient(135deg,#ecfdf5,#fff);
+            border: 1px solid #a7f3d0;
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .sc-social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            background: #f4f1ff;
+            border: 1px solid #e3dbff;
+            color: #5b32c9;
+            font-size: 11px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+
+        .sc-social-link:hover {
+            background: #6d3df5;
+            color: white;
+        }
+
         .sc-betaway {
             color: #7b4c00;
             background: #fff7db;
@@ -826,6 +894,8 @@
                     <div id="detail-services-badges" class="flex flex-wrap gap-1.5"></div>
 
                     <div id="detail-giveaway-badge"></div>
+
+                    <div id="detail-social-links" class="hidden flex-wrap gap-2 pt-2"></div>
                 </div>
 
                 <div class="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-2">
@@ -841,6 +911,19 @@
                 </div>
 
             </div>
+        </div>
+
+        <!-- Live promotions from this salon -->
+        <div id="detail-promotions-section" class="hidden space-y-4">
+            <h3 class="text-xl font-black text-gray-900">🏷️ Current Offers &amp; Promotions</h3>
+            <div id="detail-promotions-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- Open positions at this salon -->
+        <div id="detail-jobs-section" class="hidden space-y-4">
+            <h3 class="text-xl font-black text-gray-900">💼 Job Openings at This Salon</h3>
+            <p class="text-xs text-gray-500 -mt-2">This salon is hiring. Contact them directly if you're interested.</p>
+            <div id="detail-jobs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
         </div>
 
         <!-- Gallery -->
@@ -1367,6 +1450,19 @@
             const betaway =
                 salon.betaway_challenge && isPaid;
 
+            // Hiring status and the live discount come straight from
+            // /salons/approved, which resolves them server-side, so the
+            // grid needs no extra request per salon. A locked (unpaid)
+            // salon shows neither.
+            const isHiring = salon.isHiring && isPaid;
+
+            const discount = isPaid ? salon.activeDiscount : null;
+            const discountLabel = discount
+                ? (discount.discount_type === 'percentage'
+                    ? `${discount.discount_value}% OFF`
+                    : `R${discount.discount_value} OFF`)
+                : '';
+
             // Real service categories this salon actually offers (from the
             // `services` column), used by the category filter buttons —
             // NOT the salon's name, which is what caused clicking "Hair" to
@@ -1428,6 +1524,10 @@
                             ? `<span class="sc-featured-label">Featured</span>`
                             : ''}
 
+                        ${discountLabel
+                            ? `<span class="sc-discount-tag">🏷️ ${escapeHtml(discountLabel)}</span>`
+                            : ''}
+
                         <div class="sc-salon-heart">
                             ♡
                         </div>
@@ -1460,6 +1560,10 @@
 
                         ${giveaway
                             ? `<span class="sc-giveaway">🎁 Giveaway Active</span>`
+                            : ''}
+
+                        ${isHiring
+                            ? `<span class="sc-hiring">💼 Now Hiring</span>`
                             : ''}
 
                         ${!isPaid
@@ -1847,6 +1951,8 @@
                 document.getElementById('detail-book-btn').onclick =
                     () => openBookingModal(salon.id);
 
+                renderSocialLinks(salon);
+                fetchSalonOffers(salonId);
                 fetchSalonGallery(salonId);
 
             } catch (err) {
@@ -1857,6 +1963,110 @@
 
                 alert('Could not load salon details.');
                 showDashboardView();
+            }
+        }
+
+        // Shows Instagram / Facebook / WhatsApp buttons when the salon
+        // owner has filled them in. WhatsApp becomes a real click-to-chat
+        // link: SA local numbers starting 0 are converted to +27 format,
+        // which is what wa.me requires.
+        function renderSocialLinks(salon) {
+            const container = document.getElementById('detail-social-links');
+            if (!container) return;
+
+            const links = [];
+
+            if (salon.instagram_url) {
+                links.push(`<a class="sc-social-link" href="${safeUrl(salon.instagram_url, '')}" target="_blank" rel="noopener noreferrer">📷 Instagram</a>`);
+            }
+
+            if (salon.facebook_url) {
+                links.push(`<a class="sc-social-link" href="${safeUrl(salon.facebook_url, '')}" target="_blank" rel="noopener noreferrer">📘 Facebook</a>`);
+            }
+
+            if (salon.whatsapp_number) {
+                let digits = String(salon.whatsapp_number).replace(/[^0-9]/g, '');
+                if (digits.startsWith('0')) digits = '27' + digits.slice(1);
+                if (digits.length >= 9) {
+                    links.push(`<a class="sc-social-link" href="https://wa.me/${digits}" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>`);
+                }
+            }
+
+            container.innerHTML = links.join('');
+            container.classList.toggle('hidden', links.length === 0);
+            container.classList.toggle('flex', links.length > 0);
+        }
+
+        // Pulls the salon's live promotions and open positions. The
+        // server already filters out paused and expired entries, so
+        // anything returned here is safe to show a customer.
+        async function fetchSalonOffers(salonId) {
+            const promoSection = document.getElementById('detail-promotions-section');
+            const promoGrid = document.getElementById('detail-promotions-grid');
+            const jobsSection = document.getElementById('detail-jobs-section');
+            const jobsGrid = document.getElementById('detail-jobs-grid');
+
+            promoSection.classList.add('hidden');
+            jobsSection.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/salons/${salonId}/offers`);
+                if (!res.ok) throw new Error('Offers request failed');
+
+                const data = await res.json();
+                const discounts = data.discounts || [];
+                const jobs = data.jobs || [];
+
+                if (discounts.length > 0) {
+                    promoGrid.innerHTML = discounts.map(d => {
+                        const valueLabel = d.discount_type === 'percentage'
+                            ? `${d.discount_value}% OFF`
+                            : `R${d.discount_value} OFF`;
+                        const until = d.valid_until
+                            ? String(d.valid_until).split('T')[0]
+                            : '';
+                        return `
+                            <div class="sc-offer-card space-y-2">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-sm font-black text-slate-900">${escapeHtml(d.title)}</span>
+                                    <span class="text-[10px] font-black bg-rose-600 text-white px-2.5 py-1 rounded-full whitespace-nowrap">${escapeHtml(valueLabel)}</span>
+                                </div>
+                                ${d.description ? `<p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(d.description)}</p>` : ''}
+                                ${until ? `<p class="text-[11px] font-bold text-rose-600">⏳ Valid until ${escapeHtml(until)}</p>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                    promoSection.classList.remove('hidden');
+                }
+
+                if (jobs.length > 0) {
+                    const employmentLabels = {
+                        'full-time': 'Full-Time',
+                        'part-time': 'Part-Time',
+                        'contract': 'Contract',
+                        'internship': 'Internship',
+                        'freelance': 'Freelance / Chair Rental'
+                    };
+
+                    jobsGrid.innerHTML = jobs.map(j => `
+                        <div class="sc-job-card space-y-2">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <span class="text-sm font-black text-slate-900">${escapeHtml(j.title)}</span>
+                                <span class="text-[10px] font-black bg-emerald-600 text-white px-2.5 py-1 rounded-full whitespace-nowrap">${escapeHtml(employmentLabels[j.employment_type] || j.employment_type || '')}</span>
+                            </div>
+                            ${j.position_category ? `<p class="text-xs font-bold text-emerald-700">${escapeHtml(j.position_category)}</p>` : ''}
+                            ${j.work_hours ? `<p class="text-xs text-slate-600">⏰ ${escapeHtml(j.work_hours)}</p>` : ''}
+                            ${j.salary_range ? `<p class="text-xs font-semibold text-slate-700">💰 ${escapeHtml(j.salary_range)}</p>` : ''}
+                            ${j.description ? `<p class="text-xs text-slate-500 leading-relaxed">${escapeHtml(j.description)}</p>` : ''}
+                        </div>
+                    `).join('');
+                    jobsSection.classList.remove('hidden');
+                }
+            } catch (err) {
+                // Offers are a bonus, not core to the page — if the
+                // request fails the salon profile still works fully, so
+                // fail quietly rather than showing an error to the client.
+                console.error('Offers fetch error:', err);
             }
         }
 
