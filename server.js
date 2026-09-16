@@ -1538,13 +1538,53 @@ app.get('/api/salons/approved', async (req, res) => {
 
         if (error) throw error;
 
+        // Pull every active job posting and live discount in TWO queries
+        // total, rather than two per salon — the customer grid can show
+        // "Hiring" / "Special Offer" badges without N+1 round trips.
+        const salonIds = (salons || []).map(s => s.id);
+        const hiringSet = new Set();
+        const discountMap = {};
+
+        if (salonIds.length > 0) {
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            const { data: jobs } = await supabase
+                .from('job_postings')
+                .select('salon_id')
+                .in('salon_id', salonIds)
+                .eq('is_active', true);
+
+            (jobs || []).forEach(j => hiringSet.add(j.salon_id));
+
+            const { data: discounts } = await supabase
+                .from('salon_discounts')
+                .select('salon_id, title, discount_type, discount_value, description, valid_until')
+                .in('salon_id', salonIds)
+                .eq('is_active', true)
+                .order('created_at', { ascending: false });
+
+            // An expired promotion is never treated as live, even if the
+            // owner forgot to switch it off. Keep the newest valid one.
+            (discounts || []).forEach(d => {
+                const notExpired = !d.valid_until || String(d.valid_until).split('T')[0] >= todayStr;
+                if (notExpired && !discountMap[d.salon_id]) {
+                    discountMap[d.salon_id] = d;
+                }
+            });
+        }
+
         const evaluatedSalons = salons.map(salon => {
             let active = salon.monthly_paid;
             if (active && salon.monthly_paid_at) {
                 const diffDays = (new Date() - new Date(salon.monthly_paid_at)) / (1000 * 60 * 60 * 24);
                 if (diffDays > 30) active = false;
             }
-            return { ...salon, isPaidActive: active };
+            return {
+                ...salon,
+                isPaidActive: active,
+                isHiring: hiringSet.has(salon.id),
+                activeDiscount: discountMap[salon.id] || null
+            };
         });
 
         res.json(evaluatedSalons);
@@ -1572,8 +1612,44 @@ app.get('/api/salons/:id', async (req, res) => {
     }
 });
 
-app.patch('/api/salons/:id/header-image', async (req, res) => {
+// ------------------------------------------------------------------
+// PUBLIC SALON OFFERS (customer-facing)
+// Returns only what a customer should see: active job postings and
+// discounts that are both active AND not past their valid_until date.
+// The owner-facing /jobs and /discounts routes return everything
+// including paused and expired entries, which is why this is separate.
+// ------------------------------------------------------------------
+app.get('/api/salons/:id/offers', async (req, res) => {
     try {
+        const salonId = req.params.id;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const { data: jobs } = await supabase
+            .from('job_postings')
+            .select('*')
+            .eq('salon_id', salonId)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false });
+
+        const { data: discounts } = await supabase
+            .from('salon_discounts')
+            .select('*')
+            .eq('salon_id', salonId)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false });
+
+        const liveDiscounts = (discounts || []).filter(d =>
+            !d.valid_until || String(d.valid_until).split('T')[0] >= todayStr
+        );
+
+        res.json({ jobs: jobs || [], discounts: liveDiscounts });
+    } catch (err) {
+        console.error('Error fetching salon offers:', err.message);
+        res.status(500).json({ error: 'Error fetching salon offers' });
+    }
+});
+
+app.patch('/api/salons/:id/header-image', async (req, res) => {    try {
         const { id } = req.params;
         const { headerImage } = req.body;
 
