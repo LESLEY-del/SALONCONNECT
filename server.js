@@ -67,6 +67,26 @@ function sanitizeServices(input) {
 }
 
 // ------------------------------------------------------------------
+// JOB POSTINGS & DISCOUNTS — allowed-value lists, same pattern as
+// ALLOWED_SERVICES above: the server is the single source of truth for
+// what's a valid employment type or discount type, so a request can't
+// sneak arbitrary text into a column that's meant to drive UI logic.
+// ------------------------------------------------------------------
+const ALLOWED_EMPLOYMENT_TYPES = ['full-time', 'part-time', 'contract', 'internship', 'freelance'];
+
+function sanitizeEmploymentType(value) {
+    const v = String(value || '').trim().toLowerCase();
+    return ALLOWED_EMPLOYMENT_TYPES.includes(v) ? v : 'full-time';
+}
+
+const ALLOWED_DISCOUNT_TYPES = ['percentage', 'fixed'];
+
+function sanitizeDiscountType(value) {
+    const v = String(value || '').trim().toLowerCase();
+    return ALLOWED_DISCOUNT_TYPES.includes(v) ? v : 'percentage';
+}
+
+// ------------------------------------------------------------------
 // SUBSCRIPTION PLANS (SalonConnect business model)
 // Three tiers. Competitions are free on every plan — the monthly fee
 // pays for the platform itself (profile, bookings, reviews, gallery,
@@ -931,7 +951,7 @@ app.post('/api/admin/send-email', async (req, res) => {
 app.patch('/api/salons/:id/settings', async (req, res) => {
     try {
         const { id } = req.params;
-        const { isAcceptingBookings, advanceBookingDays, services } = req.body;
+        const { isAcceptingBookings, advanceBookingDays, services, openTime, closeTime, instagramUrl, facebookUrl, whatsappNumber } = req.body;
 
         const updateData = {};
         if (isAcceptingBookings !== undefined) updateData.is_accepting_bookings = isAcceptingBookings;
@@ -939,6 +959,15 @@ app.patch('/api/salons/:id/settings', async (req, res) => {
         // Same sanitize step as registration: only recognised categories
         // are ever written, so a profile edit can't sneak in arbitrary text.
         if (services !== undefined) updateData.services = sanitizeServices(services);
+        // FIX: the dashboard's Save Settings button has always sent openTime
+        // and closeTime, but this endpoint never wrote them anywhere — the
+        // form looked like it saved successfully while operating hours
+        // silently stayed unchanged. Now actually persisted.
+        if (openTime !== undefined && openTime !== '') updateData.open_time = openTime;
+        if (closeTime !== undefined && closeTime !== '') updateData.close_time = closeTime;
+        if (instagramUrl !== undefined) updateData.instagram_url = String(instagramUrl || '').trim().slice(0, 300);
+        if (facebookUrl !== undefined) updateData.facebook_url = String(facebookUrl || '').trim().slice(0, 300);
+        if (whatsappNumber !== undefined) updateData.whatsapp_number = String(whatsappNumber || '').trim().slice(0, 40);
 
         const { data, error } = await supabase
             .from('salons')
@@ -1129,6 +1158,179 @@ app.delete('/api/blockout-times/:id', async (req, res) => {
     } catch (err) {
         console.error("Error deleting blockout:", err);
         res.status(500).json({ error: 'Failed to delete block-out slot.' });
+    }
+});
+
+// ------------------------------------------------------------------
+// JOB POSTINGS
+// Lets a salon advertise an open position (title, role, working hours,
+// pay range, description) from their own dashboard. is_active decides
+// whether it counts toward the public "We're Hiring" badge.
+// ------------------------------------------------------------------
+app.post('/api/salons/:id/jobs', async (req, res) => {
+    try {
+        const salonId = req.params.id;
+        const { title, positionCategory, employmentType, workHours, salaryRange, description } = req.body;
+
+        if (!title || !String(title).trim()) {
+            return res.status(400).json({ error: 'Job title is required.' });
+        }
+
+        const { data, error } = await supabase
+            .from('job_postings')
+            .insert([{
+                salon_id: salonId,
+                title: String(title).trim().slice(0, 150),
+                position_category: String(positionCategory || '').trim().slice(0, 100),
+                employment_type: sanitizeEmploymentType(employmentType),
+                work_hours: String(workHours || '').trim().slice(0, 150),
+                salary_range: String(salaryRange || '').trim().slice(0, 150),
+                description: String(description || '').trim().slice(0, 1000),
+                is_active: true
+            }])
+            .select();
+
+        if (error) throw error;
+        res.status(201).json({ message: 'Job posted successfully', data });
+    } catch (err) {
+        console.error('Error posting job:', err.message);
+        res.status(500).json({ error: 'Error posting job opening' });
+    }
+});
+
+app.get('/api/salons/:id/jobs', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('job_postings')
+            .select('*')
+            .eq('salon_id', req.params.id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) {
+        console.error('Error fetching jobs:', err.message);
+        res.status(500).json({ error: 'Error fetching job postings' });
+    }
+});
+
+app.patch('/api/jobs/:id', async (req, res) => {
+    try {
+        const { isActive } = req.body;
+        const updateData = {};
+        if (isActive !== undefined) updateData.is_active = Boolean(isActive);
+
+        const { data, error } = await supabase
+            .from('job_postings')
+            .update(updateData)
+            .eq('id', req.params.id)
+            .select();
+
+        if (error) throw error;
+        res.json({ message: 'Job posting updated', data });
+    } catch (err) {
+        console.error('Error updating job:', err.message);
+        res.status(500).json({ error: 'Error updating job posting' });
+    }
+});
+
+app.delete('/api/jobs/:id', async (req, res) => {
+    try {
+        const { error } = await supabase.from('job_postings').delete().eq('id', req.params.id);
+        if (error) throw error;
+        res.json({ message: 'Job posting removed' });
+    } catch (err) {
+        console.error('Error deleting job:', err.message);
+        res.status(500).json({ error: 'Error removing job posting' });
+    }
+});
+
+// ------------------------------------------------------------------
+// DISCOUNTS & PROMOTIONS
+// A salon-run promotion (e.g. "20% off for new clients"). Both is_active
+// AND valid_until are checked before something counts as "currently
+// live" — an expired discount never gets treated as active even if the
+// owner forgets to flip it off manually.
+// ------------------------------------------------------------------
+app.post('/api/salons/:id/discounts', async (req, res) => {
+    try {
+        const salonId = req.params.id;
+        const { title, discountType, discountValue, description, validUntil } = req.body;
+
+        if (!title || !String(title).trim()) {
+            return res.status(400).json({ error: 'Promotion title is required.' });
+        }
+
+        const numericValue = parseFloat(discountValue);
+        if (isNaN(numericValue) || numericValue <= 0) {
+            return res.status(400).json({ error: 'Discount value must be a positive number.' });
+        }
+
+        const { data, error } = await supabase
+            .from('salon_discounts')
+            .insert([{
+                salon_id: salonId,
+                title: String(title).trim().slice(0, 150),
+                discount_type: sanitizeDiscountType(discountType),
+                discount_value: numericValue,
+                description: String(description || '').trim().slice(0, 1000),
+                valid_until: validUntil || null,
+                is_active: true
+            }])
+            .select();
+
+        if (error) throw error;
+        res.status(201).json({ message: 'Discount created successfully', data });
+    } catch (err) {
+        console.error('Error creating discount:', err.message);
+        res.status(500).json({ error: 'Error creating discount' });
+    }
+});
+
+app.get('/api/salons/:id/discounts', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('salon_discounts')
+            .select('*')
+            .eq('salon_id', req.params.id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) {
+        console.error('Error fetching discounts:', err.message);
+        res.status(500).json({ error: 'Error fetching discounts' });
+    }
+});
+
+app.patch('/api/discounts/:id', async (req, res) => {
+    try {
+        const { isActive } = req.body;
+        const updateData = {};
+        if (isActive !== undefined) updateData.is_active = Boolean(isActive);
+
+        const { data, error } = await supabase
+            .from('salon_discounts')
+            .update(updateData)
+            .eq('id', req.params.id)
+            .select();
+
+        if (error) throw error;
+        res.json({ message: 'Discount updated', data });
+    } catch (err) {
+        console.error('Error updating discount:', err.message);
+        res.status(500).json({ error: 'Error updating discount' });
+    }
+});
+
+app.delete('/api/discounts/:id', async (req, res) => {
+    try {
+        const { error } = await supabase.from('salon_discounts').delete().eq('id', req.params.id);
+        if (error) throw error;
+        res.json({ message: 'Discount removed' });
+    } catch (err) {
+        console.error('Error deleting discount:', err.message);
+        res.status(500).json({ error: 'Error removing discount' });
     }
 });
 
